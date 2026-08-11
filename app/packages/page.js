@@ -1,8 +1,9 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-export default function PackagesPage() {
+// Separate component that uses useSearchParams
+function PackagesContent() {
   const searchParams = useSearchParams();
   const networkFilter = searchParams.get('network') || '';
 
@@ -81,5 +82,14 @@ export default function PackagesPage() {
         </div>
       </div>
     </section>
+  );
+}
+
+// Main page component with Suspense
+export default function PackagesPage() {
+  return (
+    <Suspense fallback={<div className="container"><p>Loading packages...</p></div>}>
+      <PackagesContent />
+    </Suspense>
   );
 }
