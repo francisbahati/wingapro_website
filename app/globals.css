@@ -295,3 +295,218 @@ body {
   }
   .hero-content h1 { font-size: 2.2rem; }
 }
+/* ===== TRUST STATS ===== */
+.trust-stats {
+  background: var(--bg-light, #f8fafc);
+  padding: 3rem 0;
+  text-align: center;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 2rem;
+}
+.stat-item {
+  display: flex;
+  flex-direction: column;
+}
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--primary, #0a2e5c);
+}
+.stat-label {
+  font-size: 1rem;
+  color: #64748b;
+}
+
+/* ===== WHY CHOOSE ===== */
+.why-choose {
+  padding: 4rem 0;
+  background: #ffffff;
+}
+.why-choose .section-subtitle {
+  text-align: center;
+  color: #64748b;
+  margin-bottom: 2.5rem;
+}
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+}
+.feature-card {
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: #f8fafc;
+  transition: transform 0.2s;
+}
+.feature-card:hover {
+  transform: translateY(-5px);
+}
+.feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+.feature-card h3 {
+  margin-bottom: 0.5rem;
+}
+.feature-card p {
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+/* ===== HOW IT WORKS ===== */
+.how-it-works {
+  padding: 4rem 0;
+  background: #f1f5f9;
+}
+.how-it-works .section-subtitle {
+  text-align: center;
+  color: #64748b;
+  margin-bottom: 2.5rem;
+}
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+}
+.step {
+  text-align: center;
+}
+.step-number {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  line-height: 48px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: var(--primary, #0a2e5c);
+  color: #fff;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+}
+
+/* ===== TESTIMONIALS ===== */
+.testimonials {
+  padding: 4rem 0;
+  background: #ffffff;
+}
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+.testimonial-grid blockquote {
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border-left: 4px solid var(--primary, #0a2e5c);
+  font-style: italic;
+}
+.testimonial-grid blockquote p {
+  margin-bottom: 0.5rem;
+}
+.testimonial-grid blockquote cite {
+  font-style: normal;
+  font-weight: 500;
+  color: #334155;
+}
+
+/* ===== CTA DOWNLOAD ===== */
+.cta-download {
+  padding: 4rem 0;
+  background: var(--primary, #0a2e5c);
+  color: #fff;
+}
+.cta-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+.cta-content .btn {
+  margin-top: 1rem;
+}
+.cta-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== Responsive tweaks ===== */
+@media (max-width: 768px) {
+  .hero-container {
+    flex-direction: column;
+    text-align: center;
+  }
+  .hero-buttons .btn {
+    margin: 0.5rem auto;
+  }
+  .stats-grid,
+  .features-grid,
+  .steps-grid,
+  .testimonial-grid {
+    grid-template-columns: 1fr;
+  }
+  .cta-content {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+.network-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  background: #f8fafc;
+  border-radius: 16px;
+  text-decoration: none;
+  color: #0a2e5c;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.2s;
+  border: 1px solid #e9edf4;
+  min-height: 120px;
+}
+.network-card:hover {
+  background: #eef2f7;
+  transform: scale(1.02);
+}
+.network-image-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60px;
+  margin-bottom: 0.5rem;
+}
+.network-logo {
+  max-width: 100%;
+  height: auto;
+  max-height: 60px;
+  width: auto;
+}
+/* Logo link – flex container for image + text */
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo-image {
+  object-fit: contain;
+}
+
+.logo-text {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #0a2e5c;
+}
+.logo-text span {
+  color: #1a7bc4; /* or your brand accent */
+}
