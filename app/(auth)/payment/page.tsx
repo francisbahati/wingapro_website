@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
   Box,
@@ -17,22 +17,15 @@ import { AxiosError } from 'axios';
 
 const PRIMARY = '#0A2E5C';
 
-interface PackageData {
-  id: number;
-  name: string;
-  dataSize: string;
-  validity: string;
-  price: number;
-}
-
-export default function PaymentPage() {
+// Component that uses useSearchParams – must be wrapped in Suspense
+function PaymentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const packageId = searchParams.get('packageId');
   const network = searchParams.get('network') || '';
   const recipientName = searchParams.get('recipientName') || '';
   const recipientPhone = searchParams.get('recipientPhone') || '';
-  const [packageData, setPackageData] = useState<PackageData | null>(null);
+  const [packageData, setPackageData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -69,7 +62,7 @@ export default function PaymentPage() {
         recipientPhone,
         network,
       });
-      router.push(`/order-confirmation?id=${packageId}`);
+      router.push(`/order-confirmation?package=${packageData.name}&id=${packageId}`);
     } catch (err) {
       if (err instanceof AxiosError) {
         setError(err.response?.data?.message || 'Payment failed');
@@ -110,6 +103,8 @@ export default function PaymentPage() {
     );
   }
 
+  const price = packageData.price;
+
   return (
     <Box sx={{ p: 3, maxWidth: 500, mx: 'auto' }}>
       <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>
@@ -132,7 +127,7 @@ export default function PaymentPage() {
           </Typography>
           <Divider sx={{ my: 2 }} />
           <Typography variant="h5" sx={{ color: PRIMARY }}>
-            TZS {packageData.price.toLocaleString()}
+            TZS {price.toLocaleString()}
           </Typography>
         </CardContent>
       </Card>
@@ -165,8 +160,17 @@ export default function PaymentPage() {
         {processing ? <CircularProgress size={24} color="inherit" /> : 'Pay Now'}
       </Button>
       <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block', textAlign: 'center' }}>
-        Your wallet will be debited TZS {packageData.price.toLocaleString()}
+        Your wallet will be debited TZS {price.toLocaleString()}
       </Typography>
     </Box>
+  );
+}
+
+// Main page with Suspense boundary
+export default function PaymentPage() {
+  return (
+    <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}><CircularProgress /></Box>}>
+      <PaymentContent />
+    </Suspense>
   );
 }
