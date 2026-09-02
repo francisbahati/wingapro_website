@@ -10,7 +10,7 @@ export default function Contact() {
     console.log(form);
     setSubmitted(true);
   };
-
+//mfuko
   return (
     <section className="contact-page">
       <div className="container">
