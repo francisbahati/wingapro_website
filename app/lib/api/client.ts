@@ -26,7 +26,6 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('jwt_token');
       if (typeof window !== 'undefined') {
-        // Use replace to avoid back-button issues.
         window.location.replace('/login');
       }
     }

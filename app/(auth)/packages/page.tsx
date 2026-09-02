@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
   Box,
@@ -8,13 +8,13 @@ import {
   CardContent,
   Typography,
   Button,
-  CircularProgress,
   Chip,
   TextField,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  CircularProgress,
   Alert,
   Skeleton,
 } from '@mui/material';
@@ -33,7 +33,8 @@ interface Package {
   description?: string;
 }
 
-export default function PackagesPage() {
+// Component that uses useSearchParams – must be wrapped in Suspense
+function PackagesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const networkFilter = searchParams.get('network') || '';
@@ -55,6 +56,7 @@ export default function PackagesPage() {
       try {
         const res = await apiClient.get('/packages');
         let data = res.data.packages || [];
+        // Apply filters
         if (networkFilter) data = data.filter((p: Package) => p.network === networkFilter);
         if (searchQuery) {
           const q = searchQuery.toLowerCase();
@@ -148,9 +150,15 @@ export default function PackagesPage() {
           No packages match your criteria.
         </Typography>
       ) : (
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 2 }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
+            gap: 3,
+          }}
+        >
           {packages.map((pkg) => (
-            <Card key={pkg.id} sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Card key={pkg.id} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
               <CardContent sx={{ flex: 1 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <Typography variant="h6" component="div">
@@ -166,7 +174,7 @@ export default function PackagesPage() {
                     {pkg.description}
                   </Typography>
                 )}
-                <Typography variant="h5" sx={{ fontWeight: 'bold', mt: 2 }}>
+                <Typography variant="h5" sx={{ fontWeight: 'bold', mt: 2, color: PRIMARY }}>
                   TZS {pkg.price.toLocaleString()}
                 </Typography>
               </CardContent>
@@ -197,7 +205,7 @@ export default function PackagesPage() {
               <Typography variant="body2">Network: {selectedPackage.network}</Typography>
               <Typography variant="body2">Data: {selectedPackage.dataSize}</Typography>
               <Typography variant="body2">Validity: {selectedPackage.validity}</Typography>
-              <Typography variant="h6" sx={{ mt: 1 }}>
+              <Typography variant="h6" sx={{ mt: 1, color: PRIMARY }}>
                 TZS {selectedPackage.price.toLocaleString()}
               </Typography>
             </Box>
@@ -230,5 +238,14 @@ export default function PackagesPage() {
         </DialogActions>
       </Dialog>
     </Box>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function PackagesPage() {
+  return (
+    <Suspense fallback={<Box sx={{ p: 3, textAlign: 'center' }}><CircularProgress /></Box>}>
+      <PackagesContent />
+    </Suspense>
   );
 }
