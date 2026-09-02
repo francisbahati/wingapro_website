@@ -2,14 +2,14 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://api.wingapro.com/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL, // uses your env variable
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true,
+  withCredentials: true, // if your backend uses cookies
 });
 
-// Request interceptor to attach token
+// Attach token from localStorage (or cookie) to every request
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('jwt_token');
@@ -21,14 +21,15 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor to handle 401
+// Handle 401 – redirect to login
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Redirect to login
-      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-      window.location.href = '/login';
+      localStorage.removeItem('jwt_token');
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
