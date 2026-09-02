@@ -1,15 +1,16 @@
 // app/context/AuthContext.tsx
 'use client';
-import { createContext, useState, useEffect, ReactNode, useContext } from 'react';
-import axios from 'axios';
+
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import axios from '@/lib/api/client'; // Create this next if not already present
 
 interface User {
   id: number;
   username: string;
   email: string;
-  role: string;
-  wallet_balance: number;
+  role: 'admin' | 'seller' | 'branch_director' | 'finance' | 'technical' | 'corporate_sales' | 'showroom' | 'business_staff' | 'customer';
+  // add other user fields as needed
 }
 
 interface AuthContextType {
@@ -17,100 +18,68 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (data: any) => Promise<void>;
   logout: () => void;
-  refreshToken: () => Promise<void>;
 }
 
-// ✅ Create and export the context itself
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
+  // On mount, check if user is already logged in (e.g., token in cookie)
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        setIsLoading(false);
-        return;
-      }
+    const fetchUser = async () => {
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.data.success) {
-          setUser(res.data.user);
-        } else {
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-        }
+        const res = await axios.get('/auth/me');
+        setUser(res.data.user);
       } catch {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
     };
-    checkAuth();
+    fetchUser();
   }, []);
 
   const login = async (email: string, password: string) => {
-    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
-      username: email,
-      password,
-    });
-    if (res.data.success) {
-      localStorage.setItem('accessToken', res.data.accessToken);
-      localStorage.setItem('refreshToken', res.data.refreshToken);
+    setIsLoading(true);
+    try {
+      const res = await axios.post('/auth/login', { email, password });
       setUser(res.data.user);
-      router.push('/');
-    } else {
-      throw new Error(res.data.message || 'Login failed');
+      // Token is stored in HttpOnly cookie by the backend or we set it here (if using custom logic)
+      // For simplicity, assume backend sets a cookie or we store in local storage (not recommended)
+      router.push('/dashboard');
+    } catch (error) {
+      throw error; // Let the caller handle the error
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const register = async (data: any) => {
-    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`, data);
-    if (res.data.success) {
-      router.push('/login?registered=true');
-    } else {
-      throw new Error(res.data.message || 'Registration failed');
-    }
-  };
-
-  const logout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    setUser(null);
-    router.push('/');
-  };
-
-  const refreshToken = async () => {
-    const refresh = localStorage.getItem('refreshToken');
-    if (!refresh) throw new Error('No refresh token');
-    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh-token`, {
-      refreshToken: refresh,
-    });
-    if (res.data.success) {
-      localStorage.setItem('accessToken', res.data.accessToken);
-    } else {
-      throw new Error('Refresh failed');
+  const logout = async () => {
+    try {
+      await axios.post('/auth/logout');
+    } catch {
+      // ignore
+    } finally {
+      setUser(null);
+      router.push('/login');
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, register, logout, refreshToken }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-// ✅ Custom hook using the exported context
-export const useAuth = () => {
+export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within AuthProvider');
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
   return context;
-};
+}

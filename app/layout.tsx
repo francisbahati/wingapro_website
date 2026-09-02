@@ -1,51 +1,35 @@
 // app/layout.tsx
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
-import { AuthProvider } from '@/context/AuthContext';  // ✅ Correct path
-import Navbar from '@/components/Navbar';              // ✅ Correct path
-import React from 'react';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import theme from './theme';
+import { AuthProvider } from '@/context/AuthContext';
+import NotificationListener from '@/components/notifications/NotificationListener';
 
-export const metadata = {
-  title: 'WingaPro – Internet Packages & Devices',
-  description: 'Buy data bundles, routers, and MiFi – all in one place.',
+const inter = Inter({ subsets: ['latin'] });
+
+export const metadata: Metadata = {
+  title: 'WingaPro',
+  description: 'WingaPro Business Management',
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="en">
-      <body>
-        <AuthProvider>
-          <Navbar />
-          <main>{children}</main>
-          <footer className="site-footer">
-            <div className="container footer-grid">
-              <div className="footer-brand">
-                <div className="logo">Winga<span>Pro</span></div>
-                <p>Your trusted digital platform for internet packages and devices.</p>
-              </div>
-              <div>
-                <h5>Quick Links</h5>
-                <ul>
-                  <li><a href="/packages">Packages</a></li>
-                  <li><a href="/download">Download APK</a></li>
-                </ul>
-              </div>
-              <div>
-                <h5>Support</h5>
-                <ul>
-                  <li><a href="/about">About Us</a></li>
-                  <li><a href="/contact">Contact</a></li>
-                </ul>
-              </div>
-            </div>
-            <div className="container footer-bottom">
-              <span>&copy; {new Date().getFullYear()} WingaPro. All rights reserved.</span>
-            </div>
-          </footer>
-        </AuthProvider>
+      <body className={inter.className}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <AuthProvider>
+            <NotificationListener />
+            {children}
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
