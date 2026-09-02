@@ -1,3 +1,4 @@
+// app/(auth)/layout.tsx
 'use client';
 
 import { useState } from 'react';
@@ -23,21 +24,26 @@ import { useAuth } from '@/hooks/useAuth';
 import {
   Dashboard as DashboardIcon,
   ShoppingCart as OrdersIcon,
-  AccountBalanceWallet as WalletIcon,
-  LocalOffer as PromotionsIcon,
-  Support as SupportIcon,
-  Notifications as NotificationsIcon,
-  Person as ProfileIcon,
+  Inventory2 as ProductsIcon,
+  People as UsersIcon,
+  BarChart as ReportsIcon,
   Settings as SettingsIcon,
   Logout as LogoutIcon,
+  AccountBalanceWallet as WalletIcon,
   AddShoppingCart as BuyIcon,
-  Wifi as PackagesIcon,
-  Payment as PaymentIcon,
+  Notifications as NotificationsIcon,
+  SupportAgent as SupportIcon,
+  LocalOffer as OffersIcon,
+  Person as ProfileIcon,
 } from '@mui/icons-material';
 
 const drawerWidth = 240;
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const pathname = usePathname();
@@ -45,20 +51,18 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
   const navItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, href: '/dashboard' },
-    { text: 'Buy Data', icon: <BuyIcon />, href: '/buy' },
-    { text: 'Packages', icon: <PackagesIcon />, href: '/packages' },
     { text: 'Orders', icon: <OrdersIcon />, href: '/orders' },
+    { text: 'Products', icon: <ProductsIcon />, href: '/products' },
     { text: 'Wallet', icon: <WalletIcon />, href: '/wallet' },
-    { text: 'Deposit/Withdraw', icon: <PaymentIcon />, href: '/deposit-withdraw' },
-    { text: 'Promotions', icon: <PromotionsIcon />, href: '/promotions' },
-    { text: 'Notifications', icon: <NotificationsIcon />, href: '/notifications' },
+    { text: 'Buy Data', icon: <BuyIcon />, href: '/packages' },
+    { text: 'Promotions', icon: <OffersIcon />, href: '/promotions' },
     { text: 'Support', icon: <SupportIcon />, href: '/support' },
+    { text: 'Notifications', icon: <NotificationsIcon />, href: '/notifications' },
     { text: 'Profile', icon: <ProfileIcon />, href: '/profile' },
+    ...(user?.role === 'admin' ? [{ text: 'Users', icon: <UsersIcon />, href: '/users' }] : []),
+    { text: 'Reports', icon: <ReportsIcon />, href: '/reports' },
     { text: 'Settings', icon: <SettingsIcon />, href: '/settings' },
   ];
-
-  // Admin-only routes (if needed)
-  // if (user?.role === 'admin') { ... }
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
@@ -83,10 +87,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               selected={pathname === item.href}
               sx={{
                 '&.Mui-selected': {
-                  backgroundColor: 'rgba(10, 46, 92, 0.1)',
+                  backgroundColor: 'rgba(0, 180, 216, 0.1)',
                   color: 'primary.main',
                   '&:hover': {
-                    backgroundColor: 'rgba(10, 46, 92, 0.2)',
+                    backgroundColor: 'rgba(0, 180, 216, 0.2)',
                   },
                 },
               }}
@@ -140,16 +144,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               open={Boolean(anchorElUser)}
               onClose={() => setAnchorElUser(null)}
             >
-              <MenuItem component={Link} href="/profile">
-                <ListItemIcon><ProfileIcon fontSize="small" /></ListItemIcon>
-                Profile
-              </MenuItem>
-              <MenuItem component={Link} href="/settings">
-                <ListItemIcon><SettingsIcon fontSize="small" /></ListItemIcon>
-                Settings
-              </MenuItem>
               <MenuItem onClick={handleLogout}>
-                <ListItemIcon><LogoutIcon fontSize="small" /></ListItemIcon>
+                <ListItemIcon>
+                  <LogoutIcon fontSize="small" />
+                </ListItemIcon>
                 Logout
               </MenuItem>
             </Menu>

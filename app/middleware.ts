@@ -16,10 +16,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Role‑based protection (example: `/users` only for admin)
-  if (token && request.nextUrl.pathname.startsWith('/users')) {
-    const allowedRoles = ['admin'];
-    if (!role || !allowedRoles.includes(role)) {
+  // Role-based protection
+  if (token) {
+    // Admin-only routes
+    const adminRoutes = ['/users', '/products/new', '/products/edit', '/reports'];
+    const isAdminRoute = adminRoutes.some((route) => request.nextUrl.pathname.startsWith(route));
+    if (isAdminRoute && role !== 'admin') {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
   }
@@ -34,13 +36,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|images|apk|firebase-messaging-sw.js).*)',
   ],
 };

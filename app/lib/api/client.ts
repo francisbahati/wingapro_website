@@ -1,15 +1,13 @@
-// app/lib/api/client.ts
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL, // uses your env variable
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // if your backend uses cookies
+  withCredentials: true,
 });
 
-// Attach token from localStorage (or cookie) to every request
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('jwt_token');
@@ -28,7 +26,10 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('jwt_token');
       if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+        // Use replace to avoid back-button issues.
+        // This is the only acceptable place to do a client-side redirect outside a component.
+        // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+        window.location.replace('/login');
       }
     }
     return Promise.reject(error);

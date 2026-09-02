@@ -1,26 +1,25 @@
-// app/(auth)/wallet/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Card,
   CardContent,
   Typography,
-  TextField,
   Button,
-  Alert,
   CircularProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
+  List,
+  ListItem,
+  ListItemText,
   Chip,
+  Divider,
+  Alert,
 } from '@mui/material';
-import { AxiosError } from 'axios';
+import { useRouter } from 'next/navigation';
 import apiClient from '@/lib/api/client';
+import { AxiosError } from 'axios';
+
+const PRIMARY = '#0A2E5C';
 
 interface Transaction {
   id: number;
@@ -30,161 +29,123 @@ interface Transaction {
   date: string;
 }
 
-interface WalletData {
-  balance: number;
-  transactions: Transaction[];
+interface Withdrawal {
+  id: number;
+  amount: number;
+  status: 'pending' | 'completed' | 'rejected';
+  requestedAt: string;
 }
 
 export default function WalletPage() {
-  const [wallet, setWallet] = useState<WalletData | null>(null);
-  const [amount, setAmount] = useState('');
+  const [balance, setBalance] = useState(0);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [topUpLoading, setTopUpLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [error, setError] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/wallet`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setWallet(data.wallet);
-        else {
-          setWallet({
-            balance: 5000,
-            transactions: [
-              { id: 1, type: 'credit', amount: 5000, description: 'Initial top-up', date: '2025-01-01' },
-              { id: 2, type: 'debit', amount: 500, description: '1GB Daily purchase', date: '2025-01-17' },
-            ],
-          });
+    const fetchWallet = async () => {
+      try {
+        const res = await apiClient.get('/wallet');
+        setBalance(res.data.balance || 0);
+        setTransactions(res.data.transactions || []);
+        const wRes = await apiClient.get('/withdrawals');
+        setWithdrawals(wRes.data.withdrawals || []);
+      } catch (err) {
+        if (err instanceof AxiosError) {
+          setError(err.response?.data?.message || 'Failed to load wallet');
+        } else {
+          setError('An unexpected error occurred');
         }
-      })
-      .catch(() => {
-        setWallet({
-          balance: 5000,
-          transactions: [
-            { id: 1, type: 'credit', amount: 5000, description: 'Initial top-up', date: '2025-01-01' },
-            { id: 2, type: 'debit', amount: 500, description: '1GB Daily purchase', date: '2025-01-17' },
-          ],
-        });
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchWallet();
   }, []);
 
-  const handleTopUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setTopUpLoading(true);
-    setMessage(null);
-    try {
-      await apiClient.post('/customer/wallet/topup', {
-        amount: parseFloat(amount),
-      });
-      setMessage({ type: 'success', text: 'Wallet topped up successfully' });
-      setAmount('');
-      const res = await apiClient.get('/customer/wallet');
-      setWallet(res.data.wallet);
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        setMessage({ type: 'error', text: err.response?.data?.message || 'Top-up failed' });
-      } else {
-        setMessage({ type: 'error', text: 'An unexpected error occurred' });
-      }
-    } finally {
-      setTopUpLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  if (loading) return <Box sx={{ p: 3, textAlign: 'center' }}><CircularProgress /></Box>;
+  if (error) return <Alert severity="error" sx={{ m: 3 }}>{error}</Alert>;
 
   return (
-    <Box>
-      <Typography variant="h4" sx={{ mb: 3 }}>
+    <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>
         My Wallet
       </Typography>
 
-      <Card sx={{ mb: 4, bgcolor: 'primary.main', color: 'white' }}>
+      {/* Balance Card */}
+      <Card sx={{ mb: 4, bgcolor: PRIMARY, color: 'white' }}>
         <CardContent>
           <Typography variant="body2" sx={{ opacity: 0.8 }}>
-            Current Balance
+            Total Balance
           </Typography>
-          <Typography variant="h3" sx={{ fontWeight: 'bold', my: 1 }}>
-            TZS {wallet?.balance.toLocaleString()}
+          <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
+            TZS {balance.toLocaleString()}
           </Typography>
+          <Button
+            variant="contained"
+            sx={{ mt: 2, bgcolor: 'white', color: PRIMARY }}
+            onClick={() => router.push('/deposit-withdraw')}
+          >
+            Deposit / Withdraw
+          </Button>
         </CardContent>
       </Card>
 
-      {message && (
-        <Alert severity={message.type} sx={{ mb: 2 }}>
-          {message.text}
-        </Alert>
+      {/* Withdrawals */}
+      <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+        Withdrawal History
+      </Typography>
+      {withdrawals.length === 0 ? (
+        <Typography color="text.secondary" sx={{ mb: 3 }}>
+          No withdrawal requests yet.
+        </Typography>
+      ) : (
+        <List sx={{ mb: 4 }}>
+          {withdrawals.map((w) => (
+            <ListItem key={w.id} divider>
+              <ListItemText
+                primary={`TZS ${w.amount.toLocaleString()}`}
+                secondary={new Date(w.requestedAt).toLocaleDateString()}
+              />
+              <Chip
+                label={w.status}
+                color={w.status === 'completed' ? 'success' : w.status === 'rejected' ? 'error' : 'warning'}
+                size="small"
+              />
+            </ListItem>
+          ))}
+        </List>
       )}
 
-      <Card sx={{ mb: 4 }}>
-        <CardContent>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Top Up Wallet
-          </Typography>
-          <form onSubmit={handleTopUp}>
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <TextField
-                label="Amount (TZS)"
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-                sx={{ minWidth: 200 }}
-              />
-              <Button type="submit" variant="contained" disabled={topUpLoading}>
-                {topUpLoading ? <CircularProgress size={24} color="inherit" /> : 'Top Up'}
-              </Button>
-            </Box>
-          </form>
-        </CardContent>
-      </Card>
+      <Divider sx={{ my: 3 }} />
 
-      <Card>
-        <CardContent>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Transaction History
-          </Typography>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Type</TableCell>
-                  <TableCell>Amount</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Date</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {wallet?.transactions.map((txn) => (
-                  <TableRow key={txn.id}>
-                    <TableCell>{txn.id}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={txn.type}
-                        color={txn.type === 'credit' ? 'success' : 'error'}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {txn.type === 'credit' ? '+' : '-'} TZS {txn.amount.toLocaleString()}
-                    </TableCell>
-                    <TableCell>{txn.description}</TableCell>
-                    <TableCell>{txn.date}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </CardContent>
-      </Card>
+      {/* Transactions */}
+      <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+        Recent Transactions
+      </Typography>
+      {transactions.length === 0 ? (
+        <Typography color="text.secondary">No transactions yet.</Typography>
+      ) : (
+        <List>
+          {transactions.map((tx) => (
+            <ListItem key={tx.id} divider>
+              <ListItemText
+                primary={tx.description}
+                secondary={new Date(tx.date).toLocaleString()}
+              />
+              <Typography
+                variant="body2"
+                color={tx.type === 'credit' ? 'green' : 'red'}
+                sx={{ fontWeight: 'bold' }}
+              >
+                {tx.type === 'credit' ? '+' : '-'} TZS {tx.amount.toLocaleString()}
+              </Typography>
+            </ListItem>
+          ))}
+        </List>
+      )}
     </Box>
   );
 }

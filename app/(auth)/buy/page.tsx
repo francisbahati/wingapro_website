@@ -1,4 +1,3 @@
-// app/(auth)/buy/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -17,7 +16,6 @@ import {
   Chip,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { AxiosError } from 'axios';
 import apiClient from '@/lib/api/client';
 
 interface Package {
@@ -39,30 +37,21 @@ export default function BuyPage() {
   const [recipientName, setRecipientName] = useState('');
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [purchasing, setPurchasing] = useState(false);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/packages`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setPackages(data.packages);
-        else {
-          setPackages([
-            { id: 1, name: '1GB Daily', dataSize: '1GB', validity: '24 hours', price: 500, network: 'Halotel' },
-            { id: 2, name: '5GB Monthly', dataSize: '5GB', validity: '30 days', price: 2500, network: 'Tigo' },
-            { id: 3, name: '500MB Weekly', dataSize: '500MB', validity: '7 days', price: 1000, network: 'Vodacom' },
-          ]);
-        }
-      })
-      .catch(() => {
-        setPackages([
-          { id: 1, name: '1GB Daily', dataSize: '1GB', validity: '24 hours', price: 500, network: 'Halotel' },
-          { id: 2, name: '5GB Monthly', dataSize: '5GB', validity: '30 days', price: 2500, network: 'Tigo' },
-          { id: 3, name: '500MB Weekly', dataSize: '500MB', validity: '7 days', price: 1000, network: 'Vodacom' },
-        ]);
-      })
-      .finally(() => setLoading(false));
+    const fetchPackages = async () => {
+      try {
+        const res = await apiClient.get('/packages');
+        setPackages(res.data.packages || []);
+      } catch {
+        setError('Failed to load packages');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPackages();
   }, []);
 
   const handleNext = () => {
@@ -89,25 +78,16 @@ export default function BuyPage() {
     setActiveStep((prev) => prev - 1);
   };
 
-  const handlePurchase = async () => {
-    setPurchasing(true);
-    setError('');
-    try {
-      await apiClient.post('/customer/orders', {
-        packageId: selectedPackage?.id,
-        phone: phone,
-        recipientName: recipientName,
-      });
-      router.push('/orders?purchase=success');
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        setError(err.response?.data?.message || 'Purchase failed');
-      } else {
-        setError('An unexpected error occurred');
-      }
-    } finally {
-      setPurchasing(false);
-    }
+  const handlePurchase = () => {
+    if (!selectedPackage) return;
+    setSubmitting(true);
+    const params = new URLSearchParams({
+      packageId: selectedPackage.id.toString(),
+      network: selectedPackage.network,
+      recipientName,
+      recipientPhone: phone,
+    });
+    router.push(`/payment?${params.toString()}`);
   };
 
   if (loading) {
@@ -119,8 +99,8 @@ export default function BuyPage() {
   }
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto' }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>
+    <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>
         Buy Data Package
       </Typography>
 
@@ -132,11 +112,7 @@ export default function BuyPage() {
         ))}
       </Stepper>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
       {activeStep === 0 && (
         <Card>
@@ -144,7 +120,13 @@ export default function BuyPage() {
             <Typography variant="h6" sx={{ mb: 2 }}>
               Select a Package
             </Typography>
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 2 }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
+                gap: 2,
+              }}
+            >
               {packages.map((pkg) => (
                 <Card
                   key={pkg.id}
@@ -152,6 +134,7 @@ export default function BuyPage() {
                     cursor: 'pointer',
                     border: selectedPackage?.id === pkg.id ? 2 : 1,
                     borderColor: selectedPackage?.id === pkg.id ? 'primary.main' : 'divider',
+                    '&:hover': { boxShadow: 4 },
                   }}
                   onClick={() => setSelectedPackage(pkg)}
                 >
@@ -163,7 +146,7 @@ export default function BuyPage() {
                     <Typography variant="body2" color="text.secondary">
                       {pkg.dataSize} • {pkg.validity}
                     </Typography>
-                    <Typography variant="h5" sx={{ fontWeight: 'bold', mt: 2 }}>
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', mt: 2, color: 'primary.main' }}>
                       TZS {pkg.price.toLocaleString()}
                     </Typography>
                   </CardContent>
@@ -198,7 +181,6 @@ export default function BuyPage() {
               value={recipientName}
               onChange={(e) => setRecipientName(e.target.value)}
               required
-              sx={{ mb: 2 }}
             />
           </CardContent>
         </Card>
@@ -221,7 +203,7 @@ export default function BuyPage() {
       )}
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-        <Button onClick={handleBack} disabled={activeStep === 0 || purchasing}>
+        <Button onClick={handleBack} disabled={activeStep === 0 || submitting}>
           Back
         </Button>
         {activeStep < steps.length - 1 ? (
@@ -229,8 +211,8 @@ export default function BuyPage() {
             Next
           </Button>
         ) : (
-          <Button variant="contained" onClick={handlePurchase} disabled={purchasing}>
-            {purchasing ? <CircularProgress size={24} color="inherit" /> : 'Confirm Purchase'}
+          <Button variant="contained" onClick={handlePurchase} disabled={submitting}>
+            {submitting ? <CircularProgress size={24} color="inherit" /> : 'Confirm Purchase'}
           </Button>
         )}
       </Box>

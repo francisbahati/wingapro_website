@@ -1,120 +1,162 @@
-// app/(auth)/orders/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Card,
   CardContent,
   Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Chip,
-  CircularProgress,
   Button,
+  Skeleton,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
+import apiClient from '@/lib/api/client';
+import { AxiosError } from 'axios';
+
+const PRIMARY = '#0A2E5C';
 
 interface Order {
   id: number;
-  packageName: string;
-  phoneNumber: string;
+  Package?: { name: string };
+  recipientName: string;
+  recipientPhone: string;
+  network: string;
   amount: number;
-  status: 'pending' | 'processing' | 'completed' | 'failed' | 'rejected';
+  orderStatus: string;
   createdAt: string;
 }
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const router = useRouter();
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/customer/orders`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setOrders(data.orders);
-        else {
-          setOrders([
-            { id: 1, packageName: '1GB Daily', phoneNumber: '0712345678', amount: 500, status: 'completed', createdAt: '2025-01-17' },
-            { id: 2, packageName: '5GB Monthly', phoneNumber: '0756123456', amount: 2500, status: 'pending', createdAt: '2025-01-16' },
-            { id: 3, packageName: '500MB Weekly', phoneNumber: '0789012345', amount: 1000, status: 'processing', createdAt: '2025-01-15' },
-          ]);
+    const fetchOrders = async () => {
+      try {
+        const res = await apiClient.get('/purchases');
+        setOrders(res.data.purchases || []);
+      } catch (err) {
+        if (err instanceof AxiosError) {
+          setError(err.response?.data?.message || 'Failed to load orders');
+        } else {
+          setError('An unexpected error occurred');
         }
-      })
-      .catch(() => {
-        setOrders([
-          { id: 1, packageName: '1GB Daily', phoneNumber: '0712345678', amount: 500, status: 'completed', createdAt: '2025-01-17' },
-          { id: 2, packageName: '5GB Monthly', phoneNumber: '0756123456', amount: 2500, status: 'pending', createdAt: '2025-01-16' },
-          { id: 3, packageName: '500MB Weekly', phoneNumber: '0789012345', amount: 1000, status: 'processing', createdAt: '2025-01-15' },
-        ]);
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrders();
   }, []);
 
-  const statusColor = (status: Order['status']) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
+      case 'payment_received': return 'info';
+      case 'waiting_approval': return 'warning';
+      case 'approved': return 'primary';
+      case 'waiting_delivery': return 'warning';
       case 'completed': return 'success';
-      case 'pending': return 'warning';
-      case 'processing': return 'info';
-      case 'failed':
-      case 'rejected': return 'error';
       default: return 'default';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'payment_received': return 'Payment Received';
+      case 'waiting_approval': return 'Waiting Approval';
+      case 'approved': return 'Approved';
+      case 'waiting_delivery': return 'Waiting Delivery';
+      case 'completed': return 'Completed';
+      default: return status;
     }
   };
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-        <CircularProgress />
+      <Box sx={{ p: 3 }}>
+        {[1, 2, 3].map((i) => (
+          <Card key={i} sx={{ mb: 2 }}>
+            <CardContent>
+              <Skeleton variant="text" width="60%" />
+              <Skeleton variant="text" width="40%" />
+              <Skeleton variant="rectangular" height={40} />
+            </CardContent>
+          </Card>
+        ))}
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography color="error">{error}</Typography>
+        <Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>
+          Retry
+        </Button>
+      </Box>
+    );
+  }
+
+  if (orders.length === 0) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography variant="h6">No orders yet</Typography>
+        <Button variant="contained" sx={{ mt: 2, bgcolor: PRIMARY }} onClick={() => router.push('/packages')}>
+          Start Shopping
+        </Button>
       </Box>
     );
   }
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">My Orders</Typography>
-        <Button variant="contained" onClick={() => router.push('/packages')}>
-          Buy New
-        </Button>
-      </Box>
-      <Card>
-        <CardContent>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Order ID</TableCell>
-                  <TableCell>Package</TableCell>
-                  <TableCell>Recipient Phone</TableCell>
-                  <TableCell>Amount</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Date</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {orders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell>{order.id}</TableCell>
-                    <TableCell>{order.packageName}</TableCell>
-                    <TableCell>{order.phoneNumber}</TableCell>
-                    <TableCell>TZS {order.amount.toLocaleString()}</TableCell>
-                    <TableCell>
-                      <Chip label={order.status} color={statusColor(order.status)} size="small" />
-                    </TableCell>
-                    <TableCell>{order.createdAt}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </CardContent>
-      </Card>
+    <Box sx={{ p: 3, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>
+        My Orders
+      </Typography>
+      {orders.map((order) => (
+        <Card
+          key={order.id}
+          sx={{
+            mb: 2,
+            cursor: 'pointer',
+            '&:hover': { boxShadow: 4 },
+          }}
+          onClick={() => router.push(`/orders/${order.id}`)}
+        >
+          <CardContent>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'center' }, justifyContent: 'space-between' }}>
+              <Box>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                  {order.Package?.name || 'Package'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Recipient: {order.recipientName} ({order.recipientPhone})
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Network: {order.network}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Amount: TZS {order.amount.toLocaleString()}
+                </Typography>
+              </Box>
+              <Box sx={{ mt: { xs: 1, sm: 0 }, textAlign: { sm: 'right' } }}>
+                <Chip
+                  label={getStatusLabel(order.orderStatus)}
+                  color={getStatusColor(order.orderStatus)}
+                  size="small"
+                  sx={{ mb: 1 }}
+                />
+                <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
+                  {new Date(order.createdAt).toLocaleDateString()}
+                </Typography>
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
+      ))}
     </Box>
   );
 }
