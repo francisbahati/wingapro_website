@@ -27,8 +27,6 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('jwt_token');
       if (typeof window !== 'undefined') {
         // Use replace to avoid back-button issues.
-        // This is the only acceptable place to do a client-side redirect outside a component.
-        // eslint-disable-next-line @next/next/no-location-assign-relative-destination
         window.location.replace('/login');
       }
     }

@@ -146,8 +146,8 @@ export default function ReportsPage() {
                   cx="50%"
                   cy="50%"
                   outerRadius={80}
-                  // Explicitly type the label parameter as the data item shape
-                  label={({ network }: { network: string }) => network}
+                  // The label function receives PieLabelRenderProps which includes 'name'
+                  label={({ name }) => name}
                 >
                   {networkSales.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
