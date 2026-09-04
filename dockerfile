@@ -1,32 +1,59 @@
-# ---------- Dependencies ----------
+# ============================================
+# Stage 1: Install dependencies
+# ============================================
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev && npm cache clean --force
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# ---------- Build ----------
+# ============================================
+# Stage 2: Build the Next.js app
+# ============================================
 FROM node:20-alpine AS builder
 WORKDIR /app
+
+# Copy dependencies
 COPY --from=deps /app/node_modules ./node_modules
+
+# Copy source files
 COPY . .
+
+# Declare build-time arguments (Dokploy passes env vars here)
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
+ARG NEXT_PUBLIC_FIREBASE_VAPID_KEY
+ENV NEXT_PUBLIC_FIREBASE_VAPID_KEY=$NEXT_PUBLIC_FIREBASE_VAPID_KEY
+
+# Build the app
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-# ---------- Production ----------
+# ============================================
+# Stage 3: Production runner (standalone output)
+# ============================================
 FROM node:20-alpine AS runner
 WORKDIR /app
-ENV NODE_ENV=production
-ENV PORT=3002
-ENV HOSTNAME=0.0.0.0
 
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Copy standalone output
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-EXPOSE 3002
+# Set permissions
+RUN chown -R nextjs:nodejs /app
 
-# Optional health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget -qO- http://localhost:3002/health || exit 1
+USER nextjs
 
-CMD ["npm", "start"]
+EXPOSE 3000
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "server.js"]
