@@ -17,6 +17,17 @@ import { AxiosError } from 'axios';
 
 const PRIMARY = '#0A2E5C';
 
+// Define the expected shape of the package data from the API
+interface PackageData {
+  id: number;
+  name: string;
+  dataSize: string;
+  validity: string;
+  price: number;
+  network: string;
+  description?: string;
+}
+
 // Component that uses useSearchParams – must be wrapped in Suspense
 function PaymentContent() {
   const searchParams = useSearchParams();
@@ -25,7 +36,7 @@ function PaymentContent() {
   const network = searchParams.get('network') || '';
   const recipientName = searchParams.get('recipientName') || '';
   const recipientPhone = searchParams.get('recipientPhone') || '';
-  const [packageData, setPackageData] = useState<any>(null);
+  const [packageData, setPackageData] = useState<PackageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -54,6 +65,7 @@ function PaymentContent() {
   }, [packageId]);
 
   const handlePay = async () => {
+    if (!packageData) return;
     setProcessing(true);
     try {
       await apiClient.post('/purchase', {
