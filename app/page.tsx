@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import {
   AndroidRounded,
-  WindowsRounded,
+  ComputerRounded, // ✅ WindowsRounded doesn't exist – use ComputerRounded
 } from '@mui/icons-material';
 
 interface Promotion {
@@ -26,7 +26,7 @@ interface Promotion {
   validUntil?: string;
 }
 
-// Network image mapping – adjust paths if your images are elsewhere
+// Network image mapping
 const networkImages: Record<string, string> = {
   Halotel: '/images/halotel.webp',
   Tigo: '/images/yas.webp',
@@ -188,7 +188,7 @@ export default function Home() {
                     height={60}
                     className="network-logo"
                     style={{ objectFit: 'contain' }}
-                    unoptimized // Remove if you want Next.js optimization
+                    unoptimized
                   />
                 </div>
                 <span>{net}</span>
@@ -255,7 +255,7 @@ export default function Home() {
             </Button>
             <Button
               variant="contained"
-              startIcon={<WindowsRounded />}
+              startIcon={<ComputerRounded />}
               href="/windows/WingaProSetup.exe"
               download
               sx={{ bgcolor: '#0A2E5C', '&:hover': { bgcolor: '#063a5e' } }}

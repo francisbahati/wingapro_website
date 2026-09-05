@@ -1,8 +1,8 @@
+// app/download/page.tsx
 'use client';
 
-import { Box, Container, Typography, Card, CardContent, Button, Grid } from '@mui/material';
-import { AndroidRounded, WindowsRounded } from '@mui/icons-material';
-import Link from 'next/link';
+import { Box, Container, Typography, Card, CardContent, Button } from '@mui/material';
+import { AndroidRounded, ComputerRounded } from '@mui/icons-material';
 
 export default function DownloadPage() {
   return (
@@ -15,43 +15,39 @@ export default function DownloadPage() {
           Fast, secure and easy – available on Android and Windows.
         </Typography>
 
-        <Grid container spacing={4} justifyContent="center">
-          <Grid item xs={12} md={5}>
-            <Card sx={{ bgcolor: 'rgba(255,255,255,0.1)', color: '#fff', textAlign: 'center', p: 3, border: '1px solid rgba(255,255,255,0.2)' }}>
-              <AndroidRounded sx={{ fontSize: 80, color: '#00b4d8' }} />
-              <Typography variant="h5" sx={{ my: 2 }}>Android APK</Typography>
-              <Typography variant="body2" sx={{ mb: 3 }}>
-                Download the APK for your Android device. Works on Android 8+.
-              </Typography>
-              <Button
-                variant="contained"
-                href="/apk/wingapro.apk"
-                download
-                sx={{ bgcolor: '#00b4d8', '&:hover': { bgcolor: '#0093b0' }, px: 4, py: 1.5 }}
-              >
-                Download APK
-              </Button>
-            </Card>
-          </Grid>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4, justifyContent: 'center' }}>
+          <Card sx={{ bgcolor: 'rgba(255,255,255,0.1)', color: '#fff', textAlign: 'center', p: 3, border: '1px solid rgba(255,255,255,0.2)', flex: 1 }}>
+            <AndroidRounded sx={{ fontSize: 80, color: '#00b4d8' }} />
+            <Typography variant="h5" sx={{ my: 2 }}>Android APK</Typography>
+            <Typography variant="body2" sx={{ mb: 3 }}>
+              Download the APK for your Android device. Works on Android 8+.
+            </Typography>
+            <Button
+              variant="contained"
+              href="/apk/wingapro.apk"
+              download
+              sx={{ bgcolor: '#00b4d8', '&:hover': { bgcolor: '#0093b0' }, px: 4, py: 1.5 }}
+            >
+              Download APK
+            </Button>
+          </Card>
 
-          <Grid item xs={12} md={5}>
-            <Card sx={{ bgcolor: 'rgba(255,255,255,0.1)', color: '#fff', textAlign: 'center', p: 3, border: '1px solid rgba(255,255,255,0.2)' }}>
-              <WindowsRounded sx={{ fontSize: 80, color: '#00b4d8' }} />
-              <Typography variant="h5" sx={{ my: 2 }}>Windows App</Typography>
-              <Typography variant="body2" sx={{ mb: 3 }}>
-                Install the desktop app for Windows 10/11.
-              </Typography>
-              <Button
-                variant="contained"
-                href="/windows/WingaProSetup.exe"
-                download
-                sx={{ bgcolor: '#00b4d8', '&:hover': { bgcolor: '#0093b0' }, px: 4, py: 1.5 }}
-              >
-                Download for Windows
-              </Button>
-            </Card>
-          </Grid>
-        </Grid>
+          <Card sx={{ bgcolor: 'rgba(255,255,255,0.1)', color: '#fff', textAlign: 'center', p: 3, border: '1px solid rgba(255,255,255,0.2)', flex: 1 }}>
+            <ComputerRounded sx={{ fontSize: 80, color: '#00b4d8' }} />
+            <Typography variant="h5" sx={{ my: 2 }}>Windows App</Typography>
+            <Typography variant="body2" sx={{ mb: 3 }}>
+              Install the desktop app for Windows 10/11.
+            </Typography>
+            <Button
+              variant="contained"
+              href="/windows/WingaProSetup.exe"
+              download
+              sx={{ bgcolor: '#00b4d8', '&:hover': { bgcolor: '#0093b0' }, px: 4, py: 1.5 }}
+            >
+              Download for Windows
+            </Button>
+          </Card>
+        </Box>
 
         <Typography variant="body2" align="center" sx={{ color: '#aaa', mt: 6 }}>
           Your data is protected. All downloads are secure and verified.
