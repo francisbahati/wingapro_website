@@ -14,13 +14,13 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth'; // Or '@/context/AuthContext' – depends on your structure
 import { AxiosError } from 'axios';
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,7 +30,7 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await login(email, password);
+      await login(username, password);
       router.push('/dashboard');
     } catch (err) {
       if (err instanceof AxiosError) {
@@ -70,10 +70,9 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit}>
             <TextField
               fullWidth
-              label="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              label="Username or Email"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               sx={{ mb: 2 }}
             />
