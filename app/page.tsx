@@ -1,10 +1,22 @@
 // app/page.tsx
 'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import HeroBackground from '@/components/HeroBackground';
+
+// MUI imports for the download section
+import {
+  Box,
+  Button,
+  Typography,
+} from '@mui/material';
+import {
+  AndroidRounded,
+  WindowsRounded,
+} from '@mui/icons-material';
 
 interface Promotion {
   id: number;
@@ -219,6 +231,38 @@ export default function Home() {
               <i className="fas fa-mobile-alt" style={{ fontSize: '4rem', color: 'white' }}></i>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ======== NEW SECTION: APP DOWNLOADS (Android & Windows) ======== */}
+      <section className="app-download-section" style={{ padding: '4rem 0', textAlign: 'center' }}>
+        <div className="container">
+          <Typography variant="h3" sx={{ mb: 2 }}>
+            Get the Apps
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 4, color: '#666' }}>
+            Download for your Android device or Windows PC.
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
+            <Button
+              variant="contained"
+              startIcon={<AndroidRounded />}
+              href="/apk/wingapro.apk"
+              download
+              sx={{ bgcolor: '#0A2E5C', '&:hover': { bgcolor: '#063a5e' } }}
+            >
+              Android APK
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<WindowsRounded />}
+              href="/windows/WingaProSetup.exe"
+              download
+              sx={{ bgcolor: '#0A2E5C', '&:hover': { bgcolor: '#063a5e' } }}
+            >
+              Windows App
+            </Button>
+          </Box>
         </div>
       </section>
     </>

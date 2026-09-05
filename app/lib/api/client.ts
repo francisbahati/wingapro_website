@@ -1,19 +1,29 @@
+// lib/api/client.ts
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api`, // MUST include /api
-  headers: { 'Content-Type': 'application/json' },
-  timeout: 30000,
+  // ✅ Append /api to the base URL – matches your backend structure
+  baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api`,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 30000, // 30 seconds
 });
 
-// Attach token
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+// Attach access token from localStorage (or cookie) to every request
+apiClient.interceptors.request.use(
+  (config) => {
+    // You can also read from a cookie if you prefer
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-// Handle 401
+// Handle 401 – attempt refresh token or redirect to login
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -32,9 +42,12 @@ apiClient.interceptors.response.use(
           return apiClient(originalRequest);
         }
       } catch (refreshError) {
+        // Refresh token invalid – clear and redirect
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       }
     }
