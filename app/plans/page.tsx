@@ -16,6 +16,7 @@ function PlansContent() {
   useEffect(() => {
     const fetchPackages = async () => {
       try {
+        // Use plain fetch – no auth token attached
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/packages`);
         const data = await res.json();
         let list = data.packages || data;
