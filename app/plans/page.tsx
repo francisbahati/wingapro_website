@@ -3,8 +3,10 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Box, Container, Typography, Card, CardContent, Button, Chip, Skeleton, Alert } from '@mui/material';
+import { Box, Container, Typography, Card, CardContent, Button, Chip, Skeleton, Alert, TextField, IconButton } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 function PlansContent() {
   const searchParams = useSearchParams();
@@ -16,7 +18,6 @@ function PlansContent() {
   useEffect(() => {
     const fetchPackages = async () => {
       try {
-        // Use plain fetch – no auth token attached
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/packages`);
         const data = await res.json();
         let list = data.packages || data;
@@ -33,57 +34,68 @@ function PlansContent() {
 
   if (loading) {
     return (
-      <Box>
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Navbar />
-        <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Container maxWidth="lg" sx={{ py: 8, flexGrow: 1 }}>
           <Typography variant="h3" gutterBottom>Data Packages</Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 3 }}>
             {[1,2,3].map((i) => (
-              <Card key={i}>
+              <Card key={i} sx={{ borderRadius: 3 }}>
                 <CardContent><Skeleton width="60%" height={40} /></CardContent>
               </Card>
             ))}
           </Box>
         </Container>
+        <Footer />
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Box>
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Navbar />
-        <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Container maxWidth="lg" sx={{ py: 8, flexGrow: 1 }}>
           <Alert severity="error">{error}</Alert>
           <Button variant="contained" sx={{ mt: 2 }} onClick={() => window.location.reload()}>Retry</Button>
         </Container>
+        <Footer />
       </Box>
     );
   }
 
   return (
-    <Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Navbar />
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Typography variant="h3" gutterBottom>Data Packages</Typography>
+      <Container maxWidth="lg" sx={{ py: 8, flexGrow: 1 }}>
+        <Typography variant="h3" gutterBottom sx={{ fontWeight: 800 }}>
+          Data <span style={{ color: '#00b4d8' }}>Packages</span>
+        </Typography>
+        <Typography variant="h6" color="text.secondary" sx={{ mb: 4 }}>
+          Choose your network and find the perfect plan.
+        </Typography>
         {networkFilter && <Chip label={`Network: ${networkFilter}`} onDelete={() => window.history.back()} sx={{ mb: 2 }} />}
         {packages.length === 0 ? (
           <Typography variant="body1">No packages available.</Typography>
         ) : (
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 3 }}>
             {packages.map((pkg) => (
-              <Card key={pkg.id}>
-                <CardContent>
-                  <Typography variant="h6">{pkg.name}</Typography>
-                  <Typography variant="body2">{pkg.network} • {pkg.dataSize} • {pkg.validity}</Typography>
-                  <Typography variant="h5" sx={{ my: 1 }}>TZS {pkg.price.toLocaleString()}</Typography>
-                  <Button variant="contained" href="/login">Buy Now</Button>
+              <Card key={pkg.id} sx={{ borderRadius: 3, '&:hover': { transform: 'translateY(-5px)', boxShadow: 6 }, transition: '0.3s' }}>
+                <CardContent sx={{ textAlign: 'center' }}>
+                  <Chip label={pkg.network} size="small" sx={{ bgcolor: '#0A2E5C', color: 'white', mb: 1 }} />
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>{pkg.name}</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ my: 1 }}>{pkg.dataSize} • {pkg.validity}</Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 800, color: '#0A2E5C', my: 1 }}>TZS {pkg.price.toLocaleString()}</Typography>
+                  <Button variant="contained" href="/login" sx={{ bgcolor: '#0A2E5C', '&:hover': { bgcolor: '#071e3d' } }}>
+                    Buy Now
+                  </Button>
                 </CardContent>
               </Card>
             ))}
           </Box>
         )}
       </Container>
+      <Footer />
     </Box>
   );
 }

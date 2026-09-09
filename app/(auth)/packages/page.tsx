@@ -1,3 +1,4 @@
+// app/(auth)/packages/page.tsx
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
@@ -158,23 +159,38 @@ function PackagesContent() {
           }}
         >
           {packages.map((pkg) => (
-            <Card key={pkg.id} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-              <CardContent sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <Typography variant="h6" component="div">
-                    {pkg.name}
-                  </Typography>
-                  <Chip label={pkg.network} size="small" sx={{ bgcolor: PRIMARY, color: 'white' }} />
-                </Box>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            <Card
+              key={pkg.id}
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                borderRadius: 3,
+                '&:hover': {
+                  transform: 'translateY(-5px)',
+                  boxShadow: 4,
+                  transition: 'transform 0.3s, box-shadow 0.3s',
+                },
+              }}
+            >
+              <CardContent sx={{ flexGrow: 1, textAlign: 'center' }}>
+                <Chip
+                  label={pkg.network}
+                  size="small"
+                  sx={{ bgcolor: PRIMARY, color: 'white', mb: 1 }}
+                />
+                <Typography variant="h6" component="div" sx={{ fontWeight: 700 }}>
+                  {pkg.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ my: 1 }}>
                   {pkg.dataSize} • {pkg.validity}
                 </Typography>
                 {pkg.description && (
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                     {pkg.description}
                   </Typography>
                 )}
-                <Typography variant="h5" sx={{ fontWeight: 'bold', mt: 2, color: PRIMARY }}>
+                <Typography variant="h5" sx={{ fontWeight: 800, color: PRIMARY, mt: 2 }}>
                   TZS {pkg.price.toLocaleString()}
                 </Typography>
               </CardContent>

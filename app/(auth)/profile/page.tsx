@@ -2,26 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Box,
-  Card,
-  Typography,
-  Avatar,
-  TextField,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  IconButton,
-  InputAdornment,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-  CircularProgress,
-  Alert,
-  Skeleton,
+  Box, Card, Typography, Avatar, TextField, Button, Dialog, DialogTitle, DialogContent,
+  DialogActions, IconButton, InputAdornment, List, ListItemButton, ListItemIcon, ListItemText,
+  Divider, CircularProgress, Alert, Skeleton,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -66,11 +49,8 @@ export default function ProfilePage() {
         const res = await apiClient.get('/users/profile');
         setProfile(res.data.user);
       } catch (err) {
-        if (err instanceof AxiosError) {
-          setError(err.response?.data?.message || 'Failed to load profile');
-        } else {
-          setError('An unexpected error occurred');
-        }
+        if (err instanceof AxiosError) setError(err.response?.data?.message || 'Failed to load profile');
+        else setError('An unexpected error occurred');
       } finally {
         setLoading(false);
       }
@@ -89,21 +69,15 @@ export default function ProfilePage() {
     }
     setChangingPassword(true);
     try {
-      await apiClient.post('/users/change-password', {
-        oldPassword,
-        newPassword,
-      });
+      await apiClient.post('/users/change-password', { oldPassword, newPassword });
       alert('Password changed successfully!');
       setPasswordDialog(false);
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err) {
-      if (err instanceof AxiosError) {
-        alert(err.response?.data?.message || 'Failed to change password');
-      } else {
-        alert('An unexpected error occurred');
-      }
+      if (err instanceof AxiosError) alert(err.response?.data?.message || 'Failed to change password');
+      else alert('An unexpected error occurred');
     } finally {
       setChangingPassword(false);
     }
@@ -132,9 +106,7 @@ export default function ProfilePage() {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="error">{error}</Alert>
-        <Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>
-          Retry
-        </Button>
+        <Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>Retry</Button>
       </Box>
     );
   }
@@ -147,30 +119,22 @@ export default function ProfilePage() {
 
   return (
     <Box sx={{ p: 3, maxWidth: 600, mx: 'auto' }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>
-        My Profile
-      </Typography>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>My Profile</Typography>
 
       {/* Profile Header */}
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
         <Avatar sx={{ width: 80, height: 80, bgcolor: PRIMARY, fontSize: 32 }}>
           {username.charAt(0).toUpperCase()}
         </Avatar>
-        <Typography variant="h5" sx={{ fontWeight: 'bold', mt: 1 }}>
-          {username}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {email}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {phone}
-        </Typography>
+        <Typography variant="h5" sx={{ fontWeight: 'bold', mt: 1 }}>{username}</Typography>
+        <Typography variant="body2" color="text.secondary">{email}</Typography>
+        <Typography variant="body2" color="text.secondary">{phone}</Typography>
         {branch && <Typography variant="body2" color="text.secondary">Branch: {branch}</Typography>}
         <Typography variant="body2" color="text.secondary">Role: Customer</Typography>
       </Box>
 
       {/* Options */}
-      <Card sx={{ mb: 2 }}>
+      <Card sx={{ mb: 2, borderRadius: 3 }}>
         <List>
           <ListItemButton onClick={() => setPasswordDialog(true)}>
             <ListItemIcon><LockIcon sx={{ color: PRIMARY }} /></ListItemIcon>
@@ -205,7 +169,7 @@ export default function ProfilePage() {
             fullWidth
             margin="dense"
             value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOldPassword(e.target.value)}
             slotProps={{
               input: {
                 endAdornment: (
@@ -224,7 +188,7 @@ export default function ProfilePage() {
             fullWidth
             margin="dense"
             value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
             helperText="Minimum 6 characters"
             slotProps={{
               input: {
@@ -244,7 +208,7 @@ export default function ProfilePage() {
             fullWidth
             margin="dense"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
             slotProps={{
               input: {
                 endAdornment: (
@@ -259,15 +223,8 @@ export default function ProfilePage() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setPasswordDialog(false)} disabled={changingPassword}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleChangePassword}
-            disabled={changingPassword}
-            sx={{ bgcolor: PRIMARY }}
-          >
+          <Button onClick={() => setPasswordDialog(false)} disabled={changingPassword}>Cancel</Button>
+          <Button variant="contained" onClick={handleChangePassword} disabled={changingPassword} sx={{ bgcolor: PRIMARY }}>
             {changingPassword ? <CircularProgress size={24} color="inherit" /> : 'Update Password'}
           </Button>
         </DialogActions>

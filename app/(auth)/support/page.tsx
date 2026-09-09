@@ -2,22 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  List,
-  Chip,
-  IconButton,
-  CircularProgress,
-  Alert,
-  Skeleton,
+  Box, Card, CardContent, Typography, Button, TextField, Dialog, DialogTitle, DialogContent,
+  DialogActions, List, Chip, IconButton, CircularProgress, Alert, Skeleton,
 } from '@mui/material';
 import apiClient from '@/lib/api/client';
 import { AxiosError } from 'axios';
@@ -47,18 +33,14 @@ export default function SupportPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  // Effect data fetch
   useEffect(() => {
     const fetchTickets = async () => {
       try {
         const res = await apiClient.get('/tickets');
         setTickets(res.data.tickets || []);
       } catch (err) {
-        if (err instanceof AxiosError) {
-          setError(err.response?.data?.message || 'Failed to load tickets');
-        } else {
-          setError('An unexpected error occurred');
-        }
+        if (err instanceof AxiosError) setError(err.response?.data?.message || 'Failed to load tickets');
+        else setError('An unexpected error occurred');
       } finally {
         setLoading(false);
       }
@@ -73,24 +55,16 @@ export default function SupportPage() {
     }
     setSubmitting(true);
     try {
-      await apiClient.post('/support/ticket', {
-        subject,
-        message,
-        dispute: isDispute,
-      });
+      await apiClient.post('/support/ticket', { subject, message, dispute: isDispute });
       setDialogOpen(false);
       setSubject('');
       setMessage('');
       setIsDispute(false);
-      // Re-fetch tickets
       const res = await apiClient.get('/tickets');
       setTickets(res.data.tickets || []);
     } catch (err) {
-      if (err instanceof AxiosError) {
-        alert(err.response?.data?.message || 'Failed to create ticket');
-      } else {
-        alert('An unexpected error occurred');
-      }
+      if (err instanceof AxiosError) alert(err.response?.data?.message || 'Failed to create ticket');
+      else alert('An unexpected error occurred');
     } finally {
       setSubmitting(false);
     }
@@ -103,11 +77,8 @@ export default function SupportPage() {
       await apiClient.delete(`/tickets/${id}`);
       setTickets(tickets.filter((t) => t.id !== id));
     } catch (err) {
-      if (err instanceof AxiosError) {
-        alert(err.response?.data?.message || 'Failed to delete');
-      } else {
-        alert('An unexpected error occurred');
-      }
+      if (err instanceof AxiosError) alert(err.response?.data?.message || 'Failed to delete');
+      else alert('An unexpected error occurred');
     } finally {
       setDeletingId(null);
     }
@@ -133,34 +104,20 @@ export default function SupportPage() {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="error">{error}</Alert>
-        <Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>
-          Retry
-        </Button>
+        <Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>Retry</Button>
       </Box>
     );
   }
 
   return (
     <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>
-        Support
-      </Typography>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>Support</Typography>
 
       <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          sx={{ bgcolor: PRIMARY }}
-          onClick={() => { setIsDispute(false); setDialogOpen(true); }}
-        >
+        <Button variant="contained" startIcon={<AddIcon />} sx={{ bgcolor: PRIMARY }} onClick={() => { setIsDispute(false); setDialogOpen(true); }}>
           New Ticket
         </Button>
-        <Button
-          variant="contained"
-          startIcon={<WarningIcon />}
-          sx={{ bgcolor: 'error.main' }}
-          onClick={() => { setIsDispute(true); setDialogOpen(true); }}
-        >
+        <Button variant="contained" startIcon={<WarningIcon />} sx={{ bgcolor: 'error.main' }} onClick={() => { setIsDispute(true); setDialogOpen(true); }}>
           Dispute
         </Button>
       </Box>
@@ -170,37 +127,21 @@ export default function SupportPage() {
       ) : (
         <List>
           {tickets.map((ticket) => (
-            <Card key={ticket.id} sx={{ mb: 2 }}>
+            <Card key={ticket.id} sx={{ mb: 2, borderRadius: 3 }}>
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <Box>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                      {ticket.subject}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {ticket.message}
-                    </Typography>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>{ticket.subject}</Typography>
+                    <Typography variant="body2" color="text.secondary">{ticket.message}</Typography>
                     {ticket.adminReply && (
-                      <Typography variant="body2" sx={{ mt: 1, color: 'primary.main' }}>
-                        Reply: {ticket.adminReply}
-                      </Typography>
+                      <Typography variant="body2" sx={{ mt: 1, color: 'primary.main' }}>Reply: {ticket.adminReply}</Typography>
                     )}
-                    <Typography variant="caption" color="text.secondary">
-                      {new Date(ticket.createdAt).toLocaleString()}
-                    </Typography>
+                    <Typography variant="caption" color="text.secondary">{new Date(ticket.createdAt).toLocaleString()}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Chip
-                      label={ticket.status}
-                      color={ticket.status === 'closed' ? 'success' : 'warning'}
-                      size="small"
-                    />
+                    <Chip label={ticket.status} color={ticket.status === 'closed' ? 'success' : 'warning'} size="small" />
                     {ticket.status === 'open' && (
-                      <IconButton
-                        onClick={() => handleDelete(ticket.id)}
-                        disabled={deletingId === ticket.id}
-                        size="small"
-                      >
+                      <IconButton onClick={() => handleDelete(ticket.id)} disabled={deletingId === ticket.id} size="small">
                         {deletingId === ticket.id ? <CircularProgress size={20} /> : <DeleteIcon color="error" />}
                       </IconButton>
                     )}
@@ -215,33 +156,12 @@ export default function SupportPage() {
       <Dialog open={dialogOpen} onClose={() => !submitting && setDialogOpen(false)}>
         <DialogTitle>{isDispute ? 'File a Dispute' : 'New Support Ticket'}</DialogTitle>
         <DialogContent>
-          <TextField
-            label="Subject"
-            fullWidth
-            margin="dense"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-          />
-          <TextField
-            label="Message"
-            fullWidth
-            multiline
-            rows={4}
-            margin="dense"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          />
+          <TextField label="Subject" fullWidth margin="dense" value={subject} onChange={(e) => setSubject(e.target.value)} />
+          <TextField label="Message" fullWidth multiline rows={4} margin="dense" value={message} onChange={(e) => setMessage(e.target.value)} />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDialogOpen(false)} disabled={submitting}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleCreateTicket}
-            disabled={submitting}
-            sx={{ bgcolor: isDispute ? 'error.main' : PRIMARY }}
-          >
+          <Button onClick={() => setDialogOpen(false)} disabled={submitting}>Cancel</Button>
+          <Button variant="contained" onClick={handleCreateTicket} disabled={submitting} sx={{ bgcolor: isDispute ? 'error.main' : PRIMARY }}>
             {submitting ? <CircularProgress size={24} color="inherit" /> : 'Send'}
           </Button>
         </DialogActions>

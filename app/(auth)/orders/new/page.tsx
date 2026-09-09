@@ -2,29 +2,14 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  TextField,
-  Button,
-  Alert,
-  CircularProgress,
-  MenuItem,
-} from '@mui/material';
+import { Box, Card, CardContent, Typography, TextField, Button, Alert, CircularProgress, MenuItem } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { AxiosError } from 'axios';
 import apiClient from '@/lib/api/client';
 
 export default function NewOrderPage() {
   const router = useRouter();
-  const [form, setForm] = useState({
-    customerName: '',
-    phone: '',
-    packageId: '',
-    amount: '',
-  });
+  const [form, setForm] = useState({ customerName: '', phone: '', packageId: '', amount: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -52,74 +37,29 @@ export default function NewOrderPage() {
       });
       router.push('/orders');
     } catch (err) {
-      if (err instanceof AxiosError) {
-        setError(err.response?.data?.message || 'Failed to create order');
-      } else {
-        setError('An unexpected error occurred');
-      }
+      if (err instanceof AxiosError) setError(err.response?.data?.message || 'Failed to create order');
+      else setError('An unexpected error occurred');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Box>
-      <Typography variant="h4" sx={{ mb: 3 }}>
-        New Order
-      </Typography>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-      <Card sx={{ maxWidth: 600 }}>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" sx={{ mb: 3 }}>New Order</Typography>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      <Card sx={{ maxWidth: 600, borderRadius: 3 }}>
         <CardContent>
           <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Customer Name"
-              name="customerName"
-              value={form.customerName}
-              onChange={handleChange}
-              required
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Phone Number"
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              required
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              select
-              fullWidth
-              label="Package"
-              name="packageId"
-              value={form.packageId}
-              onChange={handleChange}
-              required
-              sx={{ mb: 2 }}
-            >
+            <TextField fullWidth label="Customer Name" name="customerName" value={form.customerName} onChange={handleChange} required sx={{ mb: 2 }} />
+            <TextField fullWidth label="Phone Number" name="phone" value={form.phone} onChange={handleChange} required sx={{ mb: 2 }} />
+            <TextField select fullWidth label="Package" name="packageId" value={form.packageId} onChange={handleChange} required sx={{ mb: 2 }}>
               {packages.map((pkg) => (
-                <MenuItem key={pkg.id} value={pkg.id}>
-                  {pkg.name}
-                </MenuItem>
+                <MenuItem key={pkg.id} value={pkg.id}>{pkg.name}</MenuItem>
               ))}
             </TextField>
-            <TextField
-              fullWidth
-              label="Amount (TZS)"
-              name="amount"
-              type="number"
-              value={form.amount}
-              onChange={handleChange}
-              required
-              sx={{ mb: 3 }}
-            />
-            <Button type="submit" variant="contained" disabled={loading}>
+            <TextField fullWidth label="Amount (TZS)" name="amount" type="number" value={form.amount} onChange={handleChange} required sx={{ mb: 3 }} />
+            <Button type="submit" variant="contained" disabled={loading} sx={{ bgcolor: '#0A2E5C' }}>
               {loading ? <CircularProgress size={24} color="inherit" /> : 'Create Order'}
             </Button>
           </form>

@@ -1,20 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  TextField,
-  Button,
-  Alert,
-  CircularProgress,
-  Stepper,
-  Step,
-  StepLabel,
-  Chip,
-} from '@mui/material';
+import { Box, Card, CardContent, Typography, TextField, Button, Alert, CircularProgress, Stepper, Step, StepLabel, Chip } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import apiClient from '@/lib/api/client';
 
@@ -90,43 +77,25 @@ export default function BuyPage() {
     router.push(`/payment?${params.toString()}`);
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}><CircularProgress /></Box>;
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>
-        Buy Data Package
-      </Typography>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>Buy Data Package</Typography>
 
       <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
         {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
+          <Step key={label}><StepLabel>{label}</StepLabel></Step>
         ))}
       </Stepper>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
       {activeStep === 0 && (
-        <Card>
+        <Card sx={{ borderRadius: 3 }}>
           <CardContent>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Select a Package
-            </Typography>
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
-                gap: 2,
-              }}
-            >
+            <Typography variant="h6" sx={{ mb: 2 }}>Select a Package</Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 2 }}>
               {packages.map((pkg) => (
                 <Card
                   key={pkg.id}
@@ -140,15 +109,9 @@ export default function BuyPage() {
                 >
                   <CardContent>
                     <Chip label={pkg.network} size="small" color="primary" />
-                    <Typography variant="h6" sx={{ my: 1 }}>
-                      {pkg.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {pkg.dataSize} • {pkg.validity}
-                    </Typography>
-                    <Typography variant="h5" sx={{ fontWeight: 'bold', mt: 2, color: 'primary.main' }}>
-                      TZS {pkg.price.toLocaleString()}
-                    </Typography>
+                    <Typography variant="h6" sx={{ my: 1 }}>{pkg.name}</Typography>
+                    <Typography variant="body2" color="text.secondary">{pkg.dataSize} • {pkg.validity}</Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', mt: 2, color: 'primary.main' }}>TZS {pkg.price.toLocaleString()}</Typography>
                   </CardContent>
                 </Card>
               ))}
@@ -158,40 +121,22 @@ export default function BuyPage() {
       )}
 
       {activeStep === 1 && (
-        <Card>
+        <Card sx={{ borderRadius: 3 }}>
           <CardContent>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Recipient Details
-            </Typography>
+            <Typography variant="h6" sx={{ mb: 2 }}>Recipient Details</Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
               Package: <strong>{selectedPackage?.name}</strong> (TZS {selectedPackage?.price.toLocaleString()})
             </Typography>
-            <TextField
-              fullWidth
-              label="Phone Number"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="e.g., 0712345678"
-              required
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Recipient Name"
-              value={recipientName}
-              onChange={(e) => setRecipientName(e.target.value)}
-              required
-            />
+            <TextField fullWidth label="Phone Number" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g., 0712345678" required sx={{ mb: 2 }} />
+            <TextField fullWidth label="Recipient Name" value={recipientName} onChange={(e) => setRecipientName(e.target.value)} required />
           </CardContent>
         </Card>
       )}
 
       {activeStep === 2 && (
-        <Card>
+        <Card sx={{ borderRadius: 3 }}>
           <CardContent>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Confirm Purchase
-            </Typography>
+            <Typography variant="h6" sx={{ mb: 2 }}>Confirm Purchase</Typography>
             <Box sx={{ mb: 3 }}>
               <Typography>Package: <strong>{selectedPackage?.name}</strong></Typography>
               <Typography>Price: <strong>TZS {selectedPackage?.price.toLocaleString()}</strong></Typography>
@@ -203,15 +148,11 @@ export default function BuyPage() {
       )}
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-        <Button onClick={handleBack} disabled={activeStep === 0 || submitting}>
-          Back
-        </Button>
+        <Button onClick={handleBack} disabled={activeStep === 0 || submitting}>Back</Button>
         {activeStep < steps.length - 1 ? (
-          <Button variant="contained" onClick={handleNext}>
-            Next
-          </Button>
+          <Button variant="contained" onClick={handleNext} sx={{ bgcolor: '#0A2E5C' }}>Next</Button>
         ) : (
-          <Button variant="contained" onClick={handlePurchase} disabled={submitting}>
+          <Button variant="contained" onClick={handlePurchase} disabled={submitting} sx={{ bgcolor: '#0A2E5C' }}>
             {submitting ? <CircularProgress size={24} color="inherit" /> : 'Confirm Purchase'}
           </Button>
         )}

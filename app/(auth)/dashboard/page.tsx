@@ -2,23 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  TextField,
-  Button,
-  Avatar,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  IconButton,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
+  Box, Card, CardContent, Typography, TextField, Button, Avatar, Chip,
+  Dialog, DialogTitle, DialogContent, DialogActions, IconButton,
+  MenuItem, Select, FormControl, InputLabel, Stack,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -27,52 +13,26 @@ import { AxiosError } from 'axios';
 import Image from 'next/image';
 import SearchIcon from '@mui/icons-material/Search';
 import TuneIcon from '@mui/icons-material/Tune';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import SecurityIcon from '@mui/icons-material/Security';
-import LockIcon from '@mui/icons-material/Lock';
-import VerifiedIcon from '@mui/icons-material/Verified';
-import HeadsetIcon from '@mui/icons-material/Headset';
+import BoltIcon from '@mui/icons-material/Bolt';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 const PRIMARY = '#0A2E5C';
-const BACKGROUND = '#F8FAFC';
-
-interface Network {
-  name: string;
-  logo: string;
-}
-
-interface Promotion {
-  id: number;
-  title: string;
-  description: string;
-  discount?: number;
-  validUntil?: string;
-  Package?: {
-    name: string;
-    displayPrice: number;
-  };
-}
 
 export default function DashboardPage() {
-  // We don't need the user variable here, so just call useAuth() without destructuring
   useAuth();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState('All');
-  const [minPrice, setMinPrice] = useState<number | null>(null);
-  const [maxPrice, setMaxPrice] = useState<number | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
-
   const [username, setUsername] = useState('User');
-  const [phone, setPhone] = useState('Not provided');
   const [walletBalance, setWalletBalance] = useState(0);
-  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [promotions, setPromotions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
-  const networks: Network[] = [
+  const networks = [
     { name: 'Halotel', logo: '/images/halotel.webp' },
     { name: 'Tigo', logo: '/images/yas.webp' },
     { name: 'Vodacom', logo: '/images/vodacom.webp' },
@@ -83,22 +43,12 @@ export default function DashboardPage() {
     const fetchData = async () => {
       try {
         const profileRes = await apiClient.get('/users/profile');
-        const userData = profileRes.data.user;
-        setUsername(userData.username || 'User');
-        setPhone(userData.phone || 'Not provided');
-        setWalletBalance(userData.wallet_balance || 0);
-
+        setUsername(profileRes.data.user.username || 'User');
+        setWalletBalance(profileRes.data.user.wallet_balance || 0);
         const promoRes = await apiClient.get('/promotions');
         setPromotions(promoRes.data.promotions || []);
-      } catch (err) {
-        if (err instanceof AxiosError) {
-          setError(err.response?.data?.message || 'Failed to load data');
-        } else {
-          setError('An unexpected error occurred');
-        }
-      } finally {
-        setLoading(false);
-      }
+      } catch (err) { console.error(err); }
+      finally { setLoading(false); }
     };
     fetchData();
   }, []);
@@ -108,58 +58,34 @@ export default function DashboardPage() {
       const params = new URLSearchParams();
       if (searchQuery) params.set('search', searchQuery);
       if (selectedNetwork !== 'All') params.set('network', selectedNetwork);
-      if (minPrice !== null) params.set('minPrice', minPrice.toString());
-      if (maxPrice !== null) params.set('maxPrice', maxPrice.toString());
       router.push(`/packages?${params.toString()}`);
     }
   };
 
-  const handleFilterApply = () => {
-    setFilterOpen(false);
-    handleSearch();
-  };
-
-  if (loading) {
-    return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Typography>Loading...</Typography>
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Typography color="error">{error}</Typography>
-        <Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>
-          Retry
-        </Button>
-      </Box>
-    );
-  }
-
   return (
-    <Box sx={{ bgcolor: BACKGROUND, minHeight: '100vh', p: { xs: 2, md: 3 } }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <Avatar sx={{ bgcolor: PRIMARY, width: 48, height: 48 }}>
-          {username.charAt(0).toUpperCase()}
-        </Avatar>
-        <Box sx={{ ml: 2, flex: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-            Welcome back, {username}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {phone}
-          </Typography>
-        </Box>
-        <IconButton>
-          <NotificationsIcon />
-        </IconButton>
-      </Box>
+    <Box sx={{ p: 3, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
+      <Typography variant="h4" sx={{ fontWeight: 800, mb: 3 }}>
+        Welcome back, {username} 👋
+      </Typography>
+
+      {/* Wallet Summary */}
+      <Card sx={{ mb: 3, background: `linear-gradient(45deg, ${PRIMARY} 30%, #1a3a5c 90%)`, color: 'white', borderRadius: 3 }}>
+        <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 3 }}>
+          <Box>
+            <Typography variant="body2" sx={{ opacity: 0.8 }}>Wallet Balance</Typography>
+            <Typography variant="h3" sx={{ fontWeight: 800 }}>TZS {walletBalance.toLocaleString()}</Typography>
+            <Button variant="contained" sx={{ mt: 2, bgcolor: 'white', color: PRIMARY }} onClick={() => router.push('/deposit-withdraw')}>
+              Deposit / Withdraw
+            </Button>
+          </Box>
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+            <Image src="/images/wallet.png" alt="Wallet" width={150} height={100} />
+          </Box>
+        </CardContent>
+      </Card>
 
       {/* Search & Filter */}
-      <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
+      <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
         <TextField
           placeholder="Search packages..."
           value={searchQuery}
@@ -168,101 +94,37 @@ export default function DashboardPage() {
           fullWidth
           size="medium"
           sx={{ bgcolor: 'white', borderRadius: 2 }}
-          slotProps={{
-            input: {
-              endAdornment: (
-                <IconButton onClick={handleSearch}>
-                  <SearchIcon />
-                </IconButton>
-              ),
-            },
-          }}
+          slotProps={{ input: { endAdornment: <IconButton onClick={handleSearch}><SearchIcon /></IconButton> } }}
         />
-        <Button
-          variant="contained"
-          sx={{ bgcolor: PRIMARY, minWidth: 48, borderRadius: 2 }}
-          onClick={() => setFilterOpen(true)}
-        >
-          <TuneIcon sx={{ color: 'white' }} />
-        </Button>
-      </Box>
-
-      {/* Banner Carousel (placeholder) */}
-      <Box sx={{ height: 200, bgcolor: PRIMARY, borderRadius: 3, mb: 3, p: 3, color: 'white' }}>
-        <Typography variant="h5">Special Offers</Typography>
-        <Typography variant="body2">Wallet Balance: TZS {walletBalance.toLocaleString()}</Typography>
-        <Button variant="contained" sx={{ mt: 2, bgcolor: 'white', color: PRIMARY }}>
-          View Details
+        <Button variant="contained" sx={{ bgcolor: PRIMARY, minWidth: 48 }} onClick={() => setFilterOpen(true)}>
+          <TuneIcon />
         </Button>
       </Box>
 
       {/* Trust Strip */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-around',
-          bgcolor: 'white',
-          borderRadius: 3,
-          p: 1.5,
-          mb: 3,
-          boxShadow: 1,
-        }}
-      >
+      <Box sx={{ display: 'flex', justifyContent: 'space-around', bgcolor: 'white', borderRadius: 3, p: 2, mb: 4, boxShadow: 1 }}>
         {[
-          { icon: <SecurityIcon />, label: 'Trusted' },
-          { icon: <LockIcon />, label: 'Secure' },
-          { icon: <VerifiedIcon />, label: 'Verified' },
-          { icon: <HeadsetIcon />, label: '24/7 Support' },
-          { icon: <TrendingUpIcon />, label: 'Best Value' },
+          { icon: <SecurityIcon />, label: 'Secure' },
+          { icon: <BoltIcon />, label: 'Instant' },
+          { icon: <VerifiedUserIcon />, label: 'Verified' },
+          { icon: <SupportAgentIcon />, label: '24/7' },
+          { icon: <TrendingUpIcon />, label: 'Best Prices' },
         ].map((item, idx) => (
-          <Box key={idx} sx={{ textAlign: 'center' }}>
-            <Box sx={{ color: PRIMARY }}>{item.icon}</Box>
-            <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
-              {item.label}
-            </Typography>
+          <Box key={idx} sx={{ textAlign: 'center', '& svg': { color: PRIMARY, fontSize: 32 } }}>
+            {item.icon}
+            <Typography variant="caption" sx={{ display: 'block' }}>{item.label}</Typography>
           </Box>
         ))}
       </Box>
 
       {/* Networks */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-          Available Networks
-        </Typography>
-        <Button
-          variant="text"
-          sx={{ color: PRIMARY }}
-          onClick={() => router.push('/packages')}
-        >
-          See All
-        </Button>
-      </Box>
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2, mb: 4 }}>
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>Choose Your Network</Typography>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' }, gap: 2, mb: 4 }}>
         {networks.map((net) => (
-          <Card
-            key={net.name}
-            sx={{
-              cursor: 'pointer',
-              '&:hover': { boxShadow: 4 },
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: 100,
-            }}
-            onClick={() => {
-              setSelectedNetwork(net.name);
-              router.push(`/packages?network=${net.name}`);
-            }}
-          >
-            <CardContent>
-              <Image
-                src={net.logo}
-                alt={net.name}
-                width={100}
-                height={60}
-                style={{ objectFit: 'contain' }}
-                unoptimized
-              />
+          <Card key={net.name} onClick={() => router.push(`/packages?network=${net.name}`)} sx={{ cursor: 'pointer', '&:hover': { transform: 'scale(1.03)', boxShadow: 4 }, transition: '0.3s' }}>
+            <CardContent sx={{ textAlign: 'center', p: 2 }}>
+              <Image src={net.logo} alt={net.name} width={100} height={60} style={{ objectFit: 'contain' }} unoptimized />
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{net.name}</Typography>
             </CardContent>
           </Card>
         ))}
@@ -270,88 +132,39 @@ export default function DashboardPage() {
 
       {/* Promotions */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-          Active Promotions
-        </Typography>
-        <Button
-          variant="text"
-          sx={{ color: PRIMARY }}
-          onClick={() => router.push('/promotions')}
-        >
-          See All
-        </Button>
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>Active Promotions</Typography>
+        <Button variant="text" sx={{ color: PRIMARY }} onClick={() => router.push('/promotions')}>See All</Button>
       </Box>
       {promotions.length === 0 ? (
         <Typography color="text.secondary">No active promotions at the moment.</Typography>
       ) : (
-        promotions.slice(0, 3).map((promo) => (
-          <Card key={promo.id} sx={{ mb: 2, p: 2, display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {promo.title}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {promo.description}
-              </Typography>
-              {promo.discount && (
-                <Chip label={`-${promo.discount}% OFF`} size="small" sx={{ mt: 1, bgcolor: PRIMARY, color: 'white' }} />
-              )}
-              {promo.Package && (
-                <Typography variant="body2" color="text.secondary">
-                  {promo.Package.name} · TZS {promo.Package.displayPrice}
-                </Typography>
-              )}
-              {promo.validUntil && (
-                <Typography variant="caption" color="text.secondary">
-                  Valid until {new Date(promo.validUntil).toLocaleDateString()}
-                </Typography>
-              )}
-            </Box>
-            <IconButton onClick={() => router.push('/promotions')}>
-              <ArrowForwardIosIcon />
-            </IconButton>
-          </Card>
-        ))
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2 }}>
+          {promotions.slice(0, 3).map((promo) => (
+            <Card key={promo.id} sx={{ p: 2, borderLeft: 4, borderColor: PRIMARY, '&:hover': { boxShadow: 4 } }}>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>{promo.title}</Typography>
+              <Typography variant="body2" color="text.secondary">{promo.description}</Typography>
+              {promo.discount && <Chip label={`-${promo.discount}% OFF`} color="success" size="small" sx={{ mt: 1 }} />}
+              <Button size="small" variant="contained" sx={{ mt: 2, bgcolor: PRIMARY }} onClick={() => router.push('/promotions')}>View Deal</Button>
+            </Card>
+          ))}
+        </Box>
       )}
 
       {/* Filter Modal */}
-      <Dialog open={filterOpen} onClose={() => setFilterOpen(false)} fullWidth maxWidth="sm">
+      <Dialog open={filterOpen} onClose={() => setFilterOpen(false)}>
         <DialogTitle>Filter Packages</DialogTitle>
         <DialogContent>
           <FormControl fullWidth sx={{ mt: 1, mb: 2 }}>
             <InputLabel>Network</InputLabel>
-            <Select
-              value={selectedNetwork}
-              label="Network"
-              onChange={(e) => setSelectedNetwork(e.target.value)}
-            >
+            <Select value={selectedNetwork} label="Network" onChange={(e) => setSelectedNetwork(e.target.value)}>
               <MenuItem value="All">All</MenuItem>
-              {networks.map((n) => (
-                <MenuItem key={n.name} value={n.name}>{n.name}</MenuItem>
-              ))}
+              {networks.map((n) => <MenuItem key={n.name} value={n.name}>{n.name}</MenuItem>)}
             </Select>
           </FormControl>
-          <TextField
-            label="Min Price (TZS)"
-            type="number"
-            fullWidth
-            sx={{ mb: 2 }}
-            onChange={(e) => setMinPrice(e.target.value ? Number(e.target.value) : null)}
-          />
-          <TextField
-            label="Max Price (TZS)"
-            type="number"
-            fullWidth
-            onChange={(e) => setMaxPrice(e.target.value ? Number(e.target.value) : null)}
-          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => { setSelectedNetwork('All'); setMinPrice(null); setMaxPrice(null); }}>
-            Clear All
-          </Button>
-          <Button variant="contained" sx={{ bgcolor: PRIMARY }} onClick={handleFilterApply}>
-            Apply
-          </Button>
+          <Button onClick={() => setFilterOpen(false)}>Cancel</Button>
+          <Button variant="contained" sx={{ bgcolor: PRIMARY }} onClick={() => { setFilterOpen(false); handleSearch(); }}>Apply</Button>
         </DialogActions>
       </Dialog>
     </Box>

@@ -1,162 +1,116 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Chip,
-  Button,
-  Skeleton,
-} from '@mui/material';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { Box, Card, CardContent, Typography, Rating, Button, CircularProgress, Alert } from '@mui/material';
 import apiClient from '@/lib/api/client';
 import { AxiosError } from 'axios';
 
-const PRIMARY = '#0A2E5C';
-
 interface Order {
   id: number;
-  Package?: { name: string };
   recipientName: string;
   recipientPhone: string;
   network: string;
   amount: number;
   orderStatus: string;
   createdAt: string;
+  Package?: { name: string };
+  assignedSeller?: { username: string };
 }
 
-export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
+export default function OrderDetailPage() {
+  const { id } = useParams();
+  const router = useRouter();
+  const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const router = useRouter();
+  const [rating, setRating] = useState<number | null>(0);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const fetchOrders = async () => {
+    const fetchOrder = async () => {
       try {
-        const res = await apiClient.get('/purchases');
-        setOrders(res.data.purchases || []);
+        const res = await apiClient.get(`/purchases/${id}`);
+        setOrder(res.data.purchase);
       } catch (err) {
-        if (err instanceof AxiosError) {
-          setError(err.response?.data?.message || 'Failed to load orders');
-        } else {
-          setError('An unexpected error occurred');
-        }
+        if (err instanceof AxiosError) setError(err.response?.data?.message || 'Failed to load order');
+        else setError('An unexpected error occurred');
       } finally {
         setLoading(false);
       }
     };
-    fetchOrders();
-  }, []);
+    if (id) fetchOrder();
+  }, [id]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'payment_received': return 'info';
-      case 'waiting_approval': return 'warning';
-      case 'approved': return 'primary';
-      case 'waiting_delivery': return 'warning';
-      case 'completed': return 'success';
-      default: return 'default';
+  const handleConfirm = async () => {
+    if (!rating || rating === 0) {
+      setError('Please rate your experience');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await apiClient.put(`/purchase/${id}/confirm`, { rating });
+      router.push(`/order-confirmation?id=${id}`);
+    } catch (err) {
+      if (err instanceof AxiosError) setError(err.response?.data?.message || 'Failed to confirm');
+      else setError('An unexpected error occurred');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'payment_received': return 'Payment Received';
-      case 'waiting_approval': return 'Waiting Approval';
-      case 'approved': return 'Approved';
-      case 'waiting_delivery': return 'Waiting Delivery';
-      case 'completed': return 'Completed';
-      default: return status;
-    }
-  };
+  if (loading) return <Box sx={{ p: 3, textAlign: 'center' }}><CircularProgress /></Box>;
+  if (error) return <Alert severity="error" sx={{ m: 3 }}>{error}</Alert>;
+  if (!order) return <Typography sx={{ m: 3 }}>Order not found</Typography>;
 
-  if (loading) {
-    return (
-      <Box sx={{ p: 3 }}>
-        {[1, 2, 3].map((i) => (
-          <Card key={i} sx={{ mb: 2 }}>
-            <CardContent>
-              <Skeleton variant="text" width="60%" />
-              <Skeleton variant="text" width="40%" />
-              <Skeleton variant="rectangular" height={40} />
-            </CardContent>
-          </Card>
-        ))}
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Typography color="error">{error}</Typography>
-        <Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>
-          Retry
-        </Button>
-      </Box>
-    );
-  }
-
-  if (orders.length === 0) {
-    return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Typography variant="h6">No orders yet</Typography>
-        <Button variant="contained" sx={{ mt: 2, bgcolor: PRIMARY }} onClick={() => router.push('/packages')}>
-          Start Shopping
-        </Button>
-      </Box>
-    );
-  }
+  const canConfirm = order.orderStatus === 'waiting_delivery';
 
   return (
-    <Box sx={{ p: 3, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>
-        My Orders
+    <Box sx={{ p: 3, maxWidth: 600, mx: 'auto' }}>
+      <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
+        Order #{order.id}
       </Typography>
-      {orders.map((order) => (
-        <Card
-          key={order.id}
-          sx={{
-            mb: 2,
-            cursor: 'pointer',
-            '&:hover': { boxShadow: 4 },
-          }}
-          onClick={() => router.push(`/orders/${order.id}`)}
-        >
-          <CardContent>
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'center' }, justifyContent: 'space-between' }}>
-              <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                  {order.Package?.name || 'Package'}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Recipient: {order.recipientName} ({order.recipientPhone})
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Network: {order.network}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Amount: TZS {order.amount.toLocaleString()}
-                </Typography>
-              </Box>
-              <Box sx={{ mt: { xs: 1, sm: 0 }, textAlign: { sm: 'right' } }}>
-                <Chip
-                  label={getStatusLabel(order.orderStatus)}
-                  color={getStatusColor(order.orderStatus)}
-                  size="small"
-                  sx={{ mb: 1 }}
-                />
-                <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
-                  {new Date(order.createdAt).toLocaleDateString()}
-                </Typography>
-              </Box>
-            </Box>
-          </CardContent>
-        </Card>
-      ))}
+      <Card sx={{ mb: 3, borderRadius: 3 }}>
+        <CardContent>
+          <DetailRow label="Package" value={order.Package?.name || 'N/A'} />
+          <DetailRow label="Recipient" value={order.recipientName} />
+          <DetailRow label="Phone" value={order.recipientPhone} />
+          <DetailRow label="Network" value={order.network} />
+          <DetailRow label="Amount" value={`TZS ${order.amount.toLocaleString()}`} />
+          {order.assignedSeller && <DetailRow label="Seller" value={order.assignedSeller.username} />}
+          <DetailRow label="Status" value={order.orderStatus} />
+          <DetailRow label="Date" value={new Date(order.createdAt).toLocaleDateString()} />
+        </CardContent>
+      </Card>
+
+      {canConfirm && (
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="subtitle1" gutterBottom>
+            Rate your experience:
+          </Typography>
+          <Rating value={rating} onChange={(_, val) => setRating(val)} size="large" sx={{ mb: 2 }} />
+          <Button
+            variant="contained"
+            fullWidth
+            disabled={submitting}
+            onClick={handleConfirm}
+            sx={{ bgcolor: 'green', '&:hover': { bgcolor: 'darkgreen' } }}
+          >
+            {submitting ? <CircularProgress size={24} color="inherit" /> : 'Confirm Receipt'}
+          </Button>
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <Box sx={{ display: 'flex', py: 1, borderBottom: '1px solid #eee' }}>
+      <Typography variant="body2" sx={{ fontWeight: 'bold', width: 100 }}>
+        {label}:
+      </Typography>
+      <Typography variant="body2">{value}</Typography>
     </Box>
   );
 }
