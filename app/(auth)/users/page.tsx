@@ -15,7 +15,11 @@ import {
   TableRow,
   Chip,
   CircularProgress,
+  Alert,
+  Button,
 } from '@mui/material';
+import apiClient from '@/lib/api/client';
+import { AxiosError } from 'axios';
 
 interface User {
   id: number;
@@ -28,29 +32,24 @@ interface User {
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // Fetch users from API
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setUsers(data.users);
-        else {
-          setUsers([
-            { id: 1, username: 'admin', email: 'admin@wingapro.com', role: 'admin', isActive: true },
-            { id: 2, username: 'seller1', email: 'seller1@wingapro.com', role: 'seller', isActive: true },
-            { id: 3, username: 'finance1', email: 'finance@wingapro.com', role: 'finance', isActive: false },
-          ]);
+    const fetchUsers = async () => {
+      try {
+        const res = await apiClient.get('/users');
+        setUsers(res.data.users || []);
+      } catch (err) {
+        if (err instanceof AxiosError) {
+          setError(err.response?.data?.message || 'Failed to load users');
+        } else {
+          setError('An unexpected error occurred');
         }
-      })
-      .catch(() => {
-        setUsers([
-          { id: 1, username: 'admin', email: 'admin@wingapro.com', role: 'admin', isActive: true },
-          { id: 2, username: 'seller1', email: 'seller1@wingapro.com', role: 'seller', isActive: true },
-          { id: 3, username: 'finance1', email: 'finance@wingapro.com', role: 'finance', isActive: false },
-        ]);
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
   }, []);
 
   const roleColor = (role: string) => {
@@ -67,6 +66,17 @@ export default function UsersPage() {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
         <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error">{error}</Alert>
+        <Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>
+          Retry
+        </Button>
       </Box>
     );
   }

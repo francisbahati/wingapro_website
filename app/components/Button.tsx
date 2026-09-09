@@ -1,19 +1,31 @@
-// app/components/Button.tsx
+// components/Button.tsx
 import React from 'react';
 
-// Define the props type
 interface ButtonProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'outline'; // add other variants as needed
+  variant?: 'primary' | 'secondary' | 'outline' | 'text';
+  size?: 'sm' | 'md' | 'lg';
   className?: string;
-  // ... any other props you want to pass
-  [key: string]: any; // optional: for spreading rest props
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  onClick?: () => void;
+  // Allow any other HTML button attributes
+  [key: string]: any;
 }
 
-export default function Button({ children, variant = 'primary', className = '', ...props }: ButtonProps) {
-  const baseClass = `btn btn-${variant} ${className}`;
+export default function Button({
+  children,
+  variant = 'primary',
+  size = 'md',
+  className = '',
+  type = 'button',
+  disabled = false,
+  onClick,
+  ...props
+}: ButtonProps) {
+  const baseClass = `btn btn-${variant} btn-${size} ${className}`.trim();
   return (
-    <button className={baseClass} {...props}>
+    <button type={type} className={baseClass} disabled={disabled} onClick={onClick} {...props}>
       {children}
     </button>
   );

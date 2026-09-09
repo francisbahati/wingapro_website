@@ -21,6 +21,7 @@ import Divider from '@mui/material/Divider';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import NotificationListener from '@/components/notifications/NotificationListener';
 import {
   Dashboard as DashboardIcon,
   ShoppingCart as OrdersIcon,
@@ -106,6 +107,7 @@ export default function AuthLayout({
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+      <NotificationListener />
       <AppBar
         position="fixed"
         sx={{

@@ -2,18 +2,15 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  // ✅ Append /api to the base URL – matches your backend structure
   baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000, // 30 seconds
+  timeout: 30000,
 });
 
-// Attach access token from localStorage (or cookie) to every request
 apiClient.interceptors.request.use(
   (config) => {
-    // You can also read from a cookie if you prefer
     const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -23,7 +20,6 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Handle 401 – attempt refresh token or redirect to login
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -42,7 +38,6 @@ apiClient.interceptors.response.use(
           return apiClient(originalRequest);
         }
       } catch (refreshError) {
-        // Refresh token invalid – clear and redirect
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         if (typeof window !== 'undefined') {

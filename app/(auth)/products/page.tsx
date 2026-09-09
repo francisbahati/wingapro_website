@@ -16,10 +16,13 @@ import {
   Button,
   CircularProgress,
   IconButton,
+  Alert,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useRouter } from 'next/navigation';
+import apiClient from '@/lib/api/client';
+import { AxiosError } from 'axios';
 
 interface Product {
   id: number;
@@ -32,39 +35,37 @@ interface Product {
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const router = useRouter();
 
   useEffect(() => {
-    // Fetch products from API
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setProducts(data.products);
-        else {
-          setProducts([
-            { id: 1, name: '1GB Daily', price: 500, stock: 100, network: 'Halotel' },
-            { id: 2, name: '5GB Monthly', price: 2500, stock: 50, network: 'Tigo' },
-            { id: 3, name: 'Pocket MiFi', price: 12000, stock: 20, network: 'Vodacom' },
-          ]);
+    const fetchProducts = async () => {
+      try {
+        const res = await apiClient.get('/products');
+        setProducts(res.data.products || []);
+      } catch (err) {
+        if (err instanceof AxiosError) {
+          setError(err.response?.data?.message || 'Failed to load products');
+        } else {
+          setError('An unexpected error occurred');
         }
-      })
-      .catch(() => {
-        setProducts([
-          { id: 1, name: '1GB Daily', price: 500, stock: 100, network: 'Halotel' },
-          { id: 2, name: '5GB Monthly', price: 2500, stock: 50, network: 'Tigo' },
-          { id: 3, name: 'Pocket MiFi', price: 12000, stock: 20, network: 'Vodacom' },
-        ]);
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
   }, []);
 
   const handleDelete = async (id: number) => {
-    if (confirm('Are you sure?')) {
-      try {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`, { method: 'DELETE' });
-        setProducts(products.filter((p) => p.id !== id));
-      } catch (error) {
-        console.error(error);
+    if (!confirm('Are you sure?')) return;
+    try {
+      await apiClient.delete(`/products/${id}`);
+      setProducts(products.filter((p) => p.id !== id));
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        alert(err.response?.data?.message || 'Failed to delete product');
+      } else {
+        alert('An unexpected error occurred');
       }
     }
   };
@@ -73,6 +74,17 @@ export default function ProductsPage() {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
         <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error">{error}</Alert>
+        <Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>
+          Retry
+        </Button>
       </Box>
     );
   }

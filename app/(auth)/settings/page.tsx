@@ -10,13 +10,14 @@ import {
   TextField,
   Button,
   Alert,
+  CircularProgress,
 } from '@mui/material';
-import { useAuth } from '@/hooks/useAuth';
+import apiClient from '@/lib/api/client';
+import { AxiosError } from 'axios';
 
 export default function SettingsPage() {
-  const { user } = useAuth();
-  const [name, setName] = useState(user?.username || '');
-  const [email, setEmail] = useState(user?.email || '');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -27,20 +28,18 @@ export default function SettingsPage() {
     setLoading(true);
     setMessage(null);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email }),
-      });
-      const data = await res.json();
-      if (data.success) {
+      const res = await apiClient.put('/users/profile', { name, email });
+      if (res.data.success) {
         setMessage({ type: 'success', text: 'Profile updated successfully' });
       } else {
-        setMessage({ type: 'error', text: data.message || 'Failed to update profile' });
+        setMessage({ type: 'error', text: res.data.message || 'Failed to update profile' });
       }
-    } catch (error) {
-      console.error(error);
-      setMessage({ type: 'error', text: 'An error occurred. Please try again.' });
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to update profile' });
+      } else {
+        setMessage({ type: 'error', text: 'An unexpected error occurred' });
+      }
     } finally {
       setLoading(false);
     }
@@ -51,22 +50,23 @@ export default function SettingsPage() {
     setLoading(true);
     setMessage(null);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/change-password`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ currentPassword, newPassword }),
+      const res = await apiClient.put('/users/change-password', {
+        currentPassword,
+        newPassword,
       });
-      const data = await res.json();
-      if (data.success) {
+      if (res.data.success) {
         setMessage({ type: 'success', text: 'Password changed successfully' });
         setCurrentPassword('');
         setNewPassword('');
       } else {
-        setMessage({ type: 'error', text: data.message || 'Failed to change password' });
+        setMessage({ type: 'error', text: res.data.message || 'Failed to change password' });
       }
-    } catch (error) {
-      console.error(error);
-      setMessage({ type: 'error', text: 'An error occurred. Please try again.' });
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to change password' });
+      } else {
+        setMessage({ type: 'error', text: 'An unexpected error occurred' });
+      }
     } finally {
       setLoading(false);
     }
@@ -105,7 +105,7 @@ export default function SettingsPage() {
               sx={{ mb: 2 }}
             />
             <Button type="submit" variant="contained" disabled={loading}>
-              Update Profile
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Update Profile'}
             </Button>
           </form>
         </CardContent>
@@ -136,7 +136,7 @@ export default function SettingsPage() {
               sx={{ mb: 2 }}
             />
             <Button type="submit" variant="contained" disabled={loading}>
-              Change Password
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Change Password'}
             </Button>
           </form>
         </CardContent>
