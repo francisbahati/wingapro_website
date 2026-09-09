@@ -9,6 +9,12 @@ const apiClient = axios.create({
   timeout: 30000,
 });
 
+// Helper to clear cookies (used when auth fails)
+const clearAuthCookies = () => {
+  document.cookie = 'jwt_token=; path=/; max-age=0';
+  document.cookie = 'user_role=; path=/; max-age=0';
+};
+
 apiClient.interceptors.request.use(
   (config) => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
@@ -35,11 +41,14 @@ apiClient.interceptors.response.use(
           );
           localStorage.setItem('accessToken', data.accessToken);
           originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+          // Update cookie with new token
+          document.cookie = `jwt_token=${data.accessToken}; path=/; max-age=86400; secure; samesite=lax`;
           return apiClient(originalRequest);
         }
       } catch (refreshError) {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
+        clearAuthCookies();
         if (typeof window !== 'undefined') {
           window.location.href = '/login';
         }

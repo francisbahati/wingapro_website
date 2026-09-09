@@ -3,7 +3,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import apiClient from '@/lib/api/client'; // ✅ uses the fixed client
+import apiClient from '@/lib/api/client';
 
 interface User {
   id: number;
@@ -27,6 +27,17 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Helper functions to manage cookies
+const setAuthCookies = (token: string, role: string) => {
+  document.cookie = `jwt_token=${token}; path=/; max-age=86400; secure; samesite=lax`;
+  document.cookie = `user_role=${role}; path=/; max-age=86400; secure; samesite=lax`;
+};
+
+const clearAuthCookies = () => {
+  document.cookie = 'jwt_token=; path=/; max-age=0';
+  document.cookie = 'user_role=; path=/; max-age=0';
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,9 +54,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const res = await apiClient.get('/users/profile');
         setUser(res.data.user);
+        // Also sync cookies with the token if they are missing
+        if (res.data.user?.role) {
+          setAuthCookies(token, res.data.user.role);
+        }
       } catch {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
+        clearAuthCookies();
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -61,6 +77,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { accessToken, refreshToken, user } = res.data;
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
+      // Set cookies for middleware
+      setAuthCookies(accessToken, user.role);
       setUser(user);
       router.push('/dashboard');
     } catch (error) {
@@ -78,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      clearAuthCookies();
       setUser(null);
       router.push('/login');
     }
