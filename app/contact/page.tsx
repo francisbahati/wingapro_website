@@ -1,7 +1,7 @@
 // app/contact/page.tsx
 'use client';
 import { useState } from 'react';
-import { Box, Container, Typography, TextField, Button, Alert, Card, CardContent, Grid, Stack } from '@mui/material';
+import { Box, Container, Typography, TextField, Button, Alert, Card, CardContent } from '@mui/material';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { EmailRounded, PhoneRounded, LocationOnRounded } from '@mui/icons-material';
@@ -31,13 +31,13 @@ export default function ContactPage() {
           {/* Contact Info */}
           <Box>
             <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>Contact Information</Typography>
-            <Stack spacing={3}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                 <Box sx={{ bgcolor: '#0a2e5c', color: '#fff', borderRadius: '50%', p: 1.5 }}>
                   <EmailRounded />
                 </Box>
                 <Box>
-                  <Typography variant="subtitle1" fontWeight="600">Email</Typography>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Email</Typography>
                   <Typography variant="body2" color="text.secondary">support@wingapro.com</Typography>
                 </Box>
               </Box>
@@ -46,7 +46,7 @@ export default function ContactPage() {
                   <PhoneRounded />
                 </Box>
                 <Box>
-                  <Typography variant="subtitle1" fontWeight="600">Phone</Typography>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Phone</Typography>
                   <Typography variant="body2" color="text.secondary">+255 762 040 592</Typography>
                 </Box>
               </Box>
@@ -55,11 +55,11 @@ export default function ContactPage() {
                   <LocationOnRounded />
                 </Box>
                 <Box>
-                  <Typography variant="subtitle1" fontWeight="600">Location</Typography>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Location</Typography>
                   <Typography variant="body2" color="text.secondary">Dar es Salaam, Tanzania</Typography>
                 </Box>
               </Box>
-            </Stack>
+            </Box>
           </Box>
 
           {/* Contact Form */}
