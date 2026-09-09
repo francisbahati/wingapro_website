@@ -1,12 +1,10 @@
-
+// app/plans/page.tsx
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Box, Container, Typography, Card, CardContent, Button, Chip, Skeleton, Alert } from '@mui/material';
 import Navbar from '@/components/Navbar';
-import apiClient from '@/lib/api/client';
-import { AxiosError } from 'axios';
 
 function PlansContent() {
   const searchParams = useSearchParams();
@@ -18,16 +16,13 @@ function PlansContent() {
   useEffect(() => {
     const fetchPackages = async () => {
       try {
-        const res = await apiClient.get('/packages');
-        let data = res.data.packages || [];
-        if (networkFilter) data = data.filter((p: any) => p.network === networkFilter);
-        setPackages(data);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/packages`);
+        const data = await res.json();
+        let list = data.packages || data;
+        if (networkFilter) list = list.filter((p: any) => p.network === networkFilter);
+        setPackages(list);
       } catch (err) {
-        if (err instanceof AxiosError) {
-          setError(err.response?.data?.message || 'Failed to load packages');
-        } else {
-          setError('An unexpected error occurred');
-        }
+        setError('Failed to load packages');
       } finally {
         setLoading(false);
       }
@@ -44,10 +39,7 @@ function PlansContent() {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 3 }}>
             {[1,2,3].map((i) => (
               <Card key={i}>
-                <CardContent>
-                  <Skeleton width="60%" height={40} />
-                  <Skeleton width="40%" height={30} />
-                </CardContent>
+                <CardContent><Skeleton width="60%" height={40} /></CardContent>
               </Card>
             ))}
           </Box>
@@ -84,7 +76,7 @@ function PlansContent() {
                   <Typography variant="h6">{pkg.name}</Typography>
                   <Typography variant="body2">{pkg.network} • {pkg.dataSize} • {pkg.validity}</Typography>
                   <Typography variant="h5" sx={{ my: 1 }}>TZS {pkg.price.toLocaleString()}</Typography>
-                  <Button variant="contained" href={`/login?redirect=/plans`}>Buy Now</Button>
+                  <Button variant="contained" href="/login">Buy Now</Button>
                 </CardContent>
               </Card>
             ))}
