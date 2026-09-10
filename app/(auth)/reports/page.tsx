@@ -1,111 +1,97 @@
+// app/(auth)/reports/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, Card, CardContent, Typography, CircularProgress } from '@mui/material';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import dynamic from 'next/dynamic';
+import {
+  Alert,
+  Box,
+  Card,
+  CardContent,
+  CircularProgress,
+  Grid,
+  Typography,
+} from '@mui/material';
+import apiClient from '@/lib/api/client';
 
-interface SalesSummary {
-  totalRevenue: number;
-  totalOrders: number;
-  totalPackagesSold: number;
-  avgOrderValue: number;
-}
-
-interface NetworkSales {
-  network: string;
-  revenue: number;
-}
+// Lazy-load Recharts (heavy) client-side only
+const ReportsCharts = dynamic(() => import('./_charts'), {
+  ssr: false,
+  loading: () => (
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+      <CircularProgress />
+    </Box>
+  ),
+});
 
 export default function ReportsPage() {
-  const [summary, setSummary] = useState<SalesSummary | null>(null);
-  const [networkSales, setNetworkSales] = useState<NetworkSales[]>([]);
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    setTimeout(() => {
-      setSummary({
-        totalRevenue: 12500000,
-        totalOrders: 342,
-        totalPackagesSold: 512,
-        avgOrderValue: 36550,
-      });
-      setNetworkSales([
-        { network: 'Halotel', revenue: 4500000 },
-        { network: 'Tigo', revenue: 3800000 },
-        { network: 'Vodacom', revenue: 2900000 },
-        { network: 'Airtel', revenue: 1300000 },
-      ]);
-      setLoading(false);
-    }, 500);
+    (async () => {
+      try {
+        const res = await apiClient.get('/admin/dashboard/stats');
+        setData(res.data.stats);
+      } catch (e: any) {
+        setError(e?.response?.data?.message || 'Failed to load reports');
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
-  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}><CircularProgress /></Box>;
+  if (error) return <Alert severity="error">{error}</Alert>;
+  if (!data) return null;
+
+  const kpis = [
+    { label: 'Total Users', value: data.totalUsers?.toLocaleString() ?? '0', color: '#0A2E5C' },
+    { label: 'Total Orders', value: data.totalOrders?.toLocaleString() ?? '0', color: '#10B981' },
+    {
+      label: 'Total Revenue',
+      value: `TZS ${Number(data.totalRevenue ?? 0).toLocaleString()}`,
+      color: '#F59E0B',
+    },
+    {
+      label: 'Pending Orders',
+      value: data.pendingOrders?.toLocaleString() ?? '0',
+      color: '#8B5CF6',
+    },
+  ];
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>Reports</Typography>
+    <Box>
+      <Typography variant="h4" fontWeight={700} sx={{ mb: 3 }}>
+        Reports
+      </Typography>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 3, mb: 4 }}>
-        <Card sx={{ borderLeft: 4, borderColor: 'primary.main' }}>
-          <CardContent>
-            <Typography variant="body2" color="text.secondary">Total Revenue</Typography>
-            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>TZS {summary?.totalRevenue.toLocaleString()}</Typography>
-          </CardContent>
-        </Card>
-        <Card sx={{ borderLeft: 4, borderColor: 'success.main' }}>
-          <CardContent>
-            <Typography variant="body2" color="text.secondary">Total Orders</Typography>
-            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>{summary?.totalOrders}</Typography>
-          </CardContent>
-        </Card>
-        <Card sx={{ borderLeft: 4, borderColor: 'warning.main' }}>
-          <CardContent>
-            <Typography variant="body2" color="text.secondary">Packages Sold</Typography>
-            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>{summary?.totalPackagesSold}</Typography>
-          </CardContent>
-        </Card>
-        <Card sx={{ borderLeft: 4, borderColor: 'secondary.main' }}>
-          <CardContent>
-            <Typography variant="body2" color="text.secondary">Avg Order Value</Typography>
-            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>TZS {summary?.avgOrderValue.toLocaleString()}</Typography>
-          </CardContent>
-        </Card>
-      </Box>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {kpis.map((k) => (
+          <Grid item xs={12} sm={6} md={3} key={k.label}>
+            <Card>
+              <CardContent>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  {k.label}
+                </Typography>
+                <Typography variant="h5" fontWeight={800} sx={{ color: k.color }}>
+                  {k.value}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 4 }}>
-        <Card>
-          <CardContent>
-            <Typography variant="h6" sx={{ mb: 2 }}>Revenue by Network</Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={networkSales}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="network" />
-                <YAxis tickFormatter={(value) => `TZS ${(value / 1000)}k`} />
-                <Tooltip formatter={(value) => `TZS ${Number(value).toLocaleString()}`} />
-                <Legend />
-                <Bar dataKey="revenue" fill="#0a2e5c" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <Typography variant="h6" sx={{ mb: 2 }}>Share by Network</Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie data={networkSales} dataKey="revenue" nameKey="network" cx="50%" cy="50%" outerRadius={80} label={({ name }) => name}>
-                  {networkSales.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => `TZS ${Number(value).toLocaleString()}`} />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </Box>
+      <ReportsCharts data={data} />
     </Box>
   );
 }

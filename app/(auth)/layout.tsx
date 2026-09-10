@@ -2,187 +2,240 @@
 'use client';
 
 import { useState } from 'react';
-import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import Typography from '@mui/material/Typography';
-import Avatar from '@mui/material/Avatar';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import Divider from '@mui/material/Divider';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import NotificationListener from '@/components/notifications/NotificationListener';
+import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
 import {
-  Dashboard as DashboardIcon,
-  ShoppingCart as OrdersIcon,
-  Inventory2 as ProductsIcon,
-  People as UsersIcon,
-  BarChart as ReportsIcon,
-  Settings as SettingsIcon,
-  Logout as LogoutIcon,
-  AccountBalanceWallet as WalletIcon,
-  AddShoppingCart as BuyIcon,
-  Notifications as NotificationsIcon,
-  SupportAgent as SupportIcon,
-  LocalOffer as OffersIcon,
-  Person as ProfileIcon,
-} from '@mui/icons-material';
+  AppBar,
+  Avatar,
+  Box,
+  Divider,
+  Drawer,
+  IconButton,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Toolbar,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import LogoutIcon from '@mui/icons-material/Logout';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import PersonIcon from '@mui/icons-material/Person';
+import SettingsIcon from '@mui/icons-material/Settings';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import PeopleIcon from '@mui/icons-material/People';
+import { useAuth } from '@/context/AuthContext';
+import { brand } from '@/theme-provider';
 
-const drawerWidth = 240;
+const DRAWER_WIDTH = 248;
 
-export default function AuthLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const pathname = usePathname();
+  const router = useRouter();
   const { user, logout } = useAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const navItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, href: '/dashboard' },
-    { text: 'Orders', icon: <OrdersIcon />, href: '/orders' },
-    { text: 'Products', icon: <ProductsIcon />, href: '/products' },
-    { text: 'Wallet', icon: <WalletIcon />, href: '/wallet' },
-    { text: 'Buy Data', icon: <BuyIcon />, href: '/packages' },
-    { text: 'Promotions', icon: <OffersIcon />, href: '/promotions' },
-    { text: 'Support', icon: <SupportIcon />, href: '/support' },
+    { text: 'Orders', icon: <ShoppingCartIcon />, href: '/orders' },
+    { text: 'Buy Data', icon: <AddShoppingCartIcon />, href: '/packages' },
+    { text: 'Wallet', icon: <AccountBalanceWalletIcon />, href: '/wallet' },
+    { text: 'Promotions', icon: <LocalOfferIcon />, href: '/promotions' },
+    { text: 'Support', icon: <SupportAgentIcon />, href: '/support' },
     { text: 'Notifications', icon: <NotificationsIcon />, href: '/notifications' },
-    { text: 'Profile', icon: <ProfileIcon />, href: '/profile' },
-    ...(user?.role === 'admin' ? [{ text: 'Users', icon: <UsersIcon />, href: '/users' }] : []),
-    { text: 'Reports', icon: <ReportsIcon />, href: '/reports' },
+    { text: 'Profile', icon: <PersonIcon />, href: '/profile' },
+    ...(user?.role === 'admin'
+      ? [
+          { text: 'Users', icon: <PeopleIcon />, href: '/users' },
+          { text: 'Reports', icon: <BarChartIcon />, href: '/reports' },
+        ]
+      : []),
     { text: 'Settings', icon: <SettingsIcon />, href: '/settings' },
   ];
 
-  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
-
-  const handleLogout = () => {
-    logout();
+  const handleNavClick = (href: string) => {
+    router.push(href);
+    setMobileOpen(false);
   };
 
-  const drawerContent = (
-    <div>
-      <Box sx={{ py: 2, textAlign: 'center' }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-          Winga<span style={{ color: '#00b4d8' }}>Pro</span>
+  const drawer = (
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#fff' }}>
+      <Box
+        onClick={() => handleNavClick('/dashboard')}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.25,
+          p: 2.5,
+          cursor: 'pointer',
+        }}
+      >
+        <Image src="/images/wingapro.webp" alt="WingaPro" width={30} height={30} />
+        <Typography
+          sx={{
+            fontWeight: 800,
+            fontSize: '1.05rem',
+            color: brand.navy,
+            letterSpacing: '-0.02em',
+          }}
+        >
+          Winga
+          <Box component="span" sx={{ color: brand.cyan }}>
+            Pro
+          </Box>
         </Typography>
       </Box>
+
       <Divider />
-      <List>
-        {navItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
+
+      <List sx={{ py: 1.5, flexGrow: 1 }}>
+        {navItems.map((item) => {
+          const selected =
+            pathname === item.href || pathname.startsWith(item.href + '/');
+          return (
             <ListItemButton
-              component={Link}
-              href={item.href}
-              selected={pathname === item.href}
+              key={item.href}
+              onClick={() => handleNavClick(item.href)}
+              selected={selected}
               sx={{
+                mx: 1,
+                borderRadius: 2,
                 '&.Mui-selected': {
-                  backgroundColor: 'rgba(0, 180, 216, 0.1)',
-                  color: 'primary.main',
-                  '&:hover': {
-                    backgroundColor: 'rgba(0, 180, 216, 0.2)',
-                  },
+                  bgcolor: 'rgba(10,46,92,0.06)',
+                  color: brand.navy,
+                  '&:hover': { bgcolor: 'rgba(10,46,92,0.10)' },
                 },
               }}
             >
-              <ListItemIcon sx={{ color: 'inherit' }}>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText
+                primary={item.text}
+                slotProps={{ primary: { sx: { fontSize: '0.9rem', fontWeight: 500 } } }}
+              />
             </ListItemButton>
-          </ListItem>
-        ))}
+          );
+        })}
       </List>
-    </div>
+
+      <Divider />
+
+      <Box sx={{ p: 2 }}>
+        <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+          v1.0.0
+        </Typography>
+      </Box>
+    </Box>
   );
+
+  const currentTitle =
+    navItems.find((n) => pathname.startsWith(n.href))?.text ?? 'Dashboard';
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
-      <NotificationListener />
       <AppBar
         position="fixed"
+        elevation={0}
         sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
-          backgroundColor: 'primary.main',
-          boxShadow: 'none',
+          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+          ml: { md: `${DRAWER_WIDTH}px` },
+          bgcolor: 'rgba(255,255,255,0.85)',
+          backdropFilter: 'saturate(180%) blur(12px)',
+          color: 'text.primary',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
         }}
       >
         <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            WingaPro Dashboard
-          </Typography>
-          <Box sx={{ flexGrow: 0 }}>
-            <IconButton onClick={(e) => setAnchorElUser(e.currentTarget)} sx={{ p: 0 }}>
-              <Avatar alt={user?.username} src="/images/avatar.png">
-                {user?.username?.charAt(0).toUpperCase()}
-              </Avatar>
-            </IconButton>
-            <Menu
-              sx={{ mt: '45px' }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-              keepMounted
-              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-              open={Boolean(anchorElUser)}
-              onClose={() => setAnchorElUser(null)}
+          {isMobile && (
+            <IconButton
+              edge="start"
+              onClick={() => setMobileOpen(true)}
+              sx={{ mr: 1 }}
+              aria-label="Open navigation"
             >
-              <MenuItem onClick={handleLogout}>
-                <ListItemIcon>
-                  <LogoutIcon fontSize="small" />
-                </ListItemIcon>
-                Logout
-              </MenuItem>
-            </Menu>
-          </Box>
+              <MenuIcon />
+            </IconButton>
+          )}
+
+          <Typography sx={{ flexGrow: 1, fontWeight: 700 }}>
+            {currentTitle}
+          </Typography>
+
+          <IconButton
+            onClick={(e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}
+            aria-label="Open user menu"
+          >
+            <Avatar sx={{ bgcolor: brand.navy, width: 34, height: 34, fontSize: 14 }}>
+              {user?.username?.charAt(0).toUpperCase() ?? 'U'}
+            </Avatar>
+          </IconButton>
+
+          <Menu
+            anchorEl={anchorEl}
+            open={!!anchorEl}
+            onClose={() => setAnchorEl(null)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          >
+            <MenuItem disabled>
+              <Typography sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
+                {user?.email}
+              </Typography>
+            </MenuItem>
+            <Divider />
+            <MenuItem
+              onClick={() => {
+                setAnchorEl(null);
+                logout();
+              }}
+            >
+              <ListItemIcon>
+                <LogoutIcon fontSize="small" />
+              </ListItemIcon>
+              Logout
+            </MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
 
-      <Box
-        component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-        aria-label="mailbox folders"
-      >
+      <Box component="nav" sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }}>
         <Drawer
           variant="temporary"
           open={mobileOpen}
-          onClose={handleDrawerToggle}
+          onClose={() => setMobileOpen(false)}
           ModalProps={{ keepMounted: true }}
           sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            display: { xs: 'block', md: 'none' },
+            '& .MuiDrawer-paper': { width: DRAWER_WIDTH },
           }}
         >
-          {drawerContent}
+          {drawer}
         </Drawer>
         <Drawer
           variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-          }}
           open
+          sx={{
+            display: { xs: 'none', md: 'block' },
+            '& .MuiDrawer-paper': { width: DRAWER_WIDTH },
+          }}
         >
-          {drawerContent}
+          {drawer}
         </Drawer>
       </Box>
 
@@ -190,9 +243,10 @@ export default function AuthLayout({
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          p: { xs: 2, md: 3 },
+          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
           mt: 8,
+          minHeight: 'calc(100vh - 64px)',
         }}
       >
         {children}

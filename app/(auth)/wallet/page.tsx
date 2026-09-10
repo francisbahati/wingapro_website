@@ -1,104 +1,229 @@
+// app/(auth)/wallet/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Box, Card, CardContent, Typography, Button, CircularProgress, List, ListItem, ListItemText, Chip, Divider, Alert } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Divider,
+  Stack,
+  Typography,
+} from '@mui/material';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded';
+import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
 import apiClient from '@/lib/api/client';
-import { AxiosError } from 'axios';
+import { brand } from '@/theme-provider';
 
-const PRIMARY = '#0A2E5C';
-
-interface Transaction {
-  id: number;
+interface Tx {
   type: 'credit' | 'debit';
-  amount: number;
   description: string;
+  amount: number;
   date: string;
 }
 
 interface Withdrawal {
   id: number;
   amount: number;
-  status: 'pending' | 'completed' | 'rejected';
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'rejected';
   requestedAt: string;
 }
 
+const W_STATUS: Record<string, { color: string; label: string }> = {
+  pending: { color: '#F59E0B', label: 'Pending' },
+  processing: { color: '#3B82F6', label: 'Processing' },
+  completed: { color: '#10B981', label: 'Completed' },
+  failed: { color: '#EF4444', label: 'Failed' },
+  rejected: { color: '#EF4444', label: 'Rejected' },
+};
+
 export default function WalletPage() {
+  const router = useRouter();
   const [balance, setBalance] = useState(0);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<Tx[]>([]);
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const router = useRouter();
 
   useEffect(() => {
-    const fetchWallet = async () => {
+    (async () => {
       try {
-        const res = await apiClient.get('/wallet');
-        setBalance(res.data.balance || 0);
-        setTransactions(res.data.transactions || []);
-        const wRes = await apiClient.get('/withdrawals');
-        setWithdrawals(wRes.data.withdrawals || []);
-      } catch (err) {
-        if (err instanceof AxiosError) setError(err.response?.data?.message || 'Failed to load wallet');
-        else setError('An unexpected error occurred');
+        const [walletRes, withdrawalsRes] = await Promise.all([
+          apiClient.get('/wallet'),
+          apiClient.get('/withdraw/history', { params: { limit: 10 } }),
+        ]);
+        setBalance(walletRes.data.balance ?? 0);
+        setTransactions(walletRes.data.transactions ?? []);
+        setWithdrawals(withdrawalsRes.data.withdrawals ?? []);
+      } catch (e: any) {
+        setError(e?.response?.data?.message || 'Failed to load wallet');
       } finally {
         setLoading(false);
       }
-    };
-    fetchWallet();
+    })();
   }, []);
 
-  if (loading) return <Box sx={{ p: 3, textAlign: 'center' }}><CircularProgress /></Box>;
-  if (error) return <Alert severity="error" sx={{ m: 3 }}>{error}</Alert>;
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
-    <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>My Wallet</Typography>
+    <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+      <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
+        My Wallet
+      </Typography>
 
-      {/* Balance Card */}
-      <Card sx={{ mb: 4, bgcolor: PRIMARY, color: 'white', borderRadius: 3 }}>
-        <CardContent sx={{ p: 3 }}>
-          <Typography variant="body2" sx={{ opacity: 0.8 }}>Total Balance</Typography>
-          <Typography variant="h3" sx={{ fontWeight: 'bold' }}>TZS {balance.toLocaleString()}</Typography>
-          <Button variant="contained" sx={{ mt: 2, bgcolor: 'white', color: PRIMARY }} onClick={() => router.push('/deposit-withdraw')}>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+      <Card
+        sx={{
+          mb: 4,
+          color: '#fff',
+          border: 'none',
+          background: `linear-gradient(135deg, ${brand.navy} 0%, ${brand.navyLight} 60%, ${brand.cyan} 140%)`,
+          boxShadow: '0 20px 40px rgba(10,46,92,0.3)',
+        }}
+      >
+        <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+          <Typography
+            variant="body2"
+            sx={{
+              opacity: 0.85,
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              fontSize: 12,
+            }}
+          >
+            Available Balance
+          </Typography>
+          <Typography
+            variant="h3"
+            sx={{ fontWeight: 800, my: 1, letterSpacing: '-0.02em' }}
+          >
+            TZS {balance.toLocaleString()}
+          </Typography>
+          <Button
+            onClick={() => router.push('/deposit-withdraw')}
+            startIcon={<AddRoundedIcon />}
+            sx={{
+              mt: 2,
+              bgcolor: '#fff',
+              color: brand.navy,
+              '&:hover': { bgcolor: '#F1F5F9' },
+            }}
+          >
             Deposit / Withdraw
           </Button>
         </CardContent>
       </Card>
 
-      {/* Withdrawals */}
-      <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>Withdrawal History</Typography>
+      <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5 }}>
+        Withdrawal History
+      </Typography>
       {withdrawals.length === 0 ? (
-        <Typography color="text.secondary" sx={{ mb: 3 }}>No withdrawal requests yet.</Typography>
+        <Typography color="text.secondary" sx={{ mb: 3 }}>
+          No withdrawal requests yet.
+        </Typography>
       ) : (
-        <List sx={{ mb: 4 }}>
-          {withdrawals.map((w) => (
-            <ListItem key={w.id} divider>
-              <ListItemText primary={`TZS ${w.amount.toLocaleString()}`} secondary={new Date(w.requestedAt).toLocaleDateString()} />
-              <Chip label={w.status} color={w.status === 'completed' ? 'success' : w.status === 'rejected' ? 'error' : 'warning'} size="small" />
-            </ListItem>
-          ))}
-        </List>
+        <Box sx={{ mb: 3, bgcolor: 'background.paper', borderRadius: 3 }}>
+          {withdrawals.map((w, i) => {
+            const s = W_STATUS[w.status];
+            return (
+              <Box
+                key={w.id}
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  p: 2,
+                  borderBottom: i < withdrawals.length - 1 ? '1px solid' : 'none',
+                  borderColor: 'divider',
+                }}
+              >
+                <Box>
+                  <Typography sx={{ fontWeight: 600 }}>
+                    TZS {w.amount.toLocaleString()}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {new Date(w.requestedAt).toLocaleString()}
+                  </Typography>
+                </Box>
+                <Chip
+                  size="small"
+                  label={s.label}
+                  sx={{ bgcolor: s.color, color: '#fff' }}
+                />
+              </Box>
+            );
+          })}
+        </Box>
       )}
 
       <Divider sx={{ my: 3 }} />
 
-      {/* Transactions */}
-      <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>Recent Transactions</Typography>
+      <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5 }}>
+        Recent Transactions
+      </Typography>
       {transactions.length === 0 ? (
         <Typography color="text.secondary">No transactions yet.</Typography>
       ) : (
-        <List>
-          {transactions.map((tx) => (
-            <ListItem key={tx.id} divider>
-              <ListItemText primary={tx.description} secondary={new Date(tx.date).toLocaleString()} />
-              <Typography variant="body2" color={tx.type === 'credit' ? 'green' : 'red'} sx={{ fontWeight: 'bold' }}>
-                {tx.type === 'credit' ? '+' : '-'} TZS {tx.amount.toLocaleString()}
-              </Typography>
-            </ListItem>
-          ))}
-        </List>
+        <Stack spacing={1}>
+          {transactions.map((tx, i) => {
+            const isCredit = tx.type === 'credit';
+            return (
+              <Card key={i}>
+                <CardContent sx={{ py: 1.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Box
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: '50%',
+                        bgcolor: isCredit ? 'success.light' : 'error.light',
+                        color: isCredit ? 'success.main' : 'error.main',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {isCredit ? (
+                        <ArrowDownwardRoundedIcon fontSize="small" />
+                      ) : (
+                        <ArrowUpwardRoundedIcon fontSize="small" />
+                      )}
+                    </Box>
+                    <Box sx={{ flexGrow: 1 }}>
+                      <Typography sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                        {tx.description}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {new Date(tx.date).toLocaleString()}
+                      </Typography>
+                    </Box>
+                    <Typography
+                      sx={{
+                        fontWeight: 700,
+                        color: isCredit ? 'success.main' : 'error.main',
+                      }}
+                    >
+                      {isCredit ? '+' : '-'} TZS {tx.amount.toLocaleString()}
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </Stack>
       )}
     </Box>
   );

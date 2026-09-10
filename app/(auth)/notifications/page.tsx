@@ -1,149 +1,144 @@
+// app/(auth)/notifications/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  Box, Card, CardContent, Typography, List, ListItemAvatar, Avatar, IconButton,
-  Chip, Button, CircularProgress, Alert, Skeleton,
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  IconButton,
+  Stack,
+  Typography,
 } from '@mui/material';
-import apiClient from '@/lib/api/client';
-import { AxiosError } from 'axios';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import DeleteIcon from '@mui/icons-material/Delete';
-
-const PRIMARY = '#0A2E5C';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import apiClient from '@/lib/api/client';
+import { brand } from '@/theme-provider';
 
 interface Notification {
   id: number;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  read: boolean;
+  isRead: boolean;
   createdAt: string;
 }
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [marking, setMarking] = useState<number | null>(null);
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const res = await apiClient.get('/notifications');
-        setNotifications(res.data.notifications || []);
-      } catch (err) {
-        if (err instanceof AxiosError) setError(err.response?.data?.message || 'Failed to load notifications');
-        else setError('An unexpected error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchNotifications();
-  }, []);
-
-  const markAsRead = async (id: number) => {
-    setMarking(id);
+  const load = async () => {
     try {
-      await apiClient.put(`/notifications/${id}/read`);
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-    } catch (err) {
-      if (err instanceof AxiosError) alert(err.response?.data?.message || 'Failed to mark as read');
-      else alert('An unexpected error occurred');
+      const res = await apiClient.get('/notifications');
+      setItems(res.data.notifications ?? []);
+    } catch (e: any) {
+      setError(e?.response?.data?.message || 'Failed to load notifications');
     } finally {
-      setMarking(null);
+      setLoading(false);
     }
   };
 
-  const deleteNotification = async (id: number) => {
+  useEffect(() => { load(); }, []);
+
+  const markRead = async (id: number) => {
+    try {
+      await apiClient.put(`/notifications/${id}/read`);
+      setItems((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
+    } catch { /* silent */ }
+  };
+
+  const remove = async (id: number) => {
     if (!confirm('Delete this notification?')) return;
     try {
       await apiClient.delete(`/notifications/${id}`);
-      setNotifications(prev => prev.filter(n => n.id !== id));
-    } catch (err) {
-      if (err instanceof AxiosError) alert(err.response?.data?.message || 'Failed to delete');
-      else alert('An unexpected error occurred');
-    }
+      setItems((prev) => prev.filter((n) => n.id !== id));
+    } catch { /* silent */ }
   };
 
-  const markAllRead = async () => {
+  const markAll = async () => {
     try {
       await apiClient.post('/notifications/mark-all-read');
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    } catch (err) {
-      if (err instanceof AxiosError) alert(err.response?.data?.message || 'Failed to mark all as read');
-      else alert('An unexpected error occurred');
-    }
+      setItems((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    } catch { /* silent */ }
   };
-
-  const unreadCount = notifications.filter(n => !n.read).length;
 
   if (loading) {
     return (
-      <Box sx={{ p: 3 }}>
-        {[1, 2, 3].map(i => (
-          <Card key={i} sx={{ mb: 2 }}>
-            <CardContent>
-              <Skeleton variant="text" width="60%" />
-              <Skeleton variant="text" width="40%" />
-            </CardContent>
-          </Card>
-        ))}
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+        <CircularProgress />
       </Box>
     );
   }
 
-  if (error) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Alert severity="error">{error}</Alert>
-        <Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>Retry</Button>
-      </Box>
-    );
-  }
+  const unread = items.filter((n) => !n.isRead).length;
 
   return (
-    <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold' }}>Notifications</Typography>
-        {unreadCount > 0 && (
-          <Button variant="outlined" onClick={markAllRead} size="small" sx={{ borderColor: PRIMARY, color: PRIMARY }}>Mark all as read</Button>
+    <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+        <Typography variant="h4" fontWeight={700}>Notifications</Typography>
+        {unread > 0 && (
+          <Button onClick={markAll} variant="outlined" size="small">
+            Mark all read
+          </Button>
         )}
-      </Box>
+      </Stack>
 
-      {notifications.length === 0 ? (
-        <Typography color="text.secondary" align="center" sx={{ mt: 4 }}>No notifications yet.</Typography>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+      {items.length === 0 ? (
+        <Card sx={{ p: 6, textAlign: 'center' }}>
+          <NotificationsIcon sx={{ fontSize: 56, color: 'text.secondary', mb: 2 }} />
+          <Typography color="text.secondary">No notifications yet.</Typography>
+        </Card>
       ) : (
-        <List>
-          {notifications.map((n) => (
-            <Card key={n.id} sx={{ mb: 2, opacity: n.read ? 0.8 : 1, bgcolor: n.read ? 'inherit' : '#f0f7ff', borderLeft: `4px solid ${n.read ? '#e0e0e0' : PRIMARY}` }}>
+        <Stack spacing={1.5}>
+          {items.map((n) => (
+            <Card
+              key={n.id}
+              sx={{
+                borderLeft: `4px solid ${n.isRead ? '#E2E8F0' : brand.navy}`,
+                bgcolor: n.isRead ? 'background.paper' : 'rgba(10,46,92,0.03)',
+              }}
+            >
               <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                  <ListItemAvatar sx={{ minWidth: 40 }}>
-                    <Avatar sx={{ bgcolor: PRIMARY }}><NotificationsIcon /></Avatar>
-                  </ListItemAvatar>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>{n.title}</Typography>
-                    <Typography variant="body2" color="text.secondary">{n.message}</Typography>
-                    <Typography variant="caption" color="text.secondary">{new Date(n.createdAt).toLocaleString()}</Typography>
-                    {!n.read && <Chip label="New" size="small" color="primary" sx={{ ml: 1 }} />}
+                <Stack direction="row" spacing={2} alignItems="flex-start">
+                  <Avatar sx={{ bgcolor: brand.navy }}>
+                    <NotificationsIcon fontSize="small" />
+                  </Avatar>
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Typography fontWeight={600}>{n.title}</Typography>
+                      {!n.isRead && <Chip label="New" size="small" color="primary" />}
+                    </Stack>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                      {n.message}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {new Date(n.createdAt).toLocaleString()}
+                    </Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    {!n.read && (
-                      <IconButton size="small" onClick={() => markAsRead(n.id)} disabled={marking === n.id} sx={{ color: PRIMARY }}>
-                        {marking === n.id ? <CircularProgress size={20} /> : <CheckCircleIcon />}
+                  <Stack>
+                    {!n.isRead && (
+                      <IconButton onClick={() => markRead(n.id)} size="small" color="primary">
+                        <CheckCircleIcon fontSize="small" />
                       </IconButton>
                     )}
-                    <IconButton size="small" onClick={() => deleteNotification(n.id)}>
-                      <DeleteIcon fontSize="small" color="error" />
+                    <IconButton onClick={() => remove(n.id)} size="small" color="error">
+                      <DeleteOutlineIcon fontSize="small" />
                     </IconButton>
-                  </Box>
-                </Box>
+                  </Stack>
+                </Stack>
               </CardContent>
             </Card>
           ))}
-        </List>
+        </Stack>
       )}
     </Box>
   );

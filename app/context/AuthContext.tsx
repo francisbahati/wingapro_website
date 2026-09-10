@@ -1,11 +1,18 @@
 // app/context/AuthContext.tsx
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import apiClient from '@/lib/api/client';
 
-interface User {
+export interface User {
   id: number;
   username: string;
   email: string;
@@ -23,66 +30,79 @@ interface AuthContextType {
   isLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Helper functions to manage cookies
-const setAuthCookies = (token: string, role: string) => {
-  document.cookie = `jwt_token=${token}; path=/; max-age=86400; secure; samesite=lax`;
-  document.cookie = `user_role=${role}; path=/; max-age=86400; secure; samesite=lax`;
-};
+// Cookie helpers — secure flag only in production
+const SECURE = typeof window !== 'undefined' && window.location.protocol === 'https:';
+const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
 
-const clearAuthCookies = () => {
-  document.cookie = 'jwt_token=; path=/; max-age=0';
-  document.cookie = 'user_role=; path=/; max-age=0';
-};
+function setAuthCookies(token: string, role: string) {
+  const base = `path=/; max-age=${COOKIE_MAX_AGE}; samesite=lax${SECURE ? '; secure' : ''}`;
+  document.cookie = `jwt_token=${token}; ${base}`;
+  document.cookie = `user_role=${role}; ${base}`;
+}
+
+function clearAuthCookies() {
+  const base = `path=/; max-age=0; samesite=lax${SECURE ? '; secure' : ''}`;
+  document.cookie = `jwt_token=; ${base}`;
+  document.cookie = `user_role=; ${base}`;
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // On mount, try to restore session from tokens
+  const refreshProfile = useCallback(async () => {
+    try {
+      const res = await apiClient.get('/users/profile');
+      setUser(res.data.user);
+    } catch {
+      setUser(null);
+    }
+  }, []);
+
+  // On mount — restore session
   useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem('accessToken');
+    let cancelled = false;
+    (async () => {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
       if (!token) {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
         return;
       }
       try {
         const res = await apiClient.get('/users/profile');
+        if (cancelled) return;
         setUser(res.data.user);
-        // Also sync cookies with the token if they are missing
         if (res.data.user?.role) {
           setAuthCookies(token, res.data.user.role);
         }
       } catch {
+        if (cancelled) return;
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         clearAuthCookies();
         setUser(null);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
-    };
-    fetchUser();
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   const login = async (username: string, password: string) => {
     setIsLoading(true);
     try {
       const res = await apiClient.post('/auth/login', { username, password });
-      const { accessToken, refreshToken, user } = res.data;
+      const { accessToken, refreshToken, user: u } = res.data;
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
-      // Set cookies for middleware
-      setAuthCookies(accessToken, user.role);
-      setUser(user);
-      router.push('/dashboard');
-    } catch (error) {
-      throw error; // Let the login page handle the error
+      setAuthCookies(accessToken, u.role);
+      setUser(u);
     } finally {
       setIsLoading(false);
     }
@@ -91,28 +111,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       await apiClient.post('/auth/logout');
-    } catch {
-      // ignore
-    } finally {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      clearAuthCookies();
-      setUser(null);
-      router.push('/login');
-    }
+    } catch { /* ignore */ }
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    clearAuthCookies();
+    setUser(null);
+    router.push('/login');
+    router.refresh();
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        login,
+        logout,
+        refreshProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
+  const ctx = useContext(AuthContext);
+  if (ctx === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  return context;
+  return ctx;
 }

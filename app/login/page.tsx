@@ -1,78 +1,125 @@
+// app/login/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
-  Box, Card, CardContent, TextField, Button, Typography, Alert, CircularProgress, IconButton, InputAdornment,
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Divider,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
 } from '@mui/material';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import { AxiosError } from 'axios';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import LockRoundedIcon from '@mui/icons-material/LockRounded';
+import { useAuth } from '@/context/AuthContext';
+import { brand } from '@/theme-provider';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const params = useSearchParams();
+  const next = params.get('next') || '/dashboard';
   const { login } = useAuth();
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
       await login(username, password);
-      router.push('/dashboard');
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        setError(err.response?.data?.message || 'Invalid credentials');
-      } else {
-        setError('An unexpected error occurred');
-      }
+      router.push(next);
+      router.refresh();
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Invalid credentials');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #0a1a2b, #1a3a5c)', p: 2 }}>
-      <Card sx={{ maxWidth: 420, width: '100%', backdropFilter: 'blur(10px)', bgcolor: 'rgba(255,255,255,0.95)', borderRadius: 4 }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        p: 2,
+        background: `linear-gradient(135deg, ${brand.navy} 0%, ${brand.navyLight} 60%, ${brand.cyan} 140%)`,
+      }}
+    >
+      <Card sx={{ maxWidth: 440, width: '100%', borderRadius: 4, p: 1 }}>
         <CardContent sx={{ p: 4 }}>
-          <Typography variant="h5" sx={{ mb: 1, textAlign: 'center', fontWeight: 800 }}>
-            Welcome back to <span style={{ color: '#00b4d8' }}>WingaPro</span>
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>
-            Sign in to continue
-          </Typography>
+          <Box sx={{ textAlign: 'center', mb: 3 }}>
+            <Box
+              sx={{
+                width: 56,
+                height: 56,
+                mx: 'auto',
+                mb: 2,
+                borderRadius: 3,
+                background: `linear-gradient(135deg, ${brand.navy}, ${brand.cyan})`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <LockRoundedIcon sx={{ color: '#fff', fontSize: 28 }} />
+            </Box>
+            <Typography variant="h5" sx={{ fontWeight: 800 }} gutterBottom>
+              Welcome back
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Sign in to continue to WingaPro
+            </Typography>
+          </Box>
+
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-          <form onSubmit={handleSubmit}>
+
+          <form onSubmit={submit}>
             <TextField
               fullWidth
               label="Username or Email"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setUsername(e.target.value)
+              }
               required
               sx={{ mb: 2 }}
-              slotProps={{ input: { style: { borderRadius: 8 } } }}
+              autoComplete="username"
             />
             <TextField
               fullWidth
               label="Password"
               type={showPassword ? 'text' : 'password'}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setPassword(e.target.value)
+              }
               required
               sx={{ mb: 3 }}
+              autoComplete="current-password"
               slotProps={{
                 input: {
-                  style: { borderRadius: 8 },
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        aria-label="Toggle password"
+                      >
                         {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
                     </InputAdornment>
@@ -80,19 +127,61 @@ export default function LoginPage() {
                 },
               }}
             />
-            <Button type="submit" fullWidth variant="contained" disabled={loading} sx={{ py: 1.5, bgcolor: '#0A2E5C', '&:hover': { bgcolor: '#071e3d' } }}>
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              size="large"
+              disabled={loading}
+            >
+              {loading ? <CircularProgress size={22} color="inherit" /> : 'Sign In'}
             </Button>
           </form>
-          <Typography variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
+
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+            <Button
+              onClick={() => router.push('/forgot-password')}
+              size="small"
+            >
+              Forgot password?
+            </Button>
+          </Box>
+
+          <Divider sx={{ my: 3 }} />
+
+          <Typography variant="body2" sx={{ textAlign: 'center' }}>
             Don&apos;t have an account?{' '}
-            <Link href="/register" style={{ color: '#00b4d8' }}>Register</Link>
-          </Typography>
-          <Typography variant="body2" sx={{ mt: 1, textAlign: 'center' }}>
-            <Link href="/forgot-password" style={{ color: '#00b4d8' }}>Forgot Password?</Link>
+            <Button
+              onClick={() => router.push('/register')}
+              size="small"
+              sx={{ textTransform: 'none', fontWeight: 600, color: brand.cyan, p: 0, minWidth: 0 }}
+            >
+              Create one
+            </Button>
           </Typography>
         </CardContent>
       </Card>
     </Box>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <Box
+          sx={{
+            display: 'flex',
+            minHeight: '100vh',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 // app/lib/firebase.ts
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getMessaging, isSupported } from 'firebase/messaging';
+import { getMessaging, isSupported, Messaging } from 'firebase/messaging';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,16 +12,24 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase only if not already initialized
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+const hasConfig =
+  !!firebaseConfig.apiKey &&
+  !!firebaseConfig.projectId &&
+  !!firebaseConfig.appId;
 
-// Export a function to get messaging (only on client side)
-export const getMessagingInstance = async () => {
-  if (typeof window !== 'undefined') {
-    const supported = await isSupported();
-    if (supported) return getMessaging(app);
+const app = hasConfig
+  ? (getApps().length === 0 ? initializeApp(firebaseConfig) : getApp())
+  : null;
+
+export const getMessagingInstance = async (): Promise<Messaging | null> => {
+  if (typeof window === 'undefined' || !app) return null;
+  try {
+    const ok = await isSupported();
+    if (!ok) return null;
+    return getMessaging(app);
+  } catch {
+    return null;
   }
-  return null;
 };
 
 export default app;

@@ -1,17 +1,39 @@
+// app/(auth)/users/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, Card, CardContent, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, CircularProgress, Alert, Button } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
 import apiClient from '@/lib/api/client';
-import { AxiosError } from 'axios';
 
 interface User {
   id: number;
   username: string;
   email: string;
   role: string;
-  isActive: boolean;
+  is_active: boolean;
 }
+
+const ROLE_COLORS: Record<string, string> = {
+  admin: '#EF4444',
+  seller: '#0A2E5C',
+  finance: '#F59E0B',
+  technical: '#3B82F6',
+  customer: '#10B981',
+};
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -19,37 +41,35 @@ export default function UsersPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    (async () => {
       try {
-        const res = await apiClient.get('/users');
-        setUsers(res.data.users || []);
-      } catch (err) {
-        if (err instanceof AxiosError) setError(err.response?.data?.message || 'Failed to load users');
-        else setError('An unexpected error occurred');
+        // ✅ Correct admin path
+        const res = await apiClient.get('/admin/users');
+        setUsers(res.data.users ?? []);
+      } catch (e: any) {
+        setError(e?.response?.data?.message || 'Failed to load users');
       } finally {
         setLoading(false);
       }
-    };
-    fetchUsers();
+    })();
   }, []);
 
-  const roleColor = (role: string) => {
-    switch (role) {
-      case 'admin': return 'error';
-      case 'seller': return 'primary';
-      case 'finance': return 'warning';
-      case 'technical': return 'info';
-      default: return 'default';
-    }
-  };
-
-  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}><CircularProgress /></Box>;
-  if (error) return <Box sx={{ p: 3 }}><Alert severity="error">{error}</Alert><Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>Retry</Button></Box>;
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>Users</Typography>
-      <Card sx={{ borderRadius: 3 }}>
+    <Box>
+      <Typography variant="h4" fontWeight={700} sx={{ mb: 3 }}>
+        Users
+      </Typography>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+      <Card>
         <CardContent>
           <TableContainer>
             <Table>
@@ -63,18 +83,39 @@ export default function UsersPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.id}</TableCell>
-                    <TableCell>{user.username}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell><Chip label={user.role} color={roleColor(user.role)} size="small" /></TableCell>
-                    <TableCell><Chip label={user.isActive ? 'Active' : 'Inactive'} color={user.isActive ? 'success' : 'default'} size="small" /></TableCell>
+                {users.map((u) => (
+                  <TableRow key={u.id} hover>
+                    <TableCell>{u.id}</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>{u.username}</TableCell>
+                    <TableCell>{u.email}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={u.role}
+                        size="small"
+                        sx={{
+                          bgcolor: ROLE_COLORS[u.role] ?? '#64748B',
+                          color: '#fff',
+                          fontWeight: 600,
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={u.is_active ? 'Active' : 'Inactive'}
+                        size="small"
+                        color={u.is_active ? 'success' : 'default'}
+                      />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
+          {users.length === 0 && !error && (
+            <Typography color="text.secondary" sx={{ p: 4, textAlign: 'center' }}>
+              No users to display.
+            </Typography>
+          )}
         </CardContent>
       </Card>
     </Box>
