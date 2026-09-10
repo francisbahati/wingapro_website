@@ -467,7 +467,7 @@ export default function HomePage() {
         </Container>
       </Box>
 
-      {/* ============ CTA ============ */}
+      {/* ============ CTA action ============ */}
       <Box sx={{ py: { xs: 8, md: 10 }, bgcolor: brand.navy, color: '#fff' }}>
         <Container maxWidth="lg">
           <Box
