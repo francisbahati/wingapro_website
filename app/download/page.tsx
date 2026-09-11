@@ -56,7 +56,7 @@ const APPS = [
       'Install the desktop client for a larger workspace. Ideal for sellers and corporate accounts.',
     size: '62 MB',
     version: 'v1.1.0',
-    href: '/apk/gimirey.exe',
+    href: '/apk/Wingapro.exe',
     cta: 'Download for Windows',
     isPrimary: false,
   },
