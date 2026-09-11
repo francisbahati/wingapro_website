@@ -1,0 +1,633 @@
+// app/download/page.tsx
+'use client';
+
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Typography,
+} from '@mui/material';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import AndroidRoundedIcon from '@mui/icons-material/AndroidRounded';
+import ComputerRoundedIcon from '@mui/icons-material/ComputerRounded';
+import SecurityRoundedIcon from '@mui/icons-material/SecurityRounded';
+import BoltRoundedIcon from '@mui/icons-material/BoltRounded';
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
+import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
+import VerifiedUserRoundedIcon from '@mui/icons-material/VerifiedUserRounded';
+import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded';
+import { brand } from '@/theme-provider';
+
+const FEATURES = [
+  'Instant data delivery on purchase',
+  'Wallet top-up with mobile money',
+  'Order history and receipts',
+  'Real-time push notifications',
+  'Secure login with refresh tokens',
+  'Works on WiFi and mobile data',
+];
+
+const APPS = [
+  {
+    key: 'android',
+    icon: <AndroidRoundedIcon sx={{ fontSize: 44 }} />,
+    title: 'Android App',
+    subtitle: 'For Android 8.0 and above',
+    description:
+      'Install the APK directly on your phone. Buy bundles, manage your wallet, and track orders on the go.',
+    size: '18 MB',
+    version: 'v1.1.0',
+    href: '/apk/Wingapro v1.1.apk',
+    cta: 'Download APK',
+    isPrimary: true,
+  },
+  {
+    key: 'windows',
+    icon: <ComputerRoundedIcon sx={{ fontSize: 44 }} />,
+    title: 'Windows App',
+    subtitle: 'For Windows 10 / 11',
+    description:
+      'Install the desktop client for a larger workspace. Ideal for sellers and corporate accounts.',
+    size: '62 MB',
+    version: 'v1.1.0',
+    href: '/windows/WingaProSetup.exe',
+    cta: 'Download for Windows',
+    isPrimary: false,
+  },
+];
+
+const TRUST = [
+  { icon: <SecurityRoundedIcon />, label: 'Secure & verified' },
+  { icon: <BoltRoundedIcon />, label: 'Fast installation' },
+  { icon: <VerifiedUserRoundedIcon />, label: 'No ads or tracking' },
+  { icon: <SupportAgentRoundedIcon />, label: '24/7 support' },
+];
+
+export default function DownloadPage() {
+  const router = useRouter();
+
+  return (
+    <Box sx={{ bgcolor: 'background.default' }}>
+      <Navbar />
+
+      {/* HERO */}
+      <Box
+        sx={{
+          position: 'relative',
+          overflow: 'hidden',
+          pt: { xs: 8, md: 12 },
+          pb: { xs: 8, md: 12 },
+          background: `radial-gradient(ellipse at 90% 10%, rgba(0,180,216,0.08) 0%, transparent 55%),
+                       radial-gradient(ellipse at 5% 90%, rgba(10,46,92,0.06) 0%, transparent 50%),
+                       #FFFFFF`,
+        }}
+      >
+        <Container maxWidth="lg">
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: '1.05fr 0.95fr' },
+              gap: { xs: 6, md: 8 },
+              alignItems: 'center',
+            }}
+          >
+            <Box>
+              <Chip
+                label="Available on Android & Windows"
+                sx={{
+                  bgcolor: 'rgba(0,180,216,0.10)',
+                  color: brand.cyanDeep,
+                  fontWeight: 600,
+                  mb: 3,
+                  border: '1px solid rgba(0,180,216,0.25)',
+                }}
+              />
+              <Typography
+                component="h1"
+                sx={{
+                  fontSize: { xs: '2.2rem', md: '3.2rem' },
+                  fontWeight: 800,
+                  color: brand.navy,
+                  letterSpacing: '-0.025em',
+                  lineHeight: 1.08,
+                  mb: 2,
+                }}
+              >
+                Get the{' '}
+                <Box component="span" sx={{ color: brand.cyan }}>
+                  WingaPro
+                </Box>{' '}
+                app
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: { xs: '1rem', md: '1.125rem' },
+                  color: 'text.secondary',
+                  mb: 4,
+                  maxWidth: 520,
+                  lineHeight: 1.65,
+                }}
+              >
+                Buy data, manage your wallet, and track every order — right from
+                your phone or desktop. Fast, secure, and always in sync.
+              </Typography>
+
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 5 }}>
+                <Button
+                  href="/apk/Wingapro v1.1.apk"
+                  download
+                  variant="contained"
+                  size="large"
+                  startIcon={<DownloadRoundedIcon />}
+                >
+                  Download APK
+                </Button>
+                <Button
+                  href="#apps"
+                  variant="outlined"
+                  size="large"
+                  endIcon={<ArrowForwardRoundedIcon />}
+                  sx={{ borderColor: brand.slate200, color: brand.navy }}
+                >
+                  See all versions
+                </Button>
+              </Box>
+
+              <Box
+                sx={{ display: 'flex', gap: { xs: 3, sm: 5 }, flexWrap: 'wrap' }}
+              >
+                {[
+                  { n: '10K+', l: 'Downloads' },
+                  { n: '4.8★', l: 'Avg. rating' },
+                  { n: '99.9%', l: 'Uptime' },
+                ].map((s) => (
+                  <Box key={s.l}>
+                    <Typography
+                      sx={{
+                        fontSize: '1.6rem',
+                        fontWeight: 800,
+                        color: brand.navy,
+                        letterSpacing: '-0.02em',
+                      }}
+                    >
+                      {s.n}
+                    </Typography>
+                    <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
+                      {s.l}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+
+            {/* buckete.png */}
+            <Box
+              sx={{
+                position: 'relative',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Box
+                sx={{
+                  position: 'absolute',
+                  inset: '-8%',
+                  background: `radial-gradient(circle at center, rgba(0,180,216,0.14) 0%, transparent 65%)`,
+                  filter: 'blur(30px)',
+                  zIndex: 0,
+                }}
+              />
+              <Box
+                className="animate-float"
+                sx={{
+                  position: 'relative',
+                  zIndex: 1,
+                  maxWidth: { xs: 320, md: 460 },
+                  width: '100%',
+                }}
+              >
+                <Image
+                  src="/images/buckete.png"
+                  alt="WingaPro mobile and desktop apps"
+                  width={900}
+                  height={900}
+                  priority
+                  style={{
+                    width: '100%',
+                    height: 'auto',
+                    filter: 'drop-shadow(0 30px 60px rgba(10,46,92,0.18))',
+                  }}
+                />
+              </Box>
+            </Box>
+          </Box>
+        </Container>
+      </Box>
+
+      {/* TRUST STRIP */}
+      <Box
+        sx={{
+          bgcolor: 'background.paper',
+          py: 3,
+          borderTop: '1px solid',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        <Container maxWidth="lg">
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              justifyContent: 'space-around',
+              alignItems: 'center',
+              gap: { xs: 2, sm: 0 },
+            }}
+          >
+            {TRUST.map((t) => (
+              <Box key={t.label} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ color: brand.navy, display: 'flex' }}>{t.icon}</Box>
+                <Typography
+                  sx={{ fontSize: '0.875rem', fontWeight: 600, color: brand.navy }}
+                >
+                  {t.label}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Container>
+      </Box>
+
+      {/* APPS */}
+      <Container maxWidth="lg" id="apps" sx={{ py: { xs: 8, md: 10 } }}>
+        <Typography component="h2" align="center" sx={{ mb: 1.5 }}>
+          Choose your platform
+        </Typography>
+        <Typography
+          align="center"
+          color="text.secondary"
+          sx={{ mb: 6, maxWidth: 640, mx: 'auto' }}
+        >
+          The same WingaPro experience on every device.
+        </Typography>
+
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
+            gap: 4,
+          }}
+        >
+          {APPS.map((app) => (
+            <Card
+              key={app.key}
+              className="surface-interactive"
+              sx={{
+                position: 'relative',
+                overflow: 'hidden',
+                borderRadius: 4,
+                height: '100%',
+              }}
+            >
+              {app.isPrimary && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 4,
+                    background: `linear-gradient(90deg, ${brand.navy} 0%, ${brand.cyan} 100%)`,
+                  }}
+                />
+              )}
+              <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+                <Box
+                  sx={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 3,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    bgcolor: app.isPrimary
+                      ? 'rgba(0,180,216,0.10)'
+                      : 'rgba(10,46,92,0.06)',
+                    color: app.isPrimary ? brand.cyanDeep : brand.navy,
+                    mb: 3,
+                  }}
+                >
+                  {app.icon}
+                </Box>
+
+                <Typography
+                  sx={{
+                    fontSize: '1.4rem',
+                    fontWeight: 800,
+                    color: brand.navy,
+                    letterSpacing: '-0.015em',
+                    mb: 0.5,
+                  }}
+                >
+                  {app.title}
+                </Typography>
+                <Typography sx={{ fontSize: '0.85rem', color: 'text.secondary', mb: 2 }}>
+                  {app.subtitle}
+                </Typography>
+                <Typography
+                  sx={{ fontSize: '0.95rem', color: 'text.primary', lineHeight: 1.65, mb: 3 }}
+                >
+                  {app.description}
+                </Typography>
+
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 3 }}>
+                  <Chip
+                    label={app.version}
+                    size="small"
+                    sx={{
+                      bgcolor: 'rgba(10,46,92,0.06)',
+                      color: brand.navy,
+                      fontWeight: 600,
+                      borderRadius: 1.5,
+                    }}
+                  />
+                  <Chip
+                    label={app.size}
+                    size="small"
+                    sx={{
+                      bgcolor: 'rgba(10,46,92,0.06)',
+                      color: brand.navy,
+                      fontWeight: 600,
+                      borderRadius: 1.5,
+                    }}
+                  />
+                  <Chip
+                    label="Free"
+                    size="small"
+                    sx={{
+                      bgcolor: 'rgba(16,185,129,0.10)',
+                      color: brand.success,
+                      fontWeight: 600,
+                      borderRadius: 1.5,
+                    }}
+                  />
+                </Box>
+
+                <Button
+                  href={app.href}
+                  download
+                  variant={app.isPrimary ? 'contained' : 'outlined'}
+                  size="large"
+                  fullWidth
+                  startIcon={<DownloadRoundedIcon />}
+                  sx={
+                    app.isPrimary
+                      ? {}
+                      : { borderColor: brand.slate200, color: brand.navy }
+                  }
+                >
+                  {app.cta}
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
+      </Container>
+
+      {/* WHAT'S INSIDE */}
+      <Box sx={{ bgcolor: brand.slate50, py: { xs: 8, md: 10 } }}>
+        <Container maxWidth="lg">
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+              gap: 6,
+              alignItems: 'center',
+            }}
+          >
+            <Box>
+              <Typography
+                component="h2"
+                sx={{ fontSize: { xs: '1.8rem', md: '2.25rem' }, mb: 2 }}
+              >
+                Everything you need,{' '}
+                <Box component="span" sx={{ color: brand.cyan }}>
+                  built in.
+                </Box>
+              </Typography>
+              <Typography
+                sx={{ fontSize: '1rem', color: 'text.secondary', lineHeight: 1.7, mb: 3 }}
+              >
+                No clutter. No distractions. Just the features that help you buy
+                data faster, safer, and cheaper.
+              </Typography>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                  gap: 1.5,
+                }}
+              >
+                {FEATURES.map((feature) => (
+                  <Box
+                    key={feature}
+                    sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.25 }}
+                  >
+                    <CheckCircleRoundedIcon
+                      sx={{
+                        fontSize: 20,
+                        color: brand.cyanDeep,
+                        flexShrink: 0,
+                        mt: 0.25,
+                      }}
+                    />
+                    <Typography
+                      sx={{ fontSize: '0.9rem', color: 'text.primary', lineHeight: 1.5 }}
+                    >
+                      {feature}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <Box
+                className="animate-float-slow"
+                sx={{
+                  width: { xs: 220, md: 260 },
+                  aspectRatio: '9 / 19',
+                  borderRadius: 6,
+                  border: `10px solid ${brand.navy}`,
+                  overflow: 'hidden',
+                  bgcolor: brand.navyDeep,
+                  boxShadow: '0 40px 80px rgba(10,46,92,0.28)',
+                  position: 'relative',
+                }}
+              >
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: 90,
+                    height: 18,
+                    bgcolor: brand.navy,
+                    borderBottomLeftRadius: 10,
+                    borderBottomRightRadius: 10,
+                    zIndex: 2,
+                  }}
+                />
+                <Image
+                  src="/images/wingapro.webp"
+                  alt="WingaPro app screen"
+                  width={540}
+                  height={1140}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </Box>
+            </Box>
+          </Box>
+        </Container>
+      </Box>
+
+      {/* FAQ */}
+      <Container maxWidth="md" sx={{ py: { xs: 8, md: 10 } }}>
+        <Typography component="h2" align="center" sx={{ mb: 1.5 }}>
+          Frequently asked
+        </Typography>
+        <Typography align="center" color="text.secondary" sx={{ mb: 6 }}>
+          Quick answers before you install.
+        </Typography>
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {[
+            {
+              q: 'Is the APK safe to install?',
+              a: 'Yes. Every build is signed with our developer certificate. Your Android device will warn you once about installing from outside the Play Store — this is normal for any APK.',
+            },
+            {
+              q: 'Will my data sync across devices?',
+              a: 'Yes. Sign in with the same account on both Android and Windows and everything — wallet, orders, notifications — stays in sync.',
+            },
+            {
+              q: 'Do I need to update manually?',
+              a: 'The app notifies you whenever a new version is available. You will always have the download link here on this page.',
+            },
+            {
+              q: 'What about Windows SmartScreen?',
+              a: 'Windows may show a SmartScreen prompt the first time you run the installer. Click "More info" → "Run anyway". The installer is code-signed and verified.',
+            },
+          ].map((item) => (
+            <Card key={item.q} sx={{ borderRadius: 3 }}>
+              <CardContent>
+                <Typography
+                  sx={{
+                    fontSize: '1.05rem',
+                    fontWeight: 700,
+                    color: brand.navy,
+                    mb: 1,
+                  }}
+                >
+                  {item.q}
+                </Typography>
+                <Typography
+                  sx={{ fontSize: '0.9rem', color: 'text.secondary', lineHeight: 1.65 }}
+                >
+                  {item.a}
+                </Typography>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
+      </Container>
+
+      {/* CTA */}
+      <Box sx={{ py: { xs: 8, md: 10 }, bgcolor: brand.navy, color: '#fff' }}>
+        <Container maxWidth="lg">
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: '1.4fr 1fr' },
+              gap: 4,
+              alignItems: 'center',
+            }}
+          >
+            <Box>
+              <Typography
+                component="h2"
+                sx={{
+                  fontSize: { xs: '1.8rem', md: '2.4rem' },
+                  fontWeight: 800,
+                  color: '#fff',
+                  mb: 1.5,
+                }}
+              >
+                Ready to get started?
+              </Typography>
+              <Typography
+                sx={{
+                  color: 'rgba(255,255,255,0.75)',
+                  mb: 3,
+                  maxWidth: 520,
+                  lineHeight: 1.65,
+                }}
+              >
+                Download the app, sign in, and start buying data in under a minute.
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <Button
+                  onClick={() => router.push('/register')}
+                  variant="contained"
+                  size="large"
+                  endIcon={<ArrowForwardRoundedIcon />}
+                  sx={{
+                    bgcolor: '#fff',
+                    color: brand.navy,
+                    '&:hover': { bgcolor: brand.slate100 },
+                  }}
+                >
+                  Create an account
+                </Button>
+                <Button
+                  onClick={() => router.push('/login')}
+                  variant="outlined"
+                  size="large"
+                  sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.35)' }}
+                >
+                  Sign in
+                </Button>
+              </Box>
+            </Box>
+            <Box sx={{ textAlign: 'center' }}>
+              <Box className="animate-float" sx={{ maxWidth: 320, mx: 'auto' }}>
+                <Image
+                  src="/images/buckete.png"
+                  alt="WingaPro bundle"
+                  width={900}
+                  height={900}
+                  style={{
+                    width: '100%',
+                    height: 'auto',
+                    filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.35))',
+                  }}
+                />
+              </Box>
+            </Box>
+          </Box>
+        </Container>
+      </Box>
+
+      <Footer />
+    </Box>
+  );
+}
