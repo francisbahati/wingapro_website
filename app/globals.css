@@ -734,7 +734,7 @@ img, svg, video, canvas,
   .no-print { display: none !important; }
 }
 
-/* ---------- 33. GLOBAL THEME ENFORCEMENT ---------- */
+/* ---------- 33. GLOBAL THEME ENFORCEMENT ppppo---------- */
 [data-theme="dark"] {
   .MuiPaper-root:not([data-skip-theme]),
   .MuiCard-root,
