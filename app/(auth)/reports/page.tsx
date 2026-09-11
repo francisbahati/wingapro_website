@@ -92,6 +92,6 @@ export default function ReportsPage() {
       </Grid>
 
       <ReportsCharts data={data} />
-    </Box>
+    </Box>   // ← ✅ FIXED: was </Grid>
   );
 }

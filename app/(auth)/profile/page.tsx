@@ -7,7 +7,7 @@ import {
   Divider, CircularProgress, Alert, Skeleton,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext'; // ✅ FIXED
 import apiClient from '@/lib/api/client';
 import { AxiosError } from 'axios';
 import LockIcon from '@mui/icons-material/Lock';
@@ -121,7 +121,6 @@ export default function ProfilePage() {
     <Box sx={{ p: 3, maxWidth: 600, mx: 'auto' }}>
       <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>My Profile</Typography>
 
-      {/* Profile Header */}
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
         <Avatar sx={{ width: 80, height: 80, bgcolor: PRIMARY, fontSize: 32 }}>
           {username.charAt(0).toUpperCase()}
@@ -133,7 +132,6 @@ export default function ProfilePage() {
         <Typography variant="body2" color="text.secondary">Role: Customer</Typography>
       </Box>
 
-      {/* Options */}
       <Card sx={{ mb: 2, borderRadius: 3 }}>
         <List>
           <ListItemButton onClick={() => setPasswordDialog(true)}>
@@ -159,7 +157,6 @@ export default function ProfilePage() {
         </List>
       </Card>
 
-      {/* Change Password Dialog */}
       <Dialog open={passwordDialog} onClose={() => !changingPassword && setPasswordDialog(false)}>
         <DialogTitle>Change Password</DialogTitle>
         <DialogContent>

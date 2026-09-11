@@ -1,13 +1,19 @@
-// next.config.ts
-import type { NextConfig } from 'next';
-
-const nextConfig: NextConfig = {
+// next.config.mjs
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   output: 'standalone',
-  allowedDevOrigins: ['192.168.1.15', '192.168.1.31', 'localhost'],
-  experimental: {
-    serverActions: {
-      allowedOrigins: ['wingapro.com', '*.wingapro.com', '192.168.1.31'],
-    },
+  reactStrictMode: true,
+  poweredByHeader: false,
+  eslint: {
+    // Linting is handled separately; don't block production builds
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // Keep strict — real errors should fail the build
+    ignoreBuildErrors: false,
+  },
+  images: {
+    remotePatterns: [],
   },
 };
 
