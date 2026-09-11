@@ -23,6 +23,10 @@ import apiClient from '@/lib/api/client';
 
 type Mode = 'deposit' | 'withdraw';
 
+// ⚠️ These MUST match the backend validation limits
+const MIN_DEPOSIT = 1000;    // backend: "Minimum deposit is TZS 1,000"
+const MIN_WITHDRAW = 25000;  // backend: "Minimum withdrawal amount is TZS 25,000"
+
 export default function DepositWithdrawPage() {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>('deposit');
@@ -33,8 +37,13 @@ export default function DepositWithdrawPage() {
   const [success, setSuccess] = useState('');
 
   const isWithdraw = mode === 'withdraw';
+  const minAmount = isWithdraw ? MIN_WITHDRAW : MIN_DEPOSIT;
 
-  // Accept 0712345678, 712345678, +255712345678, or 255712345678
+  /**
+   * Normalize any Tanzanian number to 0XXXXXXXXX (10 digits).
+   * Backend's formatAndValidatePhone accepts: 0XXXXXXXXX | 255XXXXXXXXX | +255XXXXXXXXX
+   * We send 0XXXXXXXXX because it's the most human-readable form.
+   */
   const normalizePhone = (value: string): string => {
     let v = value.replace(/\s+/g, '').replace(/-/g, '');
     if (v.startsWith('+255')) v = '0' + v.slice(4);
@@ -43,25 +52,27 @@ export default function DepositWithdrawPage() {
     return v;
   };
 
-  const isValidPhone = (value: string) => /^0\d{9}$/.test(normalizePhone(value));
+  const isValidPhone = (value: string) => /^0[67]\d{8}$/.test(normalizePhone(value));
 
   const handleModeChange = (_: any, val: Mode | null) => {
     if (!val) return;
     setMode(val);
     setError('');
     setSuccess('');
+    setAmount('');
+    setPhone('');
   };
 
   const handleSubmit = async () => {
+    // ---------- Client-side validation (mirrors backend exactly) ----------
     const numericAmount = parseFloat(amount);
 
-    // ---- Validation ----
     if (!amount || isNaN(numericAmount) || numericAmount <= 0) {
       setError('Please enter a valid amount');
       return;
     }
-    if (numericAmount < 500) {
-      setError('Minimum amount is TZS 500');
+    if (numericAmount < minAmount) {
+      setError(`Minimum ${isWithdraw ? 'withdrawal' : 'deposit'} amount is TZS ${minAmount.toLocaleString()}`);
       return;
     }
     if (!phone.trim()) {
@@ -73,7 +84,7 @@ export default function DepositWithdrawPage() {
       return;
     }
     if (!isValidPhone(phone)) {
-      setError('Enter a valid 10-digit Tanzanian number (e.g. 0712345678)');
+      setError('Enter a valid Tanzanian number (e.g. 0712345678)');
       return;
     }
 
@@ -82,19 +93,32 @@ export default function DepositWithdrawPage() {
     setLoading(true);
 
     try {
-      const endpoint = isWithdraw ? '/wallet/withdraw' : '/wallet/deposit';
-      const payload = {
-        amount: numericAmount,
-        phone: normalizePhone(phone),
-      };
+      // ---------- Build payload that EXACTLY matches backend expectations ----------
+      const normalizedPhone = normalizePhone(phone);
 
-      await apiClient.post(endpoint, payload);
+      if (isWithdraw) {
+        // POST /api/wallet/withdraw  →  { amount: number, phone: string }
+        await apiClient.post('/wallet/withdraw', {
+          amount: numericAmount,           // number, not string
+          phone: normalizedPhone,          // 0XXXXXXXXX
+        });
 
-      setSuccess(
-        isWithdraw
-          ? `Withdrawal request submitted. You will receive the money on ${normalizePhone(phone)} within 24 hours.`
-          : `Deposit request submitted. Please approve the payment prompt sent to ${normalizePhone(phone)}.`
-      );
+        setSuccess(
+          `Withdrawal of TZS ${numericAmount.toLocaleString()} is being sent to ${normalizedPhone}. ` +
+          `It should arrive within a few minutes.`
+        );
+      } else {
+        // POST /api/wallet/deposit  →  { amount: number, phone: string, idempotencyKey?: string }
+        // Backend generates its own key if we don't send one, so omit it.
+        await apiClient.post('/wallet/deposit', {
+          amount: numericAmount,
+          phone: normalizedPhone,
+        });
+
+        setSuccess(
+          `Deposit initiated. Please approve the payment prompt sent to ${normalizedPhone}.`
+        );
+      }
 
       setAmount('');
       setPhone('');
@@ -126,8 +150,8 @@ export default function DepositWithdrawPage() {
       </Typography>
       <Typography variant="body2" sx={{ mb: 4, color: 'var(--text-muted)' }}>
         {isWithdraw
-          ? 'Request a payout to your mobile money number.'
-          : 'Add funds to your WingaPro wallet using mobile money.'}
+          ? `Send money from your WingaPro wallet to your mobile money number (min TZS ${MIN_WITHDRAW.toLocaleString()}).`
+          : `Add funds to your WingaPro wallet via mobile money (min TZS ${MIN_DEPOSIT.toLocaleString()}).`}
       </Typography>
 
       <Card
@@ -177,15 +201,16 @@ export default function DepositWithdrawPage() {
             fullWidth
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder="Enter amount"
+            placeholder={`Minimum TZS ${minAmount.toLocaleString()}`}
             InputProps={{
               startAdornment: <InputAdornment position="start">TZS</InputAdornment>,
             }}
-            inputProps={{ min: 500, step: 100 }}
+            inputProps={{ min: minAmount, step: 100 }}
+            helperText={`Minimum ${isWithdraw ? 'withdrawal' : 'deposit'}: TZS ${minAmount.toLocaleString()}`}
             sx={{ mb: 3 }}
           />
 
-          {/* Phone — shown for BOTH deposit and withdraw */}
+          {/* Phone — shown for BOTH modes */}
           <TextField
             label={
               isWithdraw
@@ -268,8 +293,8 @@ export default function DepositWithdrawPage() {
           }}
         >
           {isWithdraw
-            ? 'Withdrawals are processed within 24 hours. Make sure the phone number matches your mobile money account.'
-            : 'You will receive a USSD / app prompt from your mobile money provider. Approve it to complete the deposit.'}
+            ? `Withdrawals are processed within minutes. Minimum: TZS ${MIN_WITHDRAW.toLocaleString()}. Make sure the phone number matches your mobile money account.`
+            : `You will receive a USSD / app prompt from your mobile money provider. Approve it to complete the deposit. Minimum: TZS ${MIN_DEPOSIT.toLocaleString()}.`}
         </Typography>
       </Box>
     </Box>
