@@ -215,7 +215,7 @@ export default function DownloadPage() {
                 }}
               >
                 <Image
-                  src="/images/buckete.png"
+                  src="/images/buckete.webp"
                   alt="WingaPro mobile and desktop apps"
                   width={900}
                   height={900}

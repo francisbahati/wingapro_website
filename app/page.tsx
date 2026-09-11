@@ -522,7 +522,7 @@ export default function HomePage() {
             <Box sx={{ textAlign: 'center' }}>
               <Box className="animate-float" sx={{ maxWidth: 320, mx: 'auto' }}>
                 <Image
-                  src="/images/buckete.png"
+                  src="/images/buckete.webp"
                   alt="WingaPro bundle"
                   width={900}
                   height={900}

@@ -122,7 +122,7 @@ export default function AboutPage() {
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <Box className="animate-float" sx={{ maxWidth: { xs: 320, md: 420 }, width: '100%' }}>
                 <Image
-                  src="/images/buckete.png"
+                  src="/images/buckete.webp"
                   alt="WingaPro"
                   width={900}
                   height={900}
