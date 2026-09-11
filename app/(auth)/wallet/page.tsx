@@ -19,7 +19,6 @@ import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded';
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
 import apiClient from '@/lib/api/client';
-import { brand } from '@/theme-provider';
 
 interface Tx {
   type: 'credit' | 'debit';
@@ -36,11 +35,11 @@ interface Withdrawal {
 }
 
 const W_STATUS: Record<string, { color: string; label: string }> = {
-  pending: { color: '#F59E0B', label: 'Pending' },
+  pending:    { color: '#F59E0B', label: 'Pending' },
   processing: { color: '#3B82F6', label: 'Processing' },
-  completed: { color: '#10B981', label: 'Completed' },
-  failed: { color: '#EF4444', label: 'Failed' },
-  rejected: { color: '#EF4444', label: 'Rejected' },
+  completed:  { color: '#10B981', label: 'Completed' },
+  failed:     { color: '#EF4444', label: 'Failed' },
+  rejected:   { color: '#EF4444', label: 'Rejected' },
 };
 
 export default function WalletPage() {
@@ -79,7 +78,7 @@ export default function WalletPage() {
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto' }}>
-      <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
+      <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, color: 'var(--navy)' }}>
         My Wallet
       </Typography>
 
@@ -90,7 +89,7 @@ export default function WalletPage() {
           mb: 4,
           color: '#fff',
           border: 'none',
-          background: `linear-gradient(135deg, ${brand.navy} 0%, ${brand.navyLight} 60%, ${brand.cyan} 140%)`,
+          background: `linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 60%, var(--cyan) 140%)`,
           boxShadow: '0 20px 40px rgba(10,46,92,0.3)',
         }}
       >
@@ -106,10 +105,7 @@ export default function WalletPage() {
           >
             Available Balance
           </Typography>
-          <Typography
-            variant="h3"
-            sx={{ fontWeight: 800, my: 1, letterSpacing: '-0.02em' }}
-          >
+          <Typography variant="h3" sx={{ fontWeight: 800, my: 1, letterSpacing: '-0.02em' }}>
             TZS {balance.toLocaleString()}
           </Typography>
           <Button
@@ -118,7 +114,7 @@ export default function WalletPage() {
             sx={{
               mt: 2,
               bgcolor: '#fff',
-              color: brand.navy,
+              color: 'var(--navy-deep)',
               '&:hover': { bgcolor: '#F1F5F9' },
             }}
           >
@@ -127,15 +123,22 @@ export default function WalletPage() {
         </CardContent>
       </Card>
 
-      <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5 }}>
+      <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, color: 'var(--navy)' }}>
         Withdrawal History
       </Typography>
       {withdrawals.length === 0 ? (
-        <Typography color="text.secondary" sx={{ mb: 3 }}>
+        <Typography sx={{ mb: 3, color: 'var(--text-muted)' }}>
           No withdrawal requests yet.
         </Typography>
       ) : (
-        <Box sx={{ mb: 3, bgcolor: 'background.paper', borderRadius: 3 }}>
+        <Box
+          sx={{
+            mb: 3,
+            bgcolor: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 3,
+          }}
+        >
           {withdrawals.map((w, i) => {
             const s = W_STATUS[w.status];
             return (
@@ -146,42 +149,40 @@ export default function WalletPage() {
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   p: 2,
-                  borderBottom: i < withdrawals.length - 1 ? '1px solid' : 'none',
-                  borderColor: 'divider',
+                  borderBottom: i < withdrawals.length - 1 ? '1px solid var(--border)' : 'none',
                 }}
               >
                 <Box>
-                  <Typography sx={{ fontWeight: 600 }}>
+                  <Typography sx={{ fontWeight: 600, color: 'var(--text)' }}>
                     TZS {w.amount.toLocaleString()}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{ color: 'var(--text-muted)' }}>
                     {new Date(w.requestedAt).toLocaleString()}
                   </Typography>
                 </Box>
-                <Chip
-                  size="small"
-                  label={s.label}
-                  sx={{ bgcolor: s.color, color: '#fff' }}
-                />
+                <Chip size="small" label={s.label} sx={{ bgcolor: s.color, color: '#fff' }} />
               </Box>
             );
           })}
         </Box>
       )}
 
-      <Divider sx={{ my: 3 }} />
+      <Divider sx={{ my: 3, borderColor: 'var(--border)' }} />
 
-      <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5 }}>
+      <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, color: 'var(--navy)' }}>
         Recent Transactions
       </Typography>
       {transactions.length === 0 ? (
-        <Typography color="text.secondary">No transactions yet.</Typography>
+        <Typography sx={{ color: 'var(--text-muted)' }}>No transactions yet.</Typography>
       ) : (
         <Stack spacing={1}>
           {transactions.map((tx, i) => {
             const isCredit = tx.type === 'credit';
             return (
-              <Card key={i}>
+              <Card
+                key={i}
+                sx={{ bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}
+              >
                 <CardContent sx={{ py: 1.5 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Box
@@ -189,8 +190,8 @@ export default function WalletPage() {
                         width: 40,
                         height: 40,
                         borderRadius: '50%',
-                        bgcolor: isCredit ? 'success.light' : 'error.light',
-                        color: isCredit ? 'success.main' : 'error.main',
+                        bgcolor: isCredit ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
+                        color: isCredit ? 'var(--success)' : 'var(--error)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -203,17 +204,17 @@ export default function WalletPage() {
                       )}
                     </Box>
                     <Box sx={{ flexGrow: 1 }}>
-                      <Typography sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                      <Typography sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text)' }}>
                         {tx.description}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" sx={{ color: 'var(--text-muted)' }}>
                         {new Date(tx.date).toLocaleString()}
                       </Typography>
                     </Box>
                     <Typography
                       sx={{
                         fontWeight: 700,
-                        color: isCredit ? 'success.main' : 'error.main',
+                        color: isCredit ? 'var(--success)' : 'var(--error)',
                       }}
                     >
                       {isCredit ? '+' : '-'} TZS {tx.amount.toLocaleString()}

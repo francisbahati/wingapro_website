@@ -17,7 +17,6 @@ import Footer from '@/components/Footer';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 import PhoneRoundedIcon from '@mui/icons-material/PhoneRounded';
 import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
-import { brand } from '@/theme-provider';
 
 const CONTACT_INFO = [
   {
@@ -49,22 +48,25 @@ export default function ContactPage() {
   };
 
   return (
-    <Box sx={{ bgcolor: 'background.default' }}>
+    <Box sx={{ bgcolor: 'var(--bg)', minHeight: '100vh' }}>
       <Navbar />
 
       <Container maxWidth="lg" sx={{ py: { xs: 8, md: 10 } }}>
-        <Typography component="h1" align="center" sx={{ mb: 1.5 }}>
+        <Typography
+          component="h1"
+          align="center"
+          sx={{ mb: 1.5, color: 'var(--navy)', fontWeight: 800 }}
+        >
           Contact{' '}
-          <Box component="span" sx={{ color: brand.cyan }}>
+          <Box component="span" sx={{ color: 'var(--cyan)' }}>
             Us
           </Box>
         </Typography>
         <Typography
           align="center"
-          color="text.secondary"
-          sx={{ mb: 6, maxWidth: 640, mx: 'auto' }}
+          sx={{ mb: 6, maxWidth: 640, mx: 'auto', color: 'var(--text-muted)' }}
         >
-          We're here to help. Reach out to us anytime.
+          We&apos;re here to help. Reach out to us anytime.
         </Typography>
 
         <Box
@@ -76,7 +78,9 @@ export default function ContactPage() {
         >
           {/* Info column */}
           <Box>
-            <Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color: brand.navy, mb: 3 }}>
+            <Typography
+              sx={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--navy)', mb: 3 }}
+            >
               Contact Information
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -86,20 +90,23 @@ export default function ContactPage() {
                     sx={{
                       width: 48,
                       height: 48,
-                      bgcolor: brand.navy,
+                      bgcolor: 'var(--navy)',
                       color: '#fff',
                       borderRadius: '50%',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       flexShrink: 0,
+                      boxShadow: '0 6px 16px rgba(10,46,92,0.20)',
                     }}
                   >
                     {item.icon}
                   </Box>
                   <Box>
-                    <Typography sx={{ fontWeight: 600 }}>{item.label}</Typography>
-                    <Typography sx={{ fontSize: '0.9rem', color: 'text.secondary' }}>
+                    <Typography sx={{ fontWeight: 600, color: 'var(--navy)' }}>
+                      {item.label}
+                    </Typography>
+                    <Typography sx={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
                       {item.value}
                     </Typography>
                   </Box>
@@ -109,11 +116,17 @@ export default function ContactPage() {
           </Box>
 
           {/* Form column */}
-          <Card sx={{ borderRadius: 3 }}>
+          <Card
+            sx={{
+              borderRadius: 3,
+              bgcolor: 'var(--surface)',
+              border: '1px solid var(--border)',
+            }}
+          >
             <CardContent sx={{ p: 4 }}>
               {submitted ? (
                 <Alert severity="success">
-                  Your message has been sent. We'll get back to you soon.
+                  Your message has been sent. We&apos;ll get back to you soon.
                 </Alert>
               ) : (
                 <Box component="form" onSubmit={handleSubmit}>
@@ -150,7 +163,13 @@ export default function ContactPage() {
                       setForm({ ...form, message: e.target.value })
                     }
                   />
-                  <Button type="submit" variant="contained" fullWidth sx={{ mt: 3 }} size="large">
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    fullWidth
+                    sx={{ mt: 3 }}
+                    size="large"
+                  >
                     Send Message
                   </Button>
                 </Box>

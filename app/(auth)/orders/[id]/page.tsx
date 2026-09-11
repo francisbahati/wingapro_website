@@ -1,4 +1,3 @@
-// app/(auth)/orders/[id]/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -18,7 +17,6 @@ import {
 } from '@mui/material';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import apiClient from '@/lib/api/client';
-import { brand } from '@/theme-provider';
 
 interface Order {
   id: number;
@@ -35,9 +33,9 @@ interface Order {
 const STATUS_COLORS: Record<string, { bg: string; label: string }> = {
   payment_received: { bg: '#3B82F6', label: 'Payment Received' },
   waiting_approval: { bg: '#F59E0B', label: 'Waiting Approval' },
-  approved: { bg: '#8B5CF6', label: 'Approved' },
+  approved:         { bg: '#8B5CF6', label: 'Approved' },
   waiting_delivery: { bg: '#0EA5E9', label: 'Out for Delivery' },
-  completed: { bg: '#10B981', label: 'Completed' },
+  completed:        { bg: '#10B981', label: 'Completed' },
 };
 
 export default function OrderDetailPage() {
@@ -53,7 +51,6 @@ export default function OrderDetailPage() {
     (async () => {
       if (!id) return;
       try {
-        // Backend has no /purchases/:id — fetch the list and find by id
         const res = await apiClient.get('/purchases');
         const found = (res.data.purchases ?? []).find((p: Order) => String(p.id) === String(id));
         if (!found) throw new Error('Order not found');
@@ -97,19 +94,19 @@ export default function OrderDetailPage() {
 
   return (
     <Box sx={{ maxWidth: 640, mx: 'auto' }}>
-      <Typography variant="h4" fontWeight={700} gutterBottom>
+      <Typography variant="h4" fontWeight={700} gutterBottom sx={{ color: 'var(--navy)' }}>
         Order #{order.id}
       </Typography>
 
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mb: 3, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
         <CardContent>
           <Stack direction="row" justifyContent="space-between" sx={{ mb: 2 }}>
-            <Typography variant="h6" fontWeight={700}>
+            <Typography variant="h6" fontWeight={700} sx={{ color: 'var(--navy)' }}>
               {order.Package?.name ?? 'Package'}
             </Typography>
             <Chip label={status.label} sx={{ bgcolor: status.bg, color: '#fff', fontWeight: 600 }} />
           </Stack>
-          <Divider sx={{ mb: 2 }} />
+          <Divider sx={{ mb: 2, borderColor: 'var(--border)' }} />
           <DetailRow label="Recipient" value={order.recipientName} />
           <DetailRow label="Phone" value={order.recipientPhone} />
           <DetailRow label="Network" value={order.network} />
@@ -120,17 +117,12 @@ export default function OrderDetailPage() {
       </Card>
 
       {canConfirm ? (
-        <Card>
+        <Card sx={{ bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
           <CardContent>
-            <Typography variant="subtitle1" fontWeight={700} gutterBottom>
+            <Typography variant="subtitle1" fontWeight={700} gutterBottom sx={{ color: 'var(--navy)' }}>
               Rate your experience
             </Typography>
-            <Rating
-              value={rating}
-              onChange={(_, v) => setRating(v)}
-              size="large"
-              sx={{ mb: 2 }}
-            />
+            <Rating value={rating} onChange={(_, v) => setRating(v)} size="large" sx={{ mb: 2 }} />
             <Button
               variant="contained"
               size="large"
@@ -157,10 +149,10 @@ export default function OrderDetailPage() {
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <Stack direction="row" spacing={2} sx={{ py: 0.75 }}>
-      <Typography variant="body2" fontWeight={600} sx={{ width: 110, color: 'text.secondary' }}>
+      <Typography variant="body2" fontWeight={600} sx={{ width: 110, color: 'var(--text-muted)' }}>
         {label}
       </Typography>
-      <Typography variant="body2" sx={{ color: 'text.primary' }}>
+      <Typography variant="body2" sx={{ color: 'var(--text)' }}>
         {value}
       </Typography>
     </Stack>

@@ -1,4 +1,3 @@
-// app/(auth)/users/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -28,11 +27,11 @@ interface User {
 }
 
 const ROLE_COLORS: Record<string, string> = {
-  admin: '#EF4444',
-  seller: '#0A2E5C',
-  finance: '#F59E0B',
+  admin:     '#EF4444',
+  seller:    '#0A2E5C',
+  finance:   '#F59E0B',
   technical: '#3B82F6',
-  customer: '#10B981',
+  customer:  '#10B981',
 };
 
 export default function UsersPage() {
@@ -43,7 +42,6 @@ export default function UsersPage() {
   useEffect(() => {
     (async () => {
       try {
-        // ✅ Correct admin path
         const res = await apiClient.get('/admin/users');
         setUsers(res.data.users ?? []);
       } catch (e: any) {
@@ -64,12 +62,12 @@ export default function UsersPage() {
 
   return (
     <Box>
-      <Typography variant="h4" fontWeight={700} sx={{ mb: 3 }}>
+      <Typography variant="h4" fontWeight={700} sx={{ mb: 3, color: 'var(--navy)' }}>
         Users
       </Typography>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-      <Card>
+      <Card sx={{ bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
         <CardContent>
           <TableContainer>
             <Table>
@@ -112,7 +110,7 @@ export default function UsersPage() {
             </Table>
           </TableContainer>
           {users.length === 0 && !error && (
-            <Typography color="text.secondary" sx={{ p: 4, textAlign: 'center' }}>
+            <Typography sx={{ p: 4, textAlign: 'center', color: 'var(--text-muted)' }}>
               No users to display.
             </Typography>
           )}

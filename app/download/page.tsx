@@ -23,7 +23,6 @@ import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import VerifiedUserRoundedIcon from '@mui/icons-material/VerifiedUserRounded';
 import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded';
-import { brand } from '@/theme-provider';
 
 const FEATURES = [
   'Instant data delivery on purchase',
@@ -64,8 +63,8 @@ const APPS = [
 ];
 
 const TRUST = [
-  { icon: <SecurityRoundedIcon />, label: 'Secure & verified' },
-  { icon: <BoltRoundedIcon />, label: 'Fast installation' },
+  { icon: <SecurityRoundedIcon />,     label: 'Secure & verified' },
+  { icon: <BoltRoundedIcon />,         label: 'Fast installation' },
   { icon: <VerifiedUserRoundedIcon />, label: 'No ads or tracking' },
   { icon: <SupportAgentRoundedIcon />, label: '24/7 support' },
 ];
@@ -74,7 +73,7 @@ export default function DownloadPage() {
   const router = useRouter();
 
   return (
-    <Box sx={{ bgcolor: 'background.default' }}>
+    <Box sx={{ bgcolor: 'var(--bg)', minHeight: '100vh' }}>
       <Navbar />
 
       {/* HERO */}
@@ -84,9 +83,10 @@ export default function DownloadPage() {
           overflow: 'hidden',
           pt: { xs: 8, md: 12 },
           pb: { xs: 8, md: 12 },
-          background: `radial-gradient(ellipse at 90% 10%, rgba(0,180,216,0.08) 0%, transparent 55%),
-                       radial-gradient(ellipse at 5% 90%, rgba(10,46,92,0.06) 0%, transparent 50%),
-                       #FFFFFF`,
+          background:
+            'radial-gradient(ellipse at 90% 10%, rgba(0,180,216,0.08) 0%, transparent 55%), ' +
+            'radial-gradient(ellipse at 5% 90%, rgba(10,46,92,0.06) 0%, transparent 50%), ' +
+            'var(--hero-base)',
         }}
       >
         <Container maxWidth="lg">
@@ -102,8 +102,8 @@ export default function DownloadPage() {
               <Chip
                 label="Available on Android & Windows"
                 sx={{
-                  bgcolor: 'rgba(0,180,216,0.10)',
-                  color: brand.cyanDeep,
+                  bgcolor: 'var(--cyan-muted)',
+                  color: 'var(--cyan-deep)',
                   fontWeight: 600,
                   mb: 3,
                   border: '1px solid rgba(0,180,216,0.25)',
@@ -114,14 +114,14 @@ export default function DownloadPage() {
                 sx={{
                   fontSize: { xs: '2.2rem', md: '3.2rem' },
                   fontWeight: 800,
-                  color: brand.navy,
+                  color: 'var(--navy)',
                   letterSpacing: '-0.025em',
                   lineHeight: 1.08,
                   mb: 2,
                 }}
               >
                 Get the{' '}
-                <Box component="span" sx={{ color: brand.cyan }}>
+                <Box component="span" sx={{ color: 'var(--cyan)' }}>
                   WingaPro
                 </Box>{' '}
                 app
@@ -129,7 +129,7 @@ export default function DownloadPage() {
               <Typography
                 sx={{
                   fontSize: { xs: '1rem', md: '1.125rem' },
-                  color: 'text.secondary',
+                  color: 'var(--text-muted)',
                   mb: 4,
                   maxWidth: 520,
                   lineHeight: 1.65,
@@ -146,6 +146,7 @@ export default function DownloadPage() {
                   variant="contained"
                   size="large"
                   startIcon={<DownloadRoundedIcon />}
+                  className="btn-shine"
                 >
                   Download APK
                 </Button>
@@ -154,15 +155,12 @@ export default function DownloadPage() {
                   variant="outlined"
                   size="large"
                   endIcon={<ArrowForwardRoundedIcon />}
-                  sx={{ borderColor: brand.slate200, color: brand.navy }}
                 >
                   See all versions
                 </Button>
               </Box>
 
-              <Box
-                sx={{ display: 'flex', gap: { xs: 3, sm: 5 }, flexWrap: 'wrap' }}
-              >
+              <Box sx={{ display: 'flex', gap: { xs: 3, sm: 5 }, flexWrap: 'wrap' }}>
                 {[
                   { n: '10K+', l: 'Downloads' },
                   { n: '4.8★', l: 'Avg. rating' },
@@ -173,13 +171,13 @@ export default function DownloadPage() {
                       sx={{
                         fontSize: '1.6rem',
                         fontWeight: 800,
-                        color: brand.navy,
+                        color: 'var(--navy)',
                         letterSpacing: '-0.02em',
                       }}
                     >
                       {s.n}
                     </Typography>
-                    <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
+                    <Typography sx={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                       {s.l}
                     </Typography>
                   </Box>
@@ -187,7 +185,6 @@ export default function DownloadPage() {
               </Box>
             </Box>
 
-            {/* buckete.png */}
             <Box
               sx={{
                 position: 'relative',
@@ -200,7 +197,7 @@ export default function DownloadPage() {
                 sx={{
                   position: 'absolute',
                   inset: '-8%',
-                  background: `radial-gradient(circle at center, rgba(0,180,216,0.14) 0%, transparent 65%)`,
+                  background: 'radial-gradient(circle at center, rgba(0,180,216,0.14) 0%, transparent 65%)',
                   filter: 'blur(30px)',
                   zIndex: 0,
                 }}
@@ -235,11 +232,10 @@ export default function DownloadPage() {
       {/* TRUST STRIP */}
       <Box
         sx={{
-          bgcolor: 'background.paper',
+          bgcolor: 'var(--surface)',
           py: 3,
-          borderTop: '1px solid',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
+          borderTop: '1px solid var(--border)',
+          borderBottom: '1px solid var(--border)',
         }}
       >
         <Container maxWidth="lg">
@@ -254,10 +250,8 @@ export default function DownloadPage() {
           >
             {TRUST.map((t) => (
               <Box key={t.label} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box sx={{ color: brand.navy, display: 'flex' }}>{t.icon}</Box>
-                <Typography
-                  sx={{ fontSize: '0.875rem', fontWeight: 600, color: brand.navy }}
-                >
+                <Box sx={{ color: 'var(--navy)', display: 'flex' }}>{t.icon}</Box>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--navy)' }}>
                   {t.label}
                 </Typography>
               </Box>
@@ -268,13 +262,16 @@ export default function DownloadPage() {
 
       {/* APPS */}
       <Container maxWidth="lg" id="apps" sx={{ py: { xs: 8, md: 10 } }}>
-        <Typography component="h2" align="center" sx={{ mb: 1.5 }}>
+        <Typography
+          component="h2"
+          align="center"
+          sx={{ mb: 1.5, color: 'var(--navy)', fontWeight: 800 }}
+        >
           Choose your platform
         </Typography>
         <Typography
           align="center"
-          color="text.secondary"
-          sx={{ mb: 6, maxWidth: 640, mx: 'auto' }}
+          sx={{ mb: 6, maxWidth: 640, mx: 'auto', color: 'var(--text-muted)' }}
         >
           The same WingaPro experience on every device.
         </Typography>
@@ -295,6 +292,8 @@ export default function DownloadPage() {
                 overflow: 'hidden',
                 borderRadius: 4,
                 height: '100%',
+                bgcolor: 'var(--surface)',
+                border: '1px solid var(--border)',
               }}
             >
               {app.isPrimary && (
@@ -305,7 +304,7 @@ export default function DownloadPage() {
                     left: 0,
                     right: 0,
                     height: 4,
-                    background: `linear-gradient(90deg, ${brand.navy} 0%, ${brand.cyan} 100%)`,
+                    background: `linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%)`,
                   }}
                 />
               )}
@@ -318,10 +317,8 @@ export default function DownloadPage() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    bgcolor: app.isPrimary
-                      ? 'rgba(0,180,216,0.10)'
-                      : 'rgba(10,46,92,0.06)',
-                    color: app.isPrimary ? brand.cyanDeep : brand.navy,
+                    bgcolor: app.isPrimary ? 'var(--cyan-muted)' : 'var(--navy-muted)',
+                    color: app.isPrimary ? 'var(--cyan-deep)' : 'var(--navy)',
                     mb: 3,
                   }}
                 >
@@ -332,18 +329,18 @@ export default function DownloadPage() {
                   sx={{
                     fontSize: '1.4rem',
                     fontWeight: 800,
-                    color: brand.navy,
+                    color: 'var(--navy)',
                     letterSpacing: '-0.015em',
                     mb: 0.5,
                   }}
                 >
                   {app.title}
                 </Typography>
-                <Typography sx={{ fontSize: '0.85rem', color: 'text.secondary', mb: 2 }}>
+                <Typography sx={{ fontSize: '0.85rem', color: 'var(--text-muted)', mb: 2 }}>
                   {app.subtitle}
                 </Typography>
                 <Typography
-                  sx={{ fontSize: '0.95rem', color: 'text.primary', lineHeight: 1.65, mb: 3 }}
+                  sx={{ fontSize: '0.95rem', color: 'var(--text)', lineHeight: 1.65, mb: 3 }}
                 >
                   {app.description}
                 </Typography>
@@ -352,32 +349,17 @@ export default function DownloadPage() {
                   <Chip
                     label={app.version}
                     size="small"
-                    sx={{
-                      bgcolor: 'rgba(10,46,92,0.06)',
-                      color: brand.navy,
-                      fontWeight: 600,
-                      borderRadius: 1.5,
-                    }}
+                    sx={{ bgcolor: 'var(--navy-muted)', color: 'var(--navy)', fontWeight: 600, borderRadius: 1.5 }}
                   />
                   <Chip
                     label={app.size}
                     size="small"
-                    sx={{
-                      bgcolor: 'rgba(10,46,92,0.06)',
-                      color: brand.navy,
-                      fontWeight: 600,
-                      borderRadius: 1.5,
-                    }}
+                    sx={{ bgcolor: 'var(--navy-muted)', color: 'var(--navy)', fontWeight: 600, borderRadius: 1.5 }}
                   />
                   <Chip
                     label="Free"
                     size="small"
-                    sx={{
-                      bgcolor: 'rgba(16,185,129,0.10)',
-                      color: brand.success,
-                      fontWeight: 600,
-                      borderRadius: 1.5,
-                    }}
+                    sx={{ bgcolor: 'var(--success-muted)', color: 'var(--success)', fontWeight: 600, borderRadius: 1.5 }}
                   />
                 </Box>
 
@@ -388,11 +370,6 @@ export default function DownloadPage() {
                   size="large"
                   fullWidth
                   startIcon={<DownloadRoundedIcon />}
-                  sx={
-                    app.isPrimary
-                      ? {}
-                      : { borderColor: brand.slate200, color: brand.navy }
-                  }
                 >
                   {app.cta}
                 </Button>
@@ -403,7 +380,7 @@ export default function DownloadPage() {
       </Container>
 
       {/* WHAT'S INSIDE */}
-      <Box sx={{ bgcolor: brand.slate50, py: { xs: 8, md: 10 } }}>
+      <Box sx={{ bgcolor: 'var(--bg-soft)', py: { xs: 8, md: 10 } }}>
         <Container maxWidth="lg">
           <Box
             sx={{
@@ -416,15 +393,15 @@ export default function DownloadPage() {
             <Box>
               <Typography
                 component="h2"
-                sx={{ fontSize: { xs: '1.8rem', md: '2.25rem' }, mb: 2 }}
+                sx={{ fontSize: { xs: '1.8rem', md: '2.25rem' }, mb: 2, color: 'var(--navy)', fontWeight: 800 }}
               >
                 Everything you need,{' '}
-                <Box component="span" sx={{ color: brand.cyan }}>
+                <Box component="span" sx={{ color: 'var(--cyan)' }}>
                   built in.
                 </Box>
               </Typography>
               <Typography
-                sx={{ fontSize: '1rem', color: 'text.secondary', lineHeight: 1.7, mb: 3 }}
+                sx={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: 1.7, mb: 3 }}
               >
                 No clutter. No distractions. Just the features that help you buy
                 data faster, safer, and cheaper.
@@ -444,13 +421,13 @@ export default function DownloadPage() {
                     <CheckCircleRoundedIcon
                       sx={{
                         fontSize: 20,
-                        color: brand.cyanDeep,
+                        color: 'var(--cyan-deep)',
                         flexShrink: 0,
                         mt: 0.25,
                       }}
                     />
                     <Typography
-                      sx={{ fontSize: '0.9rem', color: 'text.primary', lineHeight: 1.5 }}
+                      sx={{ fontSize: '0.9rem', color: 'var(--text)', lineHeight: 1.5 }}
                     >
                       {feature}
                     </Typography>
@@ -466,9 +443,9 @@ export default function DownloadPage() {
                   width: { xs: 220, md: 260 },
                   aspectRatio: '9 / 19',
                   borderRadius: 6,
-                  border: `10px solid ${brand.navy}`,
+                  border: `10px solid var(--navy)`,
                   overflow: 'hidden',
-                  bgcolor: brand.navyDeep,
+                  bgcolor: 'var(--navy-deep)',
                   boxShadow: '0 40px 80px rgba(10,46,92,0.28)',
                   position: 'relative',
                 }}
@@ -481,7 +458,7 @@ export default function DownloadPage() {
                     transform: 'translateX(-50%)',
                     width: 90,
                     height: 18,
-                    bgcolor: brand.navy,
+                    bgcolor: 'var(--navy)',
                     borderBottomLeftRadius: 10,
                     borderBottomRightRadius: 10,
                     zIndex: 2,
@@ -502,10 +479,14 @@ export default function DownloadPage() {
 
       {/* FAQ */}
       <Container maxWidth="md" sx={{ py: { xs: 8, md: 10 } }}>
-        <Typography component="h2" align="center" sx={{ mb: 1.5 }}>
+        <Typography
+          component="h2"
+          align="center"
+          sx={{ mb: 1.5, color: 'var(--navy)', fontWeight: 800 }}
+        >
           Frequently asked
         </Typography>
-        <Typography align="center" color="text.secondary" sx={{ mb: 6 }}>
+        <Typography align="center" sx={{ mb: 6, color: 'var(--text-muted)' }}>
           Quick answers before you install.
         </Typography>
 
@@ -528,20 +509,23 @@ export default function DownloadPage() {
               a: 'Windows may show a SmartScreen prompt the first time you run the installer. Click "More info" → "Run anyway". The installer is code-signed and verified.',
             },
           ].map((item) => (
-            <Card key={item.q} sx={{ borderRadius: 3 }}>
+            <Card
+              key={item.q}
+              sx={{ borderRadius: 3, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}
+            >
               <CardContent>
                 <Typography
                   sx={{
                     fontSize: '1.05rem',
                     fontWeight: 700,
-                    color: brand.navy,
+                    color: 'var(--navy)',
                     mb: 1,
                   }}
                 >
                   {item.q}
                 </Typography>
                 <Typography
-                  sx={{ fontSize: '0.9rem', color: 'text.secondary', lineHeight: 1.65 }}
+                  sx={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.65 }}
                 >
                   {item.a}
                 </Typography>
@@ -552,7 +536,13 @@ export default function DownloadPage() {
       </Container>
 
       {/* CTA */}
-      <Box sx={{ py: { xs: 8, md: 10 }, bgcolor: brand.navy, color: '#fff' }}>
+      <Box
+        sx={{
+          py: { xs: 8, md: 10 },
+          background: `linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%)`,
+          color: '#fff',
+        }}
+      >
         <Container maxWidth="lg">
           <Box
             sx={{
@@ -590,10 +580,11 @@ export default function DownloadPage() {
                   variant="contained"
                   size="large"
                   endIcon={<ArrowForwardRoundedIcon />}
+                  className="btn-shine"
                   sx={{
                     bgcolor: '#fff',
-                    color: brand.navy,
-                    '&:hover': { bgcolor: brand.slate100 },
+                    color: 'var(--navy-deep)',
+                    '&:hover': { bgcolor: '#F1F5F9' },
                   }}
                 >
                   Create an account
@@ -602,7 +593,11 @@ export default function DownloadPage() {
                   onClick={() => router.push('/login')}
                   variant="outlined"
                   size="large"
-                  sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.35)' }}
+                  sx={{
+                    color: '#fff',
+                    borderColor: 'rgba(255,255,255,0.35)',
+                    '&:hover': { borderColor: '#fff' },
+                  }}
                 >
                   Sign in
                 </Button>
@@ -611,7 +606,7 @@ export default function DownloadPage() {
             <Box sx={{ textAlign: 'center' }}>
               <Box className="animate-float" sx={{ maxWidth: 320, mx: 'auto' }}>
                 <Image
-                  src="/images/buckete.png"
+                  src="/images/buckete.webp"
                   alt="WingaPro bundle"
                   width={900}
                   height={900}

@@ -22,8 +22,6 @@ import {
 import apiClient from '@/lib/api/client';
 import { AxiosError } from 'axios';
 
-const PRIMARY = '#0A2E5C';
-
 interface Package {
   id: number;
   name: string;
@@ -34,7 +32,6 @@ interface Package {
   description?: string;
 }
 
-// Component that uses useSearchParams – must be wrapped in Suspense
 function PackagesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -57,14 +54,14 @@ function PackagesContent() {
       try {
         const res = await apiClient.get('/packages');
         let data = res.data.packages || [];
-        // Apply filters
         if (networkFilter) data = data.filter((p: Package) => p.network === networkFilter);
         if (searchQuery) {
           const q = searchQuery.toLowerCase();
-          data = data.filter((p: Package) =>
-            p.name.toLowerCase().includes(q) ||
-            p.network.toLowerCase().includes(q) ||
-            p.price.toString().includes(q)
+          data = data.filter(
+            (p: Package) =>
+              p.name.toLowerCase().includes(q) ||
+              p.network.toLowerCase().includes(q) ||
+              p.price.toString().includes(q)
           );
         }
         if (minPrice !== null) data = data.filter((p: Package) => p.price >= minPrice);
@@ -118,7 +115,10 @@ function PackagesContent() {
     return (
       <Box sx={{ p: 3 }}>
         {[1, 2, 3].map((i) => (
-          <Card key={i} sx={{ mb: 2 }}>
+          <Card
+            key={i}
+            sx={{ mb: 2, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}
+          >
             <CardContent>
               <Skeleton variant="text" width="60%" />
               <Skeleton variant="text" width="40%" />
@@ -134,7 +134,11 @@ function PackagesContent() {
     return (
       <Box sx={{ p: 3, textAlign: 'center' }}>
         <Alert severity="error">{error}</Alert>
-        <Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>
+        <Button
+          variant="contained"
+          onClick={() => window.location.reload()}
+          sx={{ mt: 2 }}
+        >
           Retry
         </Button>
       </Box>
@@ -142,12 +146,12 @@ function PackagesContent() {
   }
 
   return (
-    <Box sx={{ p: 3, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>
+    <Box sx={{ p: 3, bgcolor: 'var(--bg)', minHeight: '100vh' }}>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3, color: 'var(--navy)' }}>
         {networkFilter ? `${networkFilter} Packages` : 'All Packages'}
       </Typography>
       {packages.length === 0 ? (
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" sx={{ color: 'var(--text-muted)' }}>
           No packages match your criteria.
         </Typography>
       ) : (
@@ -166,10 +170,12 @@ function PackagesContent() {
                 display: 'flex',
                 flexDirection: 'column',
                 borderRadius: 3,
+                bgcolor: 'var(--surface)',
+                border: '1px solid var(--border)',
+                transition: 'transform 0.3s, box-shadow 0.3s',
                 '&:hover': {
                   transform: 'translateY(-5px)',
-                  boxShadow: 4,
-                  transition: 'transform 0.3s, box-shadow 0.3s',
+                  boxShadow: '0 20px 40px rgba(15,23,42,0.12)',
                 },
               }}
             >
@@ -177,30 +183,25 @@ function PackagesContent() {
                 <Chip
                   label={pkg.network}
                   size="small"
-                  sx={{ bgcolor: PRIMARY, color: 'white', mb: 1 }}
+                  sx={{ bgcolor: 'var(--navy)', color: 'white', mb: 1 }}
                 />
-                <Typography variant="h6" component="div" sx={{ fontWeight: 700 }}>
+                <Typography variant="h6" component="div" sx={{ fontWeight: 700, color: 'var(--navy)' }}>
                   {pkg.name}
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ my: 1 }}>
+                <Typography variant="body2" sx={{ my: 1, color: 'var(--text-muted)' }}>
                   {pkg.dataSize} • {pkg.validity}
                 </Typography>
                 {pkg.description && (
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <Typography variant="body2" sx={{ mb: 1, color: 'var(--text-muted)' }}>
                     {pkg.description}
                   </Typography>
                 )}
-                <Typography variant="h5" sx={{ fontWeight: 800, color: PRIMARY, mt: 2 }}>
+                <Typography variant="h5" sx={{ fontWeight: 800, color: 'var(--navy)', mt: 2 }}>
                   TZS {pkg.price.toLocaleString()}
                 </Typography>
               </CardContent>
               <Box sx={{ p: 2, pt: 0 }}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  sx={{ bgcolor: PRIMARY }}
-                  onClick={() => handleBuy(pkg)}
-                >
+                <Button fullWidth variant="contained" onClick={() => handleBuy(pkg)}>
                   Buy Now
                 </Button>
               </Box>
@@ -209,19 +210,36 @@ function PackagesContent() {
         </Box>
       )}
 
-      {/* Buy Dialog */}
-      <Dialog open={buyDialogOpen} onClose={() => setBuyDialogOpen(false)}>
-        <DialogTitle>Confirm Purchase</DialogTitle>
+      <Dialog
+        open={buyDialogOpen}
+        onClose={() => setBuyDialogOpen(false)}
+        PaperProps={{
+          sx: {
+            bgcolor: 'var(--surface)',
+            border: '1px solid var(--border)',
+            backgroundImage: 'none',
+          },
+        }}
+      >
+        <DialogTitle sx={{ color: 'var(--navy)', fontWeight: 700 }}>
+          Confirm Purchase
+        </DialogTitle>
         <DialogContent>
           {selectedPackage && (
             <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'var(--text)' }}>
                 {selectedPackage.name}
               </Typography>
-              <Typography variant="body2">Network: {selectedPackage.network}</Typography>
-              <Typography variant="body2">Data: {selectedPackage.dataSize}</Typography>
-              <Typography variant="body2">Validity: {selectedPackage.validity}</Typography>
-              <Typography variant="h6" sx={{ mt: 1, color: PRIMARY }}>
+              <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>
+                Network: {selectedPackage.network}
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>
+                Data: {selectedPackage.dataSize}
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>
+                Validity: {selectedPackage.validity}
+              </Typography>
+              <Typography variant="h6" sx={{ mt: 1, color: 'var(--navy)' }}>
                 TZS {selectedPackage.price.toLocaleString()}
               </Typography>
             </Box>
@@ -247,7 +265,6 @@ function PackagesContent() {
             variant="contained"
             disabled={submitting}
             onClick={handleConfirmPurchase}
-            sx={{ bgcolor: PRIMARY }}
           >
             {submitting ? <CircularProgress size={24} color="inherit" /> : 'Buy Now'}
           </Button>
@@ -257,10 +274,15 @@ function PackagesContent() {
   );
 }
 
-// Main page component with Suspense boundary
 export default function PackagesPage() {
   return (
-    <Suspense fallback={<Box sx={{ p: 3, textAlign: 'center' }}><CircularProgress /></Box>}>
+    <Suspense
+      fallback={
+        <Box sx={{ p: 3, textAlign: 'center', bgcolor: 'var(--bg)', minHeight: '100vh' }}>
+          <CircularProgress />
+        </Box>
+      }
+    >
       <PackagesContent />
     </Suspense>
   );

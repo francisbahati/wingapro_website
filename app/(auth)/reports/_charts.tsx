@@ -1,19 +1,9 @@
-// app/(auth)/reports/_charts.tsx
 'use client';
 
 import { Card, CardContent, Grid, Typography } from '@mui/material';
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
+  Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart,
+  ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 
 const COLORS = ['#0A2E5C', '#00B4D8', '#FFB703', '#10B981', '#8B5CF6'];
@@ -25,14 +15,14 @@ export default function ReportsCharts({ data }: { data: any }) {
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} md={7}>
-        <Card>
+        <Card sx={{ bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
           <CardContent>
-            <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+            <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: 'var(--navy)' }}>
               Revenue by Network
             </Typography>
             <ResponsiveContainer width="100%" height={320}>
               <BarChart data={revenueByNetwork}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="network" />
                 <YAxis tickFormatter={(v) => `TZS ${(v / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(v) => `TZS ${Number(v).toLocaleString()}`} />
@@ -44,9 +34,9 @@ export default function ReportsCharts({ data }: { data: any }) {
       </Grid>
 
       <Grid item xs={12} md={5}>
-        <Card>
+        <Card sx={{ bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
           <CardContent>
-            <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+            <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: 'var(--navy)' }}>
               Order Status Split
             </Typography>
             <ResponsiveContainer width="100%" height={320}>

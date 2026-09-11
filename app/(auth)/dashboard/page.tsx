@@ -2,7 +2,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
   Avatar,
@@ -23,21 +22,20 @@ import VerifiedUserRoundedIcon from '@mui/icons-material/VerifiedUserRounded';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import apiClient from '@/lib/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { brand } from '@/theme-provider';
 
 const NETWORKS = [
   { name: 'Halotel', logo: '/images/halotel.webp' },
-  { name: 'Tigo', logo: '/images/yas.webp' },
+  { name: 'Tigo',    logo: '/images/yas.webp' },
   { name: 'Vodacom', logo: '/images/vodacom.webp' },
-  { name: 'Airtel', logo: '/images/airtel.webp' },
+  { name: 'Airtel',  logo: '/images/airtel.webp' },
 ];
 
 const TRUST = [
-  { icon: <SecurityRoundedIcon />, label: 'Secure' },
-  { icon: <BoltRoundedIcon />, label: 'Instant' },
+  { icon: <SecurityRoundedIcon />,     label: 'Secure' },
+  { icon: <BoltRoundedIcon />,         label: 'Instant' },
   { icon: <VerifiedUserRoundedIcon />, label: 'Verified' },
   { icon: <SupportAgentRoundedIcon />, label: '24/7' },
-  { icon: <TrendingUpRoundedIcon />, label: 'Best Value' },
+  { icon: <TrendingUpRoundedIcon />,   label: 'Best Value' },
 ];
 
 export default function DashboardPage() {
@@ -57,7 +55,7 @@ export default function DashboardPage() {
         setProfile(p.data.user);
         setPromotions(promo.data.promotions ?? []);
       } catch {
-        // silent
+        /* silent */
       } finally {
         setLoading(false);
       }
@@ -78,23 +76,24 @@ export default function DashboardPage() {
   return (
     <Box>
       {/* Greeting */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2,
-          mb: 3,
-        }}
-      >
-        <Avatar sx={{ bgcolor: brand.navy, width: 48, height: 48, fontWeight: 700 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+        <Avatar
+          sx={{
+            bgcolor: 'var(--navy)',
+            color: '#fff',
+            width: 48,
+            height: 48,
+            fontWeight: 700,
+          }}
+        >
           {username.charAt(0).toUpperCase()}
         </Avatar>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, color: 'var(--navy)' }}>
             Welcome back, {username} 👋
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Here's what's happening with your account
+          <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>
+            Here&apos;s what&apos;s happening with your account
           </Typography>
         </Box>
       </Box>
@@ -108,39 +107,32 @@ export default function DashboardPage() {
           mb: 3,
         }}
       >
-        {/* Wallet Card */}
+        {/* Wallet */}
         <Card
           sx={{
             border: 'none',
             color: '#fff',
-            background: `linear-gradient(135deg, ${brand.navy} 0%, ${brand.navyLight} 55%, ${brand.cyan} 140%)`,
+            background: `linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 55%, var(--cyan) 140%)`,
             boxShadow: '0 20px 40px rgba(10,46,92,0.28)',
           }}
         >
           <CardContent sx={{ p: 3 }}>
             <Typography
               variant="caption"
-              sx={{
-                opacity: 0.85,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-              }}
+              sx={{ opacity: 0.85, letterSpacing: '0.1em', textTransform: 'uppercase' }}
             >
               Wallet Balance
             </Typography>
-            <Typography
-              variant="h3"
-              sx={{ fontWeight: 800, my: 1, letterSpacing: '-0.02em' }}
-            >
+            <Typography variant="h3" sx={{ fontWeight: 800, my: 1, letterSpacing: '-0.02em' }}>
               TZS {balance.toLocaleString()}
             </Typography>
-            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+            <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap' }}>
               <Button
                 onClick={() => router.push('/deposit-withdraw')}
                 startIcon={<AddRoundedIcon />}
                 sx={{
                   bgcolor: '#fff',
-                  color: brand.navy,
+                  color: 'var(--navy-deep)',
                   '&:hover': { bgcolor: '#F1F5F9' },
                 }}
               >
@@ -158,25 +150,28 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Trust Strip */}
-        <Card sx={{ height: '100%' }}>
+        {/* Trust strip */}
+        <Card
+          sx={{
+            height: '100%',
+            bgcolor: 'var(--surface)',
+            border: '1px solid var(--border)',
+          }}
+        >
           <CardContent>
-            <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', mb: 1.5 }}>
+            <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', mb: 1.5, color: 'var(--navy)' }}>
               Why WingaPro
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
               {TRUST.map((t) => (
-                <Box
-                  key={t.label}
-                  sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}
-                >
+                <Box key={t.label} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                   <Box
                     sx={{
                       width: 32,
                       height: 32,
                       borderRadius: '50%',
-                      bgcolor: 'rgba(0,180,216,0.12)',
-                      color: brand.navy,
+                      bgcolor: 'var(--cyan-muted)',
+                      color: 'var(--navy)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -184,7 +179,7 @@ export default function DashboardPage() {
                   >
                     {t.icon}
                   </Box>
-                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text)' }}>
                     {t.label}
                   </Typography>
                 </Box>
@@ -195,7 +190,7 @@ export default function DashboardPage() {
       </Box>
 
       {/* Networks */}
-      <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5 }}>
+      <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, color: 'var(--navy)' }}>
         Choose Your Network
       </Typography>
       <Box
@@ -214,6 +209,8 @@ export default function DashboardPage() {
             sx={{
               cursor: 'pointer',
               textAlign: 'center',
+              bgcolor: 'var(--surface)',
+              border: '1px solid var(--border)',
             }}
           >
             <CardContent>
@@ -233,33 +230,23 @@ export default function DashboardPage() {
                   style={{ maxHeight: 60, maxWidth: '100%', objectFit: 'contain' }}
                 />
               </Box>
-              <Typography sx={{ fontWeight: 700 }}>{n.name}</Typography>
+              <Typography sx={{ fontWeight: 700, color: 'var(--navy)' }}>{n.name}</Typography>
             </CardContent>
           </Card>
         ))}
       </Box>
 
       {/* Promotions */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mb: 1.5,
-        }}
-      >
-        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, color: 'var(--navy)' }}>
           Active Promotions
         </Typography>
-        <Button
-          onClick={() => router.push('/promotions')}
-          endIcon={<ArrowForwardRoundedIcon />}
-        >
+        <Button onClick={() => router.push('/promotions')} endIcon={<ArrowForwardRoundedIcon />}>
           See All
         </Button>
       </Box>
       {promotions.length === 0 ? (
-        <Typography color="text.secondary">No active promotions right now.</Typography>
+        <Typography sx={{ color: 'var(--text-muted)' }}>No active promotions right now.</Typography>
       ) : (
         <Box
           sx={{
@@ -269,20 +256,20 @@ export default function DashboardPage() {
           }}
         >
           {promotions.slice(0, 3).map((promo) => (
-            <Card key={promo.id} className="lift">
+            <Card
+              key={promo.id}
+              className="lift"
+              sx={{ bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}
+            >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                   <Chip label={`${promo.discount ?? 0}% OFF`} color="success" size="small" />
                 </Box>
-                <Typography sx={{ fontWeight: 700 }}>{promo.title}</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
+                <Typography sx={{ fontWeight: 700, color: 'var(--navy)' }}>{promo.title}</Typography>
+                <Typography variant="body2" sx={{ mt: 1, mb: 2, color: 'var(--text-muted)' }}>
                   {promo.description}
                 </Typography>
-                <Button
-                  onClick={() => router.push('/promotions')}
-                  size="small"
-                  variant="contained"
-                >
+                <Button onClick={() => router.push('/promotions')} size="small" variant="contained">
                   View Deal
                 </Button>
               </CardContent>

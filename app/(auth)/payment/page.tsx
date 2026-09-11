@@ -6,8 +6,6 @@ import { Box, Card, CardContent, Typography, Button, CircularProgress, Alert, Di
 import apiClient from '@/lib/api/client';
 import { AxiosError } from 'axios';
 
-const PRIMARY = '#0A2E5C';
-
 interface PackageData {
   id: number;
   name: string;
@@ -67,40 +65,62 @@ function PaymentContent() {
     }
   };
 
-  if (loading) return <Box sx={{ p: 3, textAlign: 'center' }}><CircularProgress /></Box>;
-  if (error) return <Box sx={{ p: 3 }}><Alert severity="error">{error}</Alert><Button variant="contained" onClick={() => router.back()} sx={{ mt: 2 }}>Go Back</Button></Box>;
-  if (!packageData) return <Box sx={{ p: 3 }}><Alert severity="warning">Package not found</Alert><Button variant="contained" onClick={() => router.push('/packages')} sx={{ mt: 2 }}>Browse Packages</Button></Box>;
+  if (loading) return (
+    <Box sx={{ p: 3, textAlign: 'center' }}>
+      <CircularProgress />
+    </Box>
+  );
+
+  if (error) return (
+    <Box sx={{ p: 3 }}>
+      <Alert severity="error">{error}</Alert>
+      <Button variant="contained" onClick={() => router.back()} sx={{ mt: 2 }}>Go Back</Button>
+    </Box>
+  );
+
+  if (!packageData) return (
+    <Box sx={{ p: 3 }}>
+      <Alert severity="warning">Package not found</Alert>
+      <Button variant="contained" onClick={() => router.push('/packages')} sx={{ mt: 2 }}>
+        Browse Packages
+      </Button>
+    </Box>
+  );
 
   const price = packageData.price;
 
   return (
     <Box sx={{ p: 3, maxWidth: 500, mx: 'auto' }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>Confirm Payment</Typography>
-      <Card sx={{ mb: 3, borderRadius: 3 }}>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3, color: 'var(--navy)' }}>
+        Confirm Payment
+      </Typography>
+      <Card sx={{ mb: 3, borderRadius: 3, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
         <CardContent>
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{packageData.name}</Typography>
-          <Typography variant="body2" color="text.secondary">Network: {network}</Typography>
-          <Typography variant="body2" color="text.secondary">Data: {packageData.dataSize}</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Validity: {packageData.validity}</Typography>
-          <Divider sx={{ my: 2 }} />
-          <Typography variant="h5" sx={{ color: PRIMARY }}>TZS {price.toLocaleString()}</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'var(--navy)' }}>{packageData.name}</Typography>
+          <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>Network: {network}</Typography>
+          <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>Data: {packageData.dataSize}</Typography>
+          <Typography variant="body2" sx={{ mb: 2, color: 'var(--text-muted)' }}>Validity: {packageData.validity}</Typography>
+          <Divider sx={{ my: 2, borderColor: 'var(--border)' }} />
+          <Typography variant="h5" sx={{ color: 'var(--navy)' }}>TZS {price.toLocaleString()}</Typography>
         </CardContent>
       </Card>
-      <Card sx={{ mb: 3, borderRadius: 3 }}>
+      <Card sx={{ mb: 3, borderRadius: 3, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
         <CardContent>
-          <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Recipient Details</Typography>
-          <Typography variant="body2">Name: {recipientName}</Typography>
-          <Typography variant="body2">Phone: {recipientPhone}</Typography>
+          <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'var(--navy)' }}>Recipient Details</Typography>
+          <Typography variant="body2" sx={{ color: 'var(--text)' }}>Name: {recipientName}</Typography>
+          <Typography variant="body2" sx={{ color: 'var(--text)' }}>Phone: {recipientPhone}</Typography>
         </CardContent>
       </Card>
-      <Box sx={{ bgcolor: '#e3f2fd', p: 2, borderRadius: 2, mb: 3 }}>
-        <Typography variant="body2">Payment method: <strong>Wallet Balance</strong></Typography>
+      <Box sx={{ bgcolor: 'var(--cyan-muted)', p: 2, borderRadius: 2, mb: 3 }}>
+        <Typography variant="body2" sx={{ color: 'var(--navy)' }}>
+          Payment method: <strong>Wallet Balance</strong>
+        </Typography>
       </Box>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      <Button variant="contained" fullWidth disabled={processing} onClick={handlePay} sx={{ bgcolor: PRIMARY, py: 1.5 }}>
+      <Button variant="contained" fullWidth disabled={processing} onClick={handlePay} sx={{ py: 1.5 }}>
         {processing ? <CircularProgress size={24} color="inherit" /> : 'Pay Now'}
       </Button>
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block', textAlign: 'center' }}>
+      <Typography variant="caption" sx={{ mt: 1, display: 'block', textAlign: 'center', color: 'var(--text-muted)' }}>
         Your wallet will be debited TZS {price.toLocaleString()}
       </Typography>
     </Box>
@@ -109,7 +129,13 @@ function PaymentContent() {
 
 export default function PaymentPage() {
   return (
-    <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}><CircularProgress /></Box>}>
+    <Suspense
+      fallback={
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+          <CircularProgress />
+        </Box>
+      }
+    >
       <PaymentContent />
     </Suspense>
   );

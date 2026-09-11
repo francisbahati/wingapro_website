@@ -7,7 +7,7 @@ import {
   Divider, CircularProgress, Alert, Skeleton,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext'; // ✅ FIXED
+import { useAuth } from '@/context/AuthContext';
 import apiClient from '@/lib/api/client';
 import { AxiosError } from 'axios';
 import LockIcon from '@mui/icons-material/Lock';
@@ -16,8 +16,6 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-
-const PRIMARY = '#0A2E5C';
 
 interface Profile {
   username: string;
@@ -119,36 +117,40 @@ export default function ProfilePage() {
 
   return (
     <Box sx={{ p: 3, maxWidth: 600, mx: 'auto' }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>My Profile</Typography>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3, color: 'var(--navy)' }}>
+        My Profile
+      </Typography>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
-        <Avatar sx={{ width: 80, height: 80, bgcolor: PRIMARY, fontSize: 32 }}>
+        <Avatar sx={{ width: 80, height: 80, bgcolor: 'var(--navy)', color: '#fff', fontSize: 32 }}>
           {username.charAt(0).toUpperCase()}
         </Avatar>
-        <Typography variant="h5" sx={{ fontWeight: 'bold', mt: 1 }}>{username}</Typography>
-        <Typography variant="body2" color="text.secondary">{email}</Typography>
-        <Typography variant="body2" color="text.secondary">{phone}</Typography>
-        {branch && <Typography variant="body2" color="text.secondary">Branch: {branch}</Typography>}
-        <Typography variant="body2" color="text.secondary">Role: Customer</Typography>
+        <Typography variant="h5" sx={{ fontWeight: 'bold', mt: 1, color: 'var(--navy)' }}>
+          {username}
+        </Typography>
+        <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>{email}</Typography>
+        <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>{phone}</Typography>
+        {branch && <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>Branch: {branch}</Typography>}
+        <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>Role: Customer</Typography>
       </Box>
 
-      <Card sx={{ mb: 2, borderRadius: 3 }}>
+      <Card sx={{ mb: 2, borderRadius: 3, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
         <List>
           <ListItemButton onClick={() => setPasswordDialog(true)}>
-            <ListItemIcon><LockIcon sx={{ color: PRIMARY }} /></ListItemIcon>
+            <ListItemIcon><LockIcon sx={{ color: 'var(--navy)' }} /></ListItemIcon>
             <ListItemText primary="Change Password" />
           </ListItemButton>
-          <Divider />
+          <Divider sx={{ borderColor: 'var(--border)' }} />
           <ListItemButton onClick={() => alert(`Referral code: ${referralCode}`)}>
-            <ListItemIcon><ShareIcon sx={{ color: PRIMARY }} /></ListItemIcon>
+            <ListItemIcon><ShareIcon sx={{ color: 'var(--navy)' }} /></ListItemIcon>
             <ListItemText primary="Referral Code" secondary={referralCode} />
           </ListItemButton>
-          <Divider />
+          <Divider sx={{ borderColor: 'var(--border)' }} />
           <ListItemButton onClick={() => router.push('/settings')}>
-            <ListItemIcon><SettingsIcon sx={{ color: PRIMARY }} /></ListItemIcon>
+            <ListItemIcon><SettingsIcon sx={{ color: 'var(--navy)' }} /></ListItemIcon>
             <ListItemText primary="Settings" />
           </ListItemButton>
-          <Divider />
+          <Divider sx={{ borderColor: 'var(--border)' }} />
           <ListItemButton onClick={handleLogout} disabled={loggingOut}>
             <ListItemIcon><LogoutIcon color="error" /></ListItemIcon>
             <ListItemText primary="Logout" sx={{ color: 'error.main' }} />
@@ -157,8 +159,12 @@ export default function ProfilePage() {
         </List>
       </Card>
 
-      <Dialog open={passwordDialog} onClose={() => !changingPassword && setPasswordDialog(false)}>
-        <DialogTitle>Change Password</DialogTitle>
+      <Dialog
+        open={passwordDialog}
+        onClose={() => !changingPassword && setPasswordDialog(false)}
+        PaperProps={{ sx: { bgcolor: 'var(--surface)', border: '1px solid var(--border)', backgroundImage: 'none' } }}
+      >
+        <DialogTitle sx={{ color: 'var(--navy)', fontWeight: 700 }}>Change Password</DialogTitle>
         <DialogContent>
           <TextField
             label="Current Password"
@@ -166,7 +172,7 @@ export default function ProfilePage() {
             fullWidth
             margin="dense"
             value={oldPassword}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOldPassword(e.target.value)}
+            onChange={(e) => setOldPassword(e.target.value)}
             slotProps={{
               input: {
                 endAdornment: (
@@ -185,7 +191,7 @@ export default function ProfilePage() {
             fullWidth
             margin="dense"
             value={newPassword}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
+            onChange={(e) => setNewPassword(e.target.value)}
             helperText="Minimum 6 characters"
             slotProps={{
               input: {
@@ -205,7 +211,7 @@ export default function ProfilePage() {
             fullWidth
             margin="dense"
             value={confirmPassword}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             slotProps={{
               input: {
                 endAdornment: (
@@ -221,7 +227,7 @@ export default function ProfilePage() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setPasswordDialog(false)} disabled={changingPassword}>Cancel</Button>
-          <Button variant="contained" onClick={handleChangePassword} disabled={changingPassword} sx={{ bgcolor: PRIMARY }}>
+          <Button variant="contained" onClick={handleChangePassword} disabled={changingPassword}>
             {changingPassword ? <CircularProgress size={24} color="inherit" /> : 'Update Password'}
           </Button>
         </DialogActions>

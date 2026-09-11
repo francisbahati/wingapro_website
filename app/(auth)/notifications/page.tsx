@@ -1,4 +1,3 @@
-// app/(auth)/notifications/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -19,7 +18,6 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import apiClient from '@/lib/api/client';
-import { brand } from '@/theme-provider';
 
 interface Notification {
   id: number;
@@ -82,7 +80,9 @@ export default function NotificationsPage() {
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto' }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight={700}>Notifications</Typography>
+        <Typography variant="h4" fontWeight={700} sx={{ color: 'var(--navy)' }}>
+          Notifications
+        </Typography>
         {unread > 0 && (
           <Button onClick={markAll} variant="outlined" size="small">
             Mark all read
@@ -93,9 +93,16 @@ export default function NotificationsPage() {
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
       {items.length === 0 ? (
-        <Card sx={{ p: 6, textAlign: 'center' }}>
-          <NotificationsIcon sx={{ fontSize: 56, color: 'text.secondary', mb: 2 }} />
-          <Typography color="text.secondary">No notifications yet.</Typography>
+        <Card
+          sx={{
+            p: 6,
+            textAlign: 'center',
+            bgcolor: 'var(--surface)',
+            border: '1px solid var(--border)',
+          }}
+        >
+          <NotificationsIcon sx={{ fontSize: 56, color: 'var(--text-muted)', mb: 2 }} />
+          <Typography sx={{ color: 'var(--text-muted)' }}>No notifications yet.</Typography>
         </Card>
       ) : (
         <Stack spacing={1.5}>
@@ -103,24 +110,28 @@ export default function NotificationsPage() {
             <Card
               key={n.id}
               sx={{
-                borderLeft: `4px solid ${n.isRead ? '#E2E8F0' : brand.navy}`,
-                bgcolor: n.isRead ? 'background.paper' : 'rgba(10,46,92,0.03)',
+                borderLeft: `4px solid ${n.isRead ? 'var(--border)' : 'var(--navy)'}`,
+                bgcolor: n.isRead ? 'var(--surface)' : 'var(--navy-muted)',
+                border: '1px solid var(--border)',
+                borderLeftWidth: 4,
               }}
             >
               <CardContent>
                 <Stack direction="row" spacing={2} alignItems="flex-start">
-                  <Avatar sx={{ bgcolor: brand.navy }}>
+                  <Avatar sx={{ bgcolor: 'var(--navy)', color: '#fff' }}>
                     <NotificationsIcon fontSize="small" />
                   </Avatar>
                   <Box sx={{ flexGrow: 1 }}>
                     <Stack direction="row" spacing={1} alignItems="center">
-                      <Typography fontWeight={600}>{n.title}</Typography>
+                      <Typography fontWeight={600} sx={{ color: 'var(--navy)' }}>
+                        {n.title}
+                      </Typography>
                       {!n.isRead && <Chip label="New" size="small" color="primary" />}
                     </Stack>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                    <Typography variant="body2" sx={{ mt: 0.5, color: 'var(--text-muted)' }}>
                       {n.message}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" sx={{ color: 'var(--text-muted)' }}>
                       {new Date(n.createdAt).toLocaleString()}
                     </Typography>
                   </Box>

@@ -1,4 +1,3 @@
-// app/(auth)/loading.tsx
 import { Box, Skeleton, Stack } from '@mui/material';
 
 export default function AuthLoading() {

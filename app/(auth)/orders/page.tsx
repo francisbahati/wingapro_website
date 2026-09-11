@@ -1,4 +1,3 @@
-// app/(auth)/orders/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -18,7 +17,6 @@ import {
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import apiClient from '@/lib/api/client';
-import { brand } from '@/theme-provider';
 
 interface Order {
   id: number;
@@ -34,9 +32,9 @@ interface Order {
 const STATUS_COLORS: Record<string, { bg: string; label: string }> = {
   payment_received: { bg: '#3B82F6', label: 'Payment Received' },
   waiting_approval: { bg: '#F59E0B', label: 'Waiting Approval' },
-  approved: { bg: '#8B5CF6', label: 'Approved' },
+  approved:         { bg: '#8B5CF6', label: 'Approved' },
   waiting_delivery: { bg: '#0EA5E9', label: 'Out for Delivery' },
-  completed: { bg: '#10B981', label: 'Completed' },
+  completed:        { bg: '#10B981', label: 'Completed' },
 };
 
 export default function OrdersPage() {
@@ -70,19 +68,22 @@ export default function OrdersPage() {
 
   if (orders.length === 0) {
     return (
-      <Card sx={{ p: 6, textAlign: 'center' }}>
-        <ReceiptLongIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-        <Typography variant="h5" sx={{ fontWeight: 700 }} gutterBottom>
+      <Card
+        sx={{
+          p: 6,
+          textAlign: 'center',
+          bgcolor: 'var(--surface)',
+          border: '1px solid var(--border)',
+        }}
+      >
+        <ReceiptLongIcon sx={{ fontSize: 64, color: 'var(--text-muted)', mb: 2 }} />
+        <Typography variant="h5" sx={{ fontWeight: 700, color: 'var(--navy)' }} gutterBottom>
           No orders yet
         </Typography>
-        <Typography color="text.secondary" sx={{ mb: 3 }}>
+        <Typography sx={{ mb: 3, color: 'var(--text-muted)' }}>
           Browse packages and place your first order in seconds.
         </Typography>
-        <Button
-          onClick={() => router.push('/packages')}
-          variant="contained"
-          size="large"
-        >
+        <Button onClick={() => router.push('/packages')} variant="contained" size="large">
           Browse Packages
         </Button>
       </Card>
@@ -91,17 +92,22 @@ export default function OrdersPage() {
 
   return (
     <Box>
-      <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
+      <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, color: 'var(--navy)' }}>
         My Orders
       </Typography>
       <Stack spacing={2}>
         {orders.map((o) => {
-          const status = STATUS_COLORS[o.orderStatus] ?? {
-            bg: '#64748B',
-            label: o.orderStatus,
-          };
+          const status = STATUS_COLORS[o.orderStatus] ?? { bg: '#64748B', label: o.orderStatus };
           return (
-            <Card key={o.id} className="lift" sx={{ overflow: 'hidden' }}>
+            <Card
+              key={o.id}
+              className="lift"
+              sx={{
+                overflow: 'hidden',
+                bgcolor: 'var(--surface)',
+                border: '1px solid var(--border)',
+              }}
+            >
               <CardContent>
                 <Stack
                   direction={{ xs: 'column', sm: 'row' }}
@@ -109,12 +115,8 @@ export default function OrdersPage() {
                   sx={{ justifyContent: 'space-between' }}
                 >
                   <Box sx={{ flexGrow: 1 }}>
-                    <Stack
-                      direction="row"
-                      spacing={1.5}
-                      sx={{ alignItems: 'center', mb: 1 }}
-                    >
-                      <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 1 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700, color: 'var(--navy)' }}>
                         {o.Package?.name ?? 'Package'}
                       </Typography>
                       <Chip
@@ -123,21 +125,18 @@ export default function OrdersPage() {
                         sx={{ bgcolor: status.bg, color: '#fff', fontWeight: 600 }}
                       />
                     </Stack>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>
                       Order #{o.id} · {o.network}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>
                       Recipient: {o.recipientName} · {o.recipientPhone}
                     </Typography>
-                    <Divider sx={{ my: 1.5 }} />
-                    <Stack
-                      direction="row"
-                      sx={{ justifyContent: 'space-between', alignItems: 'center' }}
-                    >
-                      <Typography variant="caption" color="text.secondary">
+                    <Divider sx={{ my: 1.5, borderColor: 'var(--border)' }} />
+                    <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="caption" sx={{ color: 'var(--text-muted)' }}>
                         {new Date(o.createdAt).toLocaleString()}
                       </Typography>
-                      <Typography variant="h6" sx={{ fontWeight: 700, color: brand.navy }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700, color: 'var(--navy)' }}>
                         TZS {Number(o.amount).toLocaleString()}
                       </Typography>
                     </Stack>

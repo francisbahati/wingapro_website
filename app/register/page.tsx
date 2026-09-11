@@ -21,7 +21,6 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import PersonAddRoundedIcon from '@mui/icons-material/PersonAddRounded';
 import apiClient from '@/lib/api/client';
-import { brand } from '@/theme-provider';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -74,25 +73,39 @@ export default function RegisterPage() {
         alignItems: 'center',
         justifyContent: 'center',
         p: 2,
-        background: `linear-gradient(135deg, ${brand.navy} 0%, ${brand.navyLight} 60%, ${brand.cyan} 140%)`,
+        background: `linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 60%, var(--cyan) 140%)`,
       }}
     >
-      <Card sx={{ maxWidth: 480, width: '100%', borderRadius: 4 }}>
+      <Card
+        sx={{
+          maxWidth: 480,
+          width: '100%',
+          borderRadius: 4,
+          bgcolor: 'var(--surface)',
+          border: '1px solid var(--border)',
+        }}
+      >
         <CardContent sx={{ p: 4 }}>
           <Box sx={{ textAlign: 'center', mb: 3 }}>
             <Box
               sx={{
-                width: 56, height: 56, mx: 'auto', mb: 2, borderRadius: 3,
-                background: `linear-gradient(135deg, ${brand.navy}, ${brand.cyan})`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: 56,
+                height: 56,
+                mx: 'auto',
+                mb: 2,
+                borderRadius: 3,
+                background: `linear-gradient(135deg, var(--navy), var(--cyan))`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               <PersonAddRoundedIcon sx={{ color: '#fff', fontSize: 28 }} />
             </Box>
-            <Typography variant="h5" fontWeight={800} gutterBottom>
+            <Typography variant="h5" fontWeight={800} sx={{ color: 'var(--navy)' }} gutterBottom>
               Create your account
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>
               Join WingaPro today
             </Typography>
           </Box>
@@ -129,11 +142,11 @@ export default function RegisterPage() {
             </Button>
           </form>
 
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ my: 3, borderColor: 'var(--border)' }} />
 
-          <Typography variant="body2" textAlign="center">
+          <Typography variant="body2" sx={{ textAlign: 'center', color: 'var(--text-muted)' }}>
             Already have an account?{' '}
-            <Link href="/login" style={{ color: brand.cyan, fontWeight: 600 }}>
+            <Link href="/login" style={{ color: 'var(--cyan)', fontWeight: 600 }}>
               Sign in
             </Link>
           </Typography>

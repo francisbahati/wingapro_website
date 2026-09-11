@@ -9,6 +9,7 @@ export default function Loading() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        bgcolor: 'var(--bg)',
       }}
     >
       <CircularProgress />

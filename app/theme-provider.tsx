@@ -7,18 +7,14 @@ import {
   createTheme,
 } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { useMediaQuery } from '@mui/material';
+import { useThemeMode } from '@/context/ThemeModeContext';
 
 // =========================================================
 // 60/30/10 PALETTE
-// 60% → neutral (whites, soft grays)
-// 30% → navy (structure: footer, buttons, headlines)
-// 10% → cyan (accent: links, hovers, highlights)
 // =========================================================
 export const brand = {
-  // 60% — DOMINANT: neutrals
-  white: '#FFFFFF',
-  slate50: '#F8FAFC',
+  white:    '#FFFFFF',
+  slate50:  '#F8FAFC',
   slate100: '#F1F5F9',
   slate200: '#E2E8F0',
   slate300: '#CBD5E1',
@@ -27,22 +23,19 @@ export const brand = {
   slate700: '#334155',
   slate900: '#0F172A',
 
-  // 30% — SECONDARY: navy
-  navy: '#0A2E5C',
+  navy:      '#0A2E5C',
   navyLight: '#123A6B',
-  navySoft: '#123A6B',
-  navyDeep: '#061B38',
+  navySoft:  '#123A6B',
+  navyDeep:  '#061B38',
 
-  // 10% — ACCENT: cyan
-  cyan: '#00B4D8',
-  cyanSoft: '#4DD0E1',
-  cyanDeep: '#0096B8',
+  cyan:      '#00B4D8',
+  cyanSoft:  '#4DD0E1',
+  cyanDeep:  '#0096B8',
 
-  // semantic
   success: '#10B981',
   warning: '#F59E0B',
-  error: '#EF4444',
-  info: '#3B82F6',
+  error:   '#EF4444',
+  info:    '#3B82F6',
 };
 
 // =========================================================
@@ -51,34 +44,43 @@ export const brand = {
 function buildTheme(mode: 'light' | 'dark') {
   const isLight = mode === 'light';
 
+  // Soft, brand-matched dark palette — NOT pure black
+  const darkBg          = '#0E1526';   // deep navy-slate
+  const darkSurface     = '#16203A';   // cards, paper
+  const darkSurface2    = '#1B2742';
+  const darkBorder      = 'rgba(148, 163, 184, 0.16)';
+  const darkBorderHover = 'rgba(0, 180, 216, 0.35)';
+  const darkText        = '#E6EAF2';
+  const darkTextMuted   = '#94A3B8';
+
   return createTheme({
     palette: {
       mode,
       primary: {
-        main: brand.navy,
-        light: brand.navyLight,
-        dark: brand.navyDeep,
+        main:  isLight ? brand.navy      : '#4B8FD6',
+        light: isLight ? brand.navyLight : '#5FA0E0',
+        dark:  isLight ? brand.navyDeep  : '#2E6BB0',
         contrastText: '#FFFFFF',
       },
       secondary: {
-        main: brand.cyan,
+        main:  brand.cyan,
         light: brand.cyanSoft,
-        dark: brand.cyanDeep,
+        dark:  brand.cyanDeep,
         contrastText: '#FFFFFF',
       },
       success: { main: brand.success },
       warning: { main: brand.warning },
-      error: { main: brand.error },
-      info: { main: brand.info },
+      error:   { main: brand.error },
+      info:    { main: brand.info },
       background: {
-        default: isLight ? brand.slate50 : '#0B1220',
-        paper: isLight ? brand.white : '#111A2C',
+        default: isLight ? brand.slate50 : darkBg,
+        paper:   isLight ? brand.white   : darkSurface,
       },
       text: {
-        primary: isLight ? brand.slate900 : '#F1F5F9',
-        secondary: isLight ? brand.slate500 : '#94A3B8',
+        primary:   isLight ? brand.slate900 : darkText,
+        secondary: isLight ? brand.slate500 : darkTextMuted,
       },
-      divider: isLight ? brand.slate200 : 'rgba(148, 163, 184, 0.14)',
+      divider: isLight ? brand.slate200 : darkBorder,
     },
     typography: {
       fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -104,9 +106,9 @@ function buildTheme(mode: 'light' | 'dark') {
       },
       h4: { fontSize: '1.375rem', fontWeight: 700, lineHeight: 1.25 },
       h5: { fontSize: '1.125rem', fontWeight: 600 },
-      h6: { fontSize: '1rem', fontWeight: 600 },
-      body1: { fontSize: '1rem', lineHeight: 1.6 },
-      body2: { fontSize: '0.9rem', lineHeight: 1.55 },
+      h6: { fontSize: '1rem',     fontWeight: 600 },
+      body1: { fontSize: '1rem',    lineHeight: 1.6  },
+      body2: { fontSize: '0.9rem',  lineHeight: 1.55 },
       button: { textTransform: 'none', fontWeight: 600, letterSpacing: 0 },
       caption: { fontSize: '0.75rem', letterSpacing: '0.02em' },
     },
@@ -117,6 +119,7 @@ function buildTheme(mode: 'light' | 'dark') {
           body: {
             WebkitFontSmoothing: 'antialiased',
             MozOsxFontSmoothing: 'grayscale',
+            transition: 'background-color .3s ease, color .3s ease',
           },
         },
       },
@@ -136,17 +139,31 @@ function buildTheme(mode: 'light' | 'dark') {
             '&:active': { transform: 'translateY(0)' },
           },
           containedPrimary: {
-            background: brand.navy,
-            boxShadow: '0 4px 14px rgba(10,46,92,0.20)',
+            background: isLight
+              ? brand.navy
+              : 'linear-gradient(135deg, #2E6BB0 0%, #4B8FD6 100%)',
+            boxShadow: isLight
+              ? '0 4px 14px rgba(10,46,92,0.20)'
+              : '0 4px 14px rgba(75,143,214,0.35)',
             '&:hover': {
-              background: brand.navyLight,
-              boxShadow: '0 8px 22px rgba(10,46,92,0.28)',
+              background: isLight ? brand.navyLight : '#5FA0E0',
+              boxShadow: isLight
+                ? '0 8px 22px rgba(10,46,92,0.28)'
+                : '0 8px 22px rgba(75,143,214,0.45)',
             },
           },
           containedSecondary: {
             background: brand.cyan,
             boxShadow: '0 4px 14px rgba(0,180,216,0.24)',
             '&:hover': { background: brand.cyanDeep },
+          },
+          outlined: {
+            borderColor: isLight ? brand.slate200 : 'rgba(148,163,184,0.30)',
+            color: isLight ? brand.navy : '#E6EAF2',
+            '&:hover': {
+              borderColor: isLight ? brand.navy : brand.cyan,
+              bgcolor: isLight ? 'rgba(10,46,92,0.03)' : 'rgba(0,180,216,0.08)',
+            },
           },
           sizeLarge: { padding: '14px 32px', fontSize: '1rem', borderRadius: 14 },
           sizeSmall: {
@@ -160,41 +177,50 @@ function buildTheme(mode: 'light' | 'dark') {
         styleOverrides: {
           root: {
             borderRadius: 20,
-            border: `1px solid ${
-              isLight ? brand.slate200 : 'rgba(148,163,184,0.12)'
-            }`,
+            border: `1px solid ${isLight ? brand.slate200 : darkBorder}`,
             boxShadow: isLight
               ? '0 1px 2px rgba(15,23,42,0.04)'
-              : '0 1px 2px rgba(0,0,0,0.4)',
+              : '0 1px 2px rgba(0,0,0,0.30)',
             backgroundImage: 'none',
+            backgroundColor: isLight ? brand.white : darkSurface,
             transition:
-              'transform .2s ease, box-shadow .2s ease, border-color .2s ease',
+              'transform .2s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease',
           },
         },
       },
       MuiPaper: {
         styleOverrides: {
-          root: { backgroundImage: 'none' },
+          root: {
+            backgroundImage: 'none',
+            backgroundColor: isLight ? brand.white : darkSurface,
+          },
         },
       },
       MuiOutlinedInput: {
         styleOverrides: {
           root: {
             borderRadius: 12,
-            backgroundColor: isLight ? '#FFFFFF' : 'rgba(255,255,255,0.03)',
-            transition: 'box-shadow .15s ease, border-color .15s ease',
+            backgroundColor: isLight ? '#FFFFFF' : 'rgba(255,255,255,0.04)',
+            transition: 'box-shadow .15s ease, border-color .15s ease, background-color .2s ease',
             '& fieldset': {
               borderColor: isLight
                 ? brand.slate200
-                : 'rgba(148,163,184,0.2)',
+                : 'rgba(148,163,184,0.22)',
             },
             '&:hover fieldset': {
-              borderColor: brand.slate400,
+              borderColor: isLight ? brand.slate400 : 'rgba(148,163,184,0.4)',
             },
             '&.Mui-focused fieldset': {
               borderColor: isLight ? brand.navy : brand.cyan,
               borderWidth: 2,
             },
+          },
+        },
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            color: isLight ? brand.slate500 : darkTextMuted,
           },
         },
       },
@@ -209,7 +235,7 @@ function buildTheme(mode: 'light' | 'dark') {
             backgroundImage: 'none',
             boxShadow: 'none',
             borderBottom: `1px solid ${
-              isLight ? brand.slate200 : 'rgba(148,163,184,0.14)'
+              isLight ? brand.slate200 : darkBorder
             }`,
           },
         },
@@ -218,10 +244,14 @@ function buildTheme(mode: 'light' | 'dark') {
         styleOverrides: {
           head: {
             fontWeight: 600,
-            color: isLight ? brand.slate500 : brand.slate300,
+            color: isLight ? brand.slate500 : darkTextMuted,
             backgroundColor: isLight
               ? brand.slate50
-              : 'rgba(255,255,255,0.02)',
+              : 'rgba(255,255,255,0.03)',
+          },
+          body: {
+            color: isLight ? brand.slate700 : darkText,
+            borderColor: isLight ? brand.slate200 : darkBorder,
           },
         },
       },
@@ -229,9 +259,8 @@ function buildTheme(mode: 'light' | 'dark') {
         styleOverrides: {
           paper: {
             backgroundImage: 'none',
-            borderRight: `1px solid ${
-              isLight ? brand.slate200 : 'rgba(148,163,184,0.14)'
-            }`,
+            backgroundColor: isLight ? brand.white : darkSurface,
+            borderRight: `1px solid ${isLight ? brand.slate200 : darkBorder}`,
           },
         },
       },
@@ -254,6 +283,35 @@ function buildTheme(mode: 'light' | 'dark') {
           },
         },
       },
+      MuiDialog: {
+        styleOverrides: {
+          paper: {
+            backgroundImage: 'none',
+            backgroundColor: isLight ? brand.white : darkSurface,
+            border: `1px solid ${isLight ? 'transparent' : darkBorder}`,
+          },
+        },
+      },
+      MuiToggleButton: {
+        styleOverrides: {
+          root: {
+            borderColor: isLight ? brand.slate200 : darkBorder,
+            color: isLight ? brand.slate500 : darkTextMuted,
+            '&.Mui-selected': {
+              backgroundColor: isLight
+                ? 'rgba(10,46,92,0.06)'
+                : 'rgba(0,180,216,0.14)',
+              color: isLight ? brand.navy : brand.cyan,
+              borderColor: isLight ? brand.navy : brand.cyan,
+              '&:hover': {
+                backgroundColor: isLight
+                  ? 'rgba(10,46,92,0.10)'
+                  : 'rgba(0,180,216,0.20)',
+              },
+            },
+          },
+        },
+      },
     },
   });
 }
@@ -262,15 +320,7 @@ function buildTheme(mode: 'light' | 'dark') {
 // PROVIDER
 // =========================================================
 export default function ThemeProvider({ children }: { children: ReactNode }) {
-  const prefersDark = useMediaQuery('(prefers-color-scheme: dark)');
-
-  const mode: 'light' | 'dark' = useMemo(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('theme-mode');
-      if (saved === 'dark' || saved === 'light') return saved;
-    }
-    return prefersDark ? 'dark' : 'light';
-  }, [prefersDark]);
+  const { mode } = useThemeMode();
 
   const theme = useMemo(() => buildTheme(mode), [mode]);
 

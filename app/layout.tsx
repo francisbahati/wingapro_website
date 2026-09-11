@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import Registry from './registry';
 import ThemeProvider from './theme-provider';
+import { ThemeModeProvider } from './context/ThemeModeContext';
 import { AuthProvider } from './context/AuthContext';
 import NotificationListener from './components/notifications/NotificationListener';
 
@@ -44,20 +45,42 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0A2E5C',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#F8FAFC' },
+    { media: '(prefers-color-scheme: dark)',  color: '#0E1526' },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
+      <head>
+        {/* Prevent theme flash on first paint — runs before React hydrates */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var saved = localStorage.getItem('wingapro-theme');
+                  var mode = (saved === 'dark' || saved === 'light') ? saved : 'light';
+                  document.documentElement.setAttribute('data-theme', mode);
+                  document.documentElement.style.colorScheme = mode;
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body>
         <Registry>
-          <ThemeProvider>
-            <AuthProvider>
-              <NotificationListener />
-              {children}
-            </AuthProvider>
-          </ThemeProvider>
+          <ThemeModeProvider>
+            <ThemeProvider>
+              <AuthProvider>
+                <NotificationListener />
+                {children}
+              </AuthProvider>
+            </ThemeProvider>
+          </ThemeModeProvider>
         </Registry>
       </body>
     </html>

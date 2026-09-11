@@ -11,8 +11,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import WarningIcon from '@mui/icons-material/Warning';
 
-const PRIMARY = '#0A2E5C';
-
 interface Ticket {
   id: number;
   subject: string;
@@ -88,7 +86,7 @@ export default function SupportPage() {
     return (
       <Box sx={{ p: 3 }}>
         {[1, 2, 3].map((i) => (
-          <Card key={i} sx={{ mb: 2 }}>
+          <Card key={i} sx={{ mb: 2, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
             <CardContent>
               <Skeleton variant="text" width="60%" />
               <Skeleton variant="text" width="40%" />
@@ -111,38 +109,77 @@ export default function SupportPage() {
 
   return (
     <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>Support</Typography>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3, color: 'var(--navy)' }}>
+        Support
+      </Typography>
 
       <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-        <Button variant="contained" startIcon={<AddIcon />} sx={{ bgcolor: PRIMARY }} onClick={() => { setIsDispute(false); setDialogOpen(true); }}>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => { setIsDispute(false); setDialogOpen(true); }}
+        >
           New Ticket
         </Button>
-        <Button variant="contained" startIcon={<WarningIcon />} sx={{ bgcolor: 'error.main' }} onClick={() => { setIsDispute(true); setDialogOpen(true); }}>
+        <Button
+          variant="contained"
+          color="error"
+          startIcon={<WarningIcon />}
+          onClick={() => { setIsDispute(true); setDialogOpen(true); }}
+        >
           Dispute
         </Button>
       </Box>
 
       {tickets.length === 0 ? (
-        <Typography color="text.secondary">No support tickets yet.</Typography>
+        <Typography sx={{ color: 'var(--text-muted)' }}>No support tickets yet.</Typography>
       ) : (
         <List>
           {tickets.map((ticket) => (
-            <Card key={ticket.id} sx={{ mb: 2, borderRadius: 3 }}>
+            <Card
+              key={ticket.id}
+              sx={{
+                mb: 2,
+                borderRadius: 3,
+                bgcolor: 'var(--surface)',
+                border: '1px solid var(--border)',
+              }}
+            >
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <Box>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>{ticket.subject}</Typography>
-                    <Typography variant="body2" color="text.secondary">{ticket.message}</Typography>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'var(--navy)' }}>
+                      {ticket.subject}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>
+                      {ticket.message}
+                    </Typography>
                     {ticket.adminReply && (
-                      <Typography variant="body2" sx={{ mt: 1, color: 'primary.main' }}>Reply: {ticket.adminReply}</Typography>
+                      <Typography variant="body2" sx={{ mt: 1, color: 'var(--cyan-deep)' }}>
+                        Reply: {ticket.adminReply}
+                      </Typography>
                     )}
-                    <Typography variant="caption" color="text.secondary">{new Date(ticket.createdAt).toLocaleString()}</Typography>
+                    <Typography variant="caption" sx={{ color: 'var(--text-muted)' }}>
+                      {new Date(ticket.createdAt).toLocaleString()}
+                    </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Chip label={ticket.status} color={ticket.status === 'closed' ? 'success' : 'warning'} size="small" />
+                    <Chip
+                      label={ticket.status}
+                      color={ticket.status === 'closed' ? 'success' : 'warning'}
+                      size="small"
+                    />
                     {ticket.status === 'open' && (
-                      <IconButton onClick={() => handleDelete(ticket.id)} disabled={deletingId === ticket.id} size="small">
-                        {deletingId === ticket.id ? <CircularProgress size={20} /> : <DeleteIcon color="error" />}
+                      <IconButton
+                        onClick={() => handleDelete(ticket.id)}
+                        disabled={deletingId === ticket.id}
+                        size="small"
+                      >
+                        {deletingId === ticket.id ? (
+                          <CircularProgress size={20} />
+                        ) : (
+                          <DeleteIcon color="error" />
+                        )}
                       </IconButton>
                     )}
                   </Box>
@@ -153,15 +190,28 @@ export default function SupportPage() {
         </List>
       )}
 
-      <Dialog open={dialogOpen} onClose={() => !submitting && setDialogOpen(false)}>
-        <DialogTitle>{isDispute ? 'File a Dispute' : 'New Support Ticket'}</DialogTitle>
+      <Dialog
+        open={dialogOpen}
+        onClose={() => !submitting && setDialogOpen(false)}
+        PaperProps={{
+          sx: { bgcolor: 'var(--surface)', border: '1px solid var(--border)', backgroundImage: 'none' },
+        }}
+      >
+        <DialogTitle sx={{ color: 'var(--navy)', fontWeight: 700 }}>
+          {isDispute ? 'File a Dispute' : 'New Support Ticket'}
+        </DialogTitle>
         <DialogContent>
           <TextField label="Subject" fullWidth margin="dense" value={subject} onChange={(e) => setSubject(e.target.value)} />
           <TextField label="Message" fullWidth multiline rows={4} margin="dense" value={message} onChange={(e) => setMessage(e.target.value)} />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)} disabled={submitting}>Cancel</Button>
-          <Button variant="contained" onClick={handleCreateTicket} disabled={submitting} sx={{ bgcolor: isDispute ? 'error.main' : PRIMARY }}>
+          <Button
+            variant="contained"
+            color={isDispute ? 'error' : 'primary'}
+            onClick={handleCreateTicket}
+            disabled={submitting}
+          >
             {submitting ? <CircularProgress size={24} color="inherit" /> : 'Send'}
           </Button>
         </DialogActions>

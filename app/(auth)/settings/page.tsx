@@ -50,31 +50,33 @@ export default function SettingsPage() {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>Settings</Typography>
+      <Typography variant="h4" sx={{ mb: 3, color: 'var(--navy)', fontWeight: 700 }}>
+        Settings
+      </Typography>
       {message && (
         <Alert severity={message.type} sx={{ mb: 2 }}>{message.text}</Alert>
       )}
 
-      <Card sx={{ mb: 4, borderRadius: 3 }}>
+      <Card sx={{ mb: 4, borderRadius: 3, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
         <CardContent>
-          <Typography variant="h6" sx={{ mb: 2 }}>Profile</Typography>
+          <Typography variant="h6" sx={{ mb: 2, color: 'var(--navy)' }}>Profile</Typography>
           <form onSubmit={handleProfileUpdate}>
             <TextField fullWidth label="Name" value={name} onChange={(e) => setName(e.target.value)} sx={{ mb: 2 }} />
             <TextField fullWidth label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} sx={{ mb: 2 }} />
-            <Button type="submit" variant="contained" disabled={loading} sx={{ bgcolor: '#0A2E5C' }}>
+            <Button type="submit" variant="contained" disabled={loading}>
               {loading ? <CircularProgress size={24} color="inherit" /> : 'Update Profile'}
             </Button>
           </form>
         </CardContent>
       </Card>
 
-      <Card sx={{ borderRadius: 3 }}>
+      <Card sx={{ borderRadius: 3, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
         <CardContent>
-          <Typography variant="h6" sx={{ mb: 2 }}>Change Password</Typography>
+          <Typography variant="h6" sx={{ mb: 2, color: 'var(--navy)' }}>Change Password</Typography>
           <form onSubmit={handlePasswordUpdate}>
             <TextField fullWidth label="Current Password" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required sx={{ mb: 2 }} />
             <TextField fullWidth label="New Password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required sx={{ mb: 2 }} />
-            <Button type="submit" variant="contained" disabled={loading} sx={{ bgcolor: '#0A2E5C' }}>
+            <Button type="submit" variant="contained" disabled={loading}>
               {loading ? <CircularProgress size={24} color="inherit" /> : 'Change Password'}
             </Button>
           </form>

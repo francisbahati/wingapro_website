@@ -16,7 +16,6 @@ import {
 } from '@mui/material';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { brand } from '@/theme-provider';
 
 interface Plan {
   id: number;
@@ -43,9 +42,7 @@ function PlansContent() {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/packages`);
         const data = await res.json();
         let list: Plan[] = data.packages || data || [];
-        if (networkFilter) {
-          list = list.filter((p) => p.network === networkFilter);
-        }
+        if (networkFilter) list = list.filter((p) => p.network === networkFilter);
         setPackages(list);
       } catch {
         setError('Failed to load packages');
@@ -56,20 +53,23 @@ function PlansContent() {
   }, [networkFilter]);
 
   return (
-    <Box sx={{ bgcolor: 'background.default' }}>
+    <Box sx={{ bgcolor: 'var(--bg)', minHeight: '100vh' }}>
       <Navbar />
 
       <Container maxWidth="lg" sx={{ py: { xs: 8, md: 10 } }}>
-        <Typography component="h1" align="center" sx={{ mb: 1.5 }}>
+        <Typography
+          component="h1"
+          align="center"
+          sx={{ mb: 1.5, color: 'var(--navy)', fontWeight: 800 }}
+        >
           Data{' '}
-          <Box component="span" sx={{ color: brand.cyan }}>
+          <Box component="span" sx={{ color: 'var(--cyan)' }}>
             Packages
           </Box>
         </Typography>
         <Typography
           align="center"
-          color="text.secondary"
-          sx={{ mb: 5, maxWidth: 640, mx: 'auto' }}
+          sx={{ mb: 5, maxWidth: 640, mx: 'auto', color: 'var(--text-muted)' }}
         >
           Choose your network and find the perfect plan.
         </Typography>
@@ -79,7 +79,12 @@ function PlansContent() {
             <Chip
               label={`Network: ${networkFilter}`}
               onDelete={() => router.push('/plans')}
-              sx={{ bgcolor: brand.navy, color: '#fff', fontWeight: 600 }}
+              sx={{
+                bgcolor: 'var(--navy)',
+                color: '#fff',
+                fontWeight: 600,
+                '& .MuiChip-deleteIcon': { color: 'rgba(255,255,255,0.7)' },
+              }}
             />
           </Box>
         )}
@@ -93,7 +98,7 @@ function PlansContent() {
         {error && <Alert severity="error">{error}</Alert>}
 
         {!loading && !error && packages.length === 0 && (
-          <Typography align="center" color="text.secondary" sx={{ py: 8 }}>
+          <Typography align="center" sx={{ py: 8, color: 'var(--text-muted)' }}>
             No packages available.
           </Typography>
         )}
@@ -102,42 +107,43 @@ function PlansContent() {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                sm: '1fr 1fr',
-                md: '1fr 1fr 1fr',
-              },
+              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
               gap: 3,
             }}
           >
             {packages.map((pkg) => (
-              <Card key={pkg.id} className="lift" sx={{ borderRadius: 4, height: '100%' }}>
+              <Card
+                key={pkg.id}
+                className="lift"
+                sx={{
+                  borderRadius: 4,
+                  height: '100%',
+                  bgcolor: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                }}
+              >
                 <CardContent sx={{ textAlign: 'center', p: 3 }}>
                   <Chip
                     label={pkg.network}
                     size="small"
                     sx={{
-                      bgcolor: brand.navy,
+                      bgcolor: 'var(--navy)',
                       color: '#fff',
                       fontWeight: 600,
                       mb: 2,
                     }}
                   />
-                  <Typography
-                    sx={{ fontSize: '1.15rem', fontWeight: 700, color: brand.navy }}
-                  >
+                  <Typography sx={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--navy)' }}>
                     {pkg.name}
                   </Typography>
-                  <Typography
-                    sx={{ fontSize: '0.85rem', color: 'text.secondary', my: 1 }}
-                  >
+                  <Typography sx={{ fontSize: '0.85rem', color: 'var(--text-muted)', my: 1 }}>
                     {pkg.dataSize} • {pkg.validity}
                   </Typography>
                   <Typography
                     sx={{
                       fontSize: '1.5rem',
                       fontWeight: 800,
-                      color: brand.navy,
+                      color: 'var(--navy)',
                       my: 2,
                       letterSpacing: '-0.02em',
                     }}
@@ -167,7 +173,15 @@ export default function PlansPage() {
   return (
     <Suspense
       fallback={
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 12 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            py: 12,
+            bgcolor: 'var(--bg)',
+            minHeight: '100vh',
+          }}
+        >
           <CircularProgress />
         </Box>
       }

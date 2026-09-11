@@ -36,7 +36,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import PeopleIcon from '@mui/icons-material/People';
 import { useAuth } from '@/context/AuthContext';
-import { brand } from '@/theme-provider';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const DRAWER_WIDTH = 248;
 
@@ -50,17 +50,17 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const navItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, href: '/dashboard' },
-    { text: 'Orders', icon: <ShoppingCartIcon />, href: '/orders' },
-    { text: 'Buy Data', icon: <AddShoppingCartIcon />, href: '/packages' },
-    { text: 'Wallet', icon: <AccountBalanceWalletIcon />, href: '/wallet' },
-    { text: 'Promotions', icon: <LocalOfferIcon />, href: '/promotions' },
-    { text: 'Support', icon: <SupportAgentIcon />, href: '/support' },
-    { text: 'Notifications', icon: <NotificationsIcon />, href: '/notifications' },
-    { text: 'Profile', icon: <PersonIcon />, href: '/profile' },
+    { text: 'Dashboard',     icon: <DashboardIcon />,              href: '/dashboard' },
+    { text: 'Orders',        icon: <ShoppingCartIcon />,           href: '/orders' },
+    { text: 'Buy Data',      icon: <AddShoppingCartIcon />,        href: '/packages' },
+    { text: 'Wallet',        icon: <AccountBalanceWalletIcon />,   href: '/wallet' },
+    { text: 'Promotions',    icon: <LocalOfferIcon />,             href: '/promotions' },
+    { text: 'Support',       icon: <SupportAgentIcon />,           href: '/support' },
+    { text: 'Notifications', icon: <NotificationsIcon />,          href: '/notifications' },
+    { text: 'Profile',       icon: <PersonIcon />,                 href: '/profile' },
     ...(user?.role === 'admin'
       ? [
-          { text: 'Users', icon: <PeopleIcon />, href: '/users' },
+          { text: 'Users',   icon: <PeopleIcon />, href: '/users' },
           { text: 'Reports', icon: <BarChartIcon />, href: '/reports' },
         ]
       : []),
@@ -73,7 +73,15 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   };
 
   const drawer = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#fff' }}>
+    <Box
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: 'var(--surface)',
+        backgroundImage: 'none',
+      }}
+    >
       <Box
         onClick={() => handleNavClick('/dashboard')}
         sx={{
@@ -84,23 +92,45 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           cursor: 'pointer',
         }}
       >
-        <Image src="/images/wingapro.webp" alt="WingaPro" width={30} height={30} />
+        {/* White circle logo */}
+        <Box
+          sx={{
+            width: 34,
+            height: 34,
+            borderRadius: '50%',
+            bgcolor: 'var(--logo-circle-bg)',
+            border: '1px solid var(--logo-circle-border)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            boxShadow: '0 4px 12px rgba(10,46,92,0.08)',
+          }}
+        >
+          <Image
+            src="/images/wingapro.webp"
+            alt="WingaPro"
+            width={26}
+            height={26}
+            style={{ width: '78%', height: '78%', objectFit: 'contain' }}
+          />
+        </Box>
         <Typography
           sx={{
             fontWeight: 800,
             fontSize: '1.05rem',
-            color: brand.navy,
+            color: 'var(--navy)',
             letterSpacing: '-0.02em',
           }}
         >
           Winga
-          <Box component="span" sx={{ color: brand.cyan }}>
+          <Box component="span" sx={{ color: 'var(--cyan)' }}>
             Pro
           </Box>
         </Typography>
       </Box>
 
-      <Divider />
+      <Divider sx={{ borderColor: 'var(--border)' }} />
 
       <List sx={{ py: 1.5, flexGrow: 1 }}>
         {navItems.map((item) => {
@@ -114,11 +144,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               sx={{
                 mx: 1,
                 borderRadius: 2,
+                color: selected ? 'var(--navy)' : 'var(--text-muted)',
                 '&.Mui-selected': {
-                  bgcolor: 'rgba(10,46,92,0.06)',
-                  color: brand.navy,
-                  '&:hover': { bgcolor: 'rgba(10,46,92,0.10)' },
+                  bgcolor: 'var(--navy-muted)',
+                  color: 'var(--navy)',
+                  '&:hover': { bgcolor: 'var(--navy-muted)' },
                 },
+                '&:hover': { bgcolor: 'var(--navy-muted)' },
               }}
             >
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
@@ -133,10 +165,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         })}
       </List>
 
-      <Divider />
+      <Divider sx={{ borderColor: 'var(--border)' }} />
 
       <Box sx={{ p: 2 }}>
-        <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+        <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
           v1.0.0
         </Typography>
       </Box>
@@ -147,18 +179,18 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     navItems.find((n) => pathname.startsWith(n.href))?.text ?? 'Dashboard';
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'var(--bg)' }}>
       <AppBar
         position="fixed"
         elevation={0}
         sx={{
           width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
           ml: { md: `${DRAWER_WIDTH}px` },
-          bgcolor: 'rgba(255,255,255,0.85)',
+          bgcolor: 'var(--navbar-bg-scrolled)',
           backdropFilter: 'saturate(180%) blur(12px)',
-          color: 'text.primary',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
+          WebkitBackdropFilter: 'saturate(180%) blur(12px)',
+          color: 'var(--text)',
+          borderBottom: '1px solid var(--border)',
         }}
       >
         <Toolbar>
@@ -166,25 +198,36 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <IconButton
               edge="start"
               onClick={() => setMobileOpen(true)}
-              sx={{ mr: 1 }}
+              sx={{ mr: 1, color: 'var(--navy)' }}
               aria-label="Open navigation"
             >
               <MenuIcon />
             </IconButton>
           )}
 
-          <Typography sx={{ flexGrow: 1, fontWeight: 700 }}>
+          <Typography sx={{ flexGrow: 1, fontWeight: 700, color: 'var(--navy)' }}>
             {currentTitle}
           </Typography>
 
-          <IconButton
-            onClick={(e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}
-            aria-label="Open user menu"
-          >
-            <Avatar sx={{ bgcolor: brand.navy, width: 34, height: 34, fontSize: 14 }}>
-              {user?.username?.charAt(0).toUpperCase() ?? 'U'}
-            </Avatar>
-          </IconButton>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <ThemeToggle size="small" />
+            <IconButton
+              onClick={(e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}
+              aria-label="Open user menu"
+            >
+              <Avatar
+                sx={{
+                  bgcolor: 'var(--navy)',
+                  color: '#fff',
+                  width: 34,
+                  height: 34,
+                  fontSize: 14,
+                }}
+              >
+                {user?.username?.charAt(0).toUpperCase() ?? 'U'}
+              </Avatar>
+            </IconButton>
+          </Box>
 
           <Menu
             anchorEl={anchorEl}
@@ -192,13 +235,19 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             onClose={() => setAnchorEl(null)}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            PaperProps={{
+              sx: {
+                bgcolor: 'var(--surface)',
+                border: '1px solid var(--border)',
+              },
+            }}
           >
             <MenuItem disabled>
-              <Typography sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
+              <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
                 {user?.email}
               </Typography>
             </MenuItem>
-            <Divider />
+            <Divider sx={{ borderColor: 'var(--border)' }} />
             <MenuItem
               onClick={() => {
                 setAnchorEl(null);
@@ -206,9 +255,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               }}
             >
               <ListItemIcon>
-                <LogoutIcon fontSize="small" />
+                <LogoutIcon fontSize="small" sx={{ color: 'var(--error)' }} />
               </ListItemIcon>
-              Logout
+              <Typography sx={{ color: 'var(--error)' }}>Logout</Typography>
             </MenuItem>
           </Menu>
         </Toolbar>
@@ -222,7 +271,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': { width: DRAWER_WIDTH },
+            '& .MuiDrawer-paper': {
+              width: DRAWER_WIDTH,
+              bgcolor: 'var(--surface)',
+              backgroundImage: 'none',
+              borderRight: '1px solid var(--border)',
+            },
           }}
         >
           {drawer}
@@ -232,7 +286,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           open
           sx={{
             display: { xs: 'none', md: 'block' },
-            '& .MuiDrawer-paper': { width: DRAWER_WIDTH },
+            '& .MuiDrawer-paper': {
+              width: DRAWER_WIDTH,
+              bgcolor: 'var(--surface)',
+              backgroundImage: 'none',
+              borderRight: '1px solid var(--border)',
+            },
           }}
         >
           {drawer}
@@ -247,6 +306,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
           mt: 8,
           minHeight: 'calc(100vh - 64px)',
+          bgcolor: 'var(--bg)',
         }}
       >
         {children}

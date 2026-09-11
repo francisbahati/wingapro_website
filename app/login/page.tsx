@@ -1,4 +1,4 @@
-// app/login/page.tsx and its complete
+// app/login/page.tsx
 'use client';
 
 import { Suspense, useState } from 'react';
@@ -20,7 +20,6 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import LockRoundedIcon from '@mui/icons-material/LockRounded';
 import { useAuth } from '@/context/AuthContext';
-import { brand } from '@/theme-provider';
 
 function LoginForm() {
   const router = useRouter();
@@ -57,10 +56,19 @@ function LoginForm() {
         alignItems: 'center',
         justifyContent: 'center',
         p: 2,
-        background: `linear-gradient(135deg, ${brand.navy} 0%, ${brand.navyLight} 60%, ${brand.cyan} 140%)`,
+        background: `linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 60%, var(--cyan) 140%)`,
       }}
     >
-      <Card sx={{ maxWidth: 440, width: '100%', borderRadius: 4, p: 1 }}>
+      <Card
+        sx={{
+          maxWidth: 440,
+          width: '100%',
+          borderRadius: 4,
+          p: 1,
+          bgcolor: 'var(--surface)',
+          border: '1px solid var(--border)',
+        }}
+      >
         <CardContent sx={{ p: 4 }}>
           <Box sx={{ textAlign: 'center', mb: 3 }}>
             <Box
@@ -70,7 +78,7 @@ function LoginForm() {
                 mx: 'auto',
                 mb: 2,
                 borderRadius: 3,
-                background: `linear-gradient(135deg, ${brand.navy}, ${brand.cyan})`,
+                background: `linear-gradient(135deg, var(--navy), var(--cyan))`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -78,10 +86,10 @@ function LoginForm() {
             >
               <LockRoundedIcon sx={{ color: '#fff', fontSize: 28 }} />
             </Box>
-            <Typography variant="h5" sx={{ fontWeight: 800 }} gutterBottom>
+            <Typography variant="h5" sx={{ fontWeight: 800, color: 'var(--navy)' }} gutterBottom>
               Welcome back
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>
               Sign in to continue to WingaPro
             </Typography>
           </Box>
@@ -93,9 +101,7 @@ function LoginForm() {
               fullWidth
               label="Username or Email"
               value={username}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setUsername(e.target.value)
-              }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
               required
               sx={{ mb: 2 }}
               autoComplete="username"
@@ -105,9 +111,7 @@ function LoginForm() {
               label="Password"
               type={showPassword ? 'text' : 'password'}
               value={password}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setPassword(e.target.value)
-              }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
               required
               sx={{ mb: 3 }}
               autoComplete="current-password"
@@ -127,34 +131,25 @@ function LoginForm() {
                 },
               }}
             />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
-              disabled={loading}
-            >
+            <Button type="submit" fullWidth variant="contained" size="large" disabled={loading}>
               {loading ? <CircularProgress size={22} color="inherit" /> : 'Sign In'}
             </Button>
           </form>
 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-            <Button
-              onClick={() => router.push('/forgot-password')}
-              size="small"
-            >
+            <Button onClick={() => router.push('/forgot-password')} size="small">
               Forgot password?
             </Button>
           </Box>
 
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ my: 3, borderColor: 'var(--border)' }} />
 
-          <Typography variant="body2" sx={{ textAlign: 'center' }}>
+          <Typography variant="body2" sx={{ textAlign: 'center', color: 'var(--text-muted)' }}>
             Don&apos;t have an account?{' '}
             <Button
               onClick={() => router.push('/register')}
               size="small"
-              sx={{ textTransform: 'none', fontWeight: 600, color: brand.cyan, p: 0, minWidth: 0 }}
+              sx={{ textTransform: 'none', fontWeight: 600, color: 'var(--cyan)', p: 0, minWidth: 0 }}
             >
               Create one
             </Button>
@@ -175,6 +170,7 @@ export default function LoginPage() {
             minHeight: '100vh',
             alignItems: 'center',
             justifyContent: 'center',
+            bgcolor: 'var(--bg)',
           }}
         >
           <CircularProgress />

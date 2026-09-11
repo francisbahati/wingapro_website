@@ -1,4 +1,3 @@
-// app/(auth)/reports/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -14,7 +13,6 @@ import {
 } from '@mui/material';
 import apiClient from '@/lib/api/client';
 
-// Lazy-load Recharts (heavy) client-side only
 const ReportsCharts = dynamic(() => import('./_charts'), {
   ssr: false,
   loading: () => (
@@ -54,32 +52,28 @@ export default function ReportsPage() {
   if (!data) return null;
 
   const kpis = [
-    { label: 'Total Users', value: data.totalUsers?.toLocaleString() ?? '0', color: '#0A2E5C' },
-    { label: 'Total Orders', value: data.totalOrders?.toLocaleString() ?? '0', color: '#10B981' },
+    { label: 'Total Users',   value: data.totalUsers?.toLocaleString() ?? '0',   color: '#0A2E5C' },
+    { label: 'Total Orders',  value: data.totalOrders?.toLocaleString() ?? '0',  color: '#10B981' },
     {
       label: 'Total Revenue',
       value: `TZS ${Number(data.totalRevenue ?? 0).toLocaleString()}`,
       color: '#F59E0B',
     },
-    {
-      label: 'Pending Orders',
-      value: data.pendingOrders?.toLocaleString() ?? '0',
-      color: '#8B5CF6',
-    },
+    { label: 'Pending Orders', value: data.pendingOrders?.toLocaleString() ?? '0', color: '#8B5CF6' },
   ];
 
   return (
     <Box>
-      <Typography variant="h4" fontWeight={700} sx={{ mb: 3 }}>
+      <Typography variant="h4" fontWeight={700} sx={{ mb: 3, color: 'var(--navy)' }}>
         Reports
       </Typography>
 
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {kpis.map((k) => (
           <Grid item xs={12} sm={6} md={3} key={k.label}>
-            <Card>
+            <Card sx={{ bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
               <CardContent>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
+                <Typography variant="body2" gutterBottom sx={{ color: 'var(--text-muted)' }}>
                   {k.label}
                 </Typography>
                 <Typography variant="h5" fontWeight={800} sx={{ color: k.color }}>
@@ -92,6 +86,6 @@ export default function ReportsPage() {
       </Grid>
 
       <ReportsCharts data={data} />
-    </Box>   // ← ✅ FIXED: was </Grid>
+    </Box>
   );
 }
