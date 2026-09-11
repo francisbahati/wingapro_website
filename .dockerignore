@@ -1,7 +1,50 @@
+# .dockerignore
+
+# Dependencies
 node_modules
+.pnp
+.pnp.js
+
+# Next.js build output
 .next
+out
+build
+dist
+
+# Git
 .git
+.gitignore
+
+# Env files (keep the example if you have one)
 .env
-.env.local
+.env.*
+!.env.example
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Editor / OS
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# Docker (don't ship these into the image)
+Dockerfile
+Dockerfile.*
+.dockerignore
+docker-compose.yml
+docker-compose.*.yml
+
+# Docs / misc
 README.md
-npm-debug.log
+LICENSE
+*.md
+
+# Cache
+.npm
+.cache
+.eslintcache
