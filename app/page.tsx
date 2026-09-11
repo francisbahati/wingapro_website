@@ -193,7 +193,7 @@ export default function HomePage() {
                 }}
               >
                 <Image
-                  src="/images/buckete.png"
+                  src="/images/buckete.webp"
                   alt="WingaPro data bundles"
                   width={900}
                   height={900}
