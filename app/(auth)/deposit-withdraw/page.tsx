@@ -32,23 +32,49 @@ export default function DepositWithdrawPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const isValidPhone = (value: string) => /^0\d{9}$/.test(value.replace(/\s/g, ''));
+  const isWithdraw = mode === 'withdraw';
+
+  // Accept 0712345678, 712345678, +255712345678, or 255712345678
+  const normalizePhone = (value: string): string => {
+    let v = value.replace(/\s+/g, '').replace(/-/g, '');
+    if (v.startsWith('+255')) v = '0' + v.slice(4);
+    if (v.startsWith('255') && v.length === 12) v = '0' + v.slice(3);
+    if (v.length === 9 && /^\d+$/.test(v)) v = '0' + v;
+    return v;
+  };
+
+  const isValidPhone = (value: string) => /^0\d{9}$/.test(normalizePhone(value));
+
+  const handleModeChange = (_: any, val: Mode | null) => {
+    if (!val) return;
+    setMode(val);
+    setError('');
+    setSuccess('');
+  };
 
   const handleSubmit = async () => {
     const numericAmount = parseFloat(amount);
+
+    // ---- Validation ----
     if (!amount || isNaN(numericAmount) || numericAmount <= 0) {
       setError('Please enter a valid amount');
       return;
     }
-    if (mode === 'withdraw') {
-      if (!phone) {
-        setError('Please enter the phone number to receive the money');
-        return;
-      }
-      if (!isValidPhone(phone)) {
-        setError('Enter a valid 10-digit phone number (e.g. 0712345678)');
-        return;
-      }
+    if (numericAmount < 500) {
+      setError('Minimum amount is TZS 500');
+      return;
+    }
+    if (!phone.trim()) {
+      setError(
+        isWithdraw
+          ? 'Please enter the mobile money number to receive the money'
+          : 'Please enter your mobile money number'
+      );
+      return;
+    }
+    if (!isValidPhone(phone)) {
+      setError('Enter a valid 10-digit Tanzanian number (e.g. 0712345678)');
+      return;
     }
 
     setError('');
@@ -56,19 +82,23 @@ export default function DepositWithdrawPage() {
     setLoading(true);
 
     try {
-      const endpoint = mode === 'deposit' ? '/wallet/deposit' : '/wallet/withdraw';
-      const payload =
-        mode === 'deposit'
-          ? { amount: numericAmount }
-          : { amount: numericAmount, phone };
+      const endpoint = isWithdraw ? '/wallet/withdraw' : '/wallet/deposit';
+      const payload = {
+        amount: numericAmount,
+        phone: normalizePhone(phone),
+      };
 
       await apiClient.post(endpoint, payload);
+
       setSuccess(
-        `${mode === 'deposit' ? 'Deposit' : 'Withdrawal request'} submitted successfully!`
+        isWithdraw
+          ? `Withdrawal request submitted. You will receive the money on ${normalizePhone(phone)} within 24 hours.`
+          : `Deposit request submitted. Please approve the payment prompt sent to ${normalizePhone(phone)}.`
       );
+
       setAmount('');
       setPhone('');
-      setTimeout(() => router.push('/wallet'), 2000);
+      setTimeout(() => router.push('/wallet'), 2500);
     } catch (err) {
       if (err instanceof AxiosError) {
         setError(err.response?.data?.message || `Failed to ${mode}`);
@@ -80,17 +110,24 @@ export default function DepositWithdrawPage() {
     }
   };
 
-  const isWithdraw = mode === 'withdraw';
-
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 560, mx: 'auto' }}>
-      <Typography variant="h4" sx={{ fontWeight: 800, mb: 1, letterSpacing: '-0.02em', color: 'var(--navy)' }}>
+      {/* Header */}
+      <Typography
+        variant="h4"
+        sx={{
+          fontWeight: 800,
+          mb: 1,
+          letterSpacing: '-0.02em',
+          color: 'var(--navy)',
+        }}
+      >
         Deposit & Withdraw
       </Typography>
       <Typography variant="body2" sx={{ mb: 4, color: 'var(--text-muted)' }}>
         {isWithdraw
           ? 'Request a payout to your mobile money number.'
-          : 'Add funds to your WingaPro wallet instantly.'}
+          : 'Add funds to your WingaPro wallet using mobile money.'}
       </Typography>
 
       <Card
@@ -102,6 +139,7 @@ export default function DepositWithdrawPage() {
           bgcolor: 'var(--surface)',
         }}
       >
+        {/* Top accent bar */}
         <Box
           sx={{
             height: 4,
@@ -110,15 +148,11 @@ export default function DepositWithdrawPage() {
         />
 
         <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+          {/* Mode toggle */}
           <ToggleButtonGroup
             value={mode}
             exclusive
-            onChange={(_, val: Mode | null) => {
-              if (!val) return;
-              setMode(val);
-              setError('');
-              setSuccess('');
-            }}
+            onChange={handleModeChange}
             fullWidth
             sx={{ mb: 4 }}
           >
@@ -136,6 +170,7 @@ export default function DepositWithdrawPage() {
             </ToggleButton>
           </ToggleButtonGroup>
 
+          {/* Amount */}
           <TextField
             label="Amount"
             type="number"
@@ -146,28 +181,39 @@ export default function DepositWithdrawPage() {
             InputProps={{
               startAdornment: <InputAdornment position="start">TZS</InputAdornment>,
             }}
+            inputProps={{ min: 500, step: 100 }}
             sx={{ mb: 3 }}
           />
 
-          {isWithdraw && (
-            <TextField
-              label="Phone number (mobile money)"
-              fullWidth
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="e.g. 0712345678"
-              helperText="The number where you want to receive the money"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PhoneIphoneRoundedIcon sx={{ color: 'var(--text-muted)', fontSize: 20 }} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ mb: 3, animation: 'fadeInUp .35s ease-out both' }}
-            />
-          )}
+          {/* Phone — shown for BOTH deposit and withdraw */}
+          <TextField
+            label={
+              isWithdraw
+                ? 'Phone number to receive money'
+                : 'Mobile money phone number'
+            }
+            fullWidth
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="e.g. 0712345678"
+            helperText={
+              isWithdraw
+                ? 'We will send the money to this number.'
+                : 'You will receive a payment prompt on this number.'
+            }
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <PhoneIphoneRoundedIcon
+                    sx={{ color: 'var(--text-muted)', fontSize: 20 }}
+                  />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ mb: 3 }}
+          />
 
+          {/* Alerts */}
           {error && (
             <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
               {error}
@@ -179,6 +225,7 @@ export default function DepositWithdrawPage() {
             </Alert>
           )}
 
+          {/* Submit */}
           <Button
             variant="contained"
             fullWidth
@@ -199,6 +246,7 @@ export default function DepositWithdrawPage() {
         </CardContent>
       </Card>
 
+      {/* Info footer */}
       <Box
         sx={{
           mt: 3,
@@ -211,10 +259,17 @@ export default function DepositWithdrawPage() {
         <Typography variant="body2" sx={{ color: 'var(--navy)', fontWeight: 600, mb: 0.5 }}>
           {isWithdraw ? 'Withdrawal info' : 'Deposit info'}
         </Typography>
-        <Typography variant="body2" sx={{ fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text-muted)' }}>
+        <Typography
+          variant="body2"
+          sx={{
+            fontSize: '0.85rem',
+            lineHeight: 1.6,
+            color: 'var(--text-muted)',
+          }}
+        >
           {isWithdraw
             ? 'Withdrawals are processed within 24 hours. Make sure the phone number matches your mobile money account.'
-            : 'Funds will be added to your wallet instantly after payment confirmation.'}
+            : 'You will receive a USSD / app prompt from your mobile money provider. Approve it to complete the deposit.'}
         </Typography>
       </Box>
     </Box>
