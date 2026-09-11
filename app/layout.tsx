@@ -53,9 +53,17 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={inter.variable}
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
+    >
       <head>
-        {/* Prevent theme flash on first paint — runs before React hydrates */}
+        {/*
+          Prevent theme flash on first paint — runs BEFORE React hydrates.
+          The ThemeModeProvider reads this attribute on mount (no re-set).
+        */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
