@@ -71,6 +71,9 @@
   --footer-bg:          #0A2E5C;
   --hero-base:          #FFFFFF;
 
+  /* ── Hero video overlay (light) ── */
+  --hero-overlay:       rgba(255, 255, 255, 0.82);
+
   /* ── Logo circle: ALWAYS white in both modes so the logo is visible ── */
   --logo-circle-bg:     #FFFFFF;
   --logo-circle-border: rgba(10, 46, 92, 0.08);
@@ -124,6 +127,9 @@
   --navbar-bg-scrolled: rgba(22, 32, 58, 0.92);
   --footer-bg:          #131C31;
   --hero-base:          #0E1526;
+
+  /* ── Hero video overlay (dark) ── */
+  --hero-overlay:       rgba(14, 21, 38, 0.86);
 
   /* Logo circle stays white in dark mode too */
   --logo-circle-bg:     #FFFFFF;
@@ -729,11 +735,7 @@ img, svg, video, canvas,
 }
 
 /* ---------- 33. GLOBAL THEME ENFORCEMENT ---------- */
-/* Forces every MUI surface to use theme variables, even if a page
-   still has hardcoded hex backgrounds. Runs BEFORE per-page overrides. */
-
 [data-theme="dark"] {
-  /* Paper-like surfaces */
   .MuiPaper-root:not([data-skip-theme]),
   .MuiCard-root,
   .MuiAppBar-root,
@@ -746,7 +748,6 @@ img, svg, video, canvas,
     background-image: none;
   }
 
-  /* Any element with inline style background: #fff or white or #FFFFFF */
   [style*="background: #fff"],
   [style*="background:#fff"],
   [style*="background: white"],
@@ -767,7 +768,6 @@ img, svg, video, canvas,
     background-color: var(--surface) !important;
   }
 
-  /* Common text colors that break dark mode */
   [style*="color: #0A2E5C"],
   [style*="color:#0A2E5C"],
   [style*="color: #000"],
@@ -777,13 +777,11 @@ img, svg, video, canvas,
     color: var(--navy) !important;
   }
 
-  /* Force dividers */
   .MuiDivider-root {
     border-color: var(--border) !important;
   }
 }
 
-/* Also apply to light mode for consistency */
 .MuiPaper-root,
 .MuiCard-root {
   transition: background-color .3s ease, border-color .3s ease, color .3s ease;

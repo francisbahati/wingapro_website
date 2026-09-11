@@ -8,15 +8,22 @@ import {
   Button,
   Card,
   CardContent,
+  CircularProgress,
   Container,
+  InputAdornment,
   TextField,
   Typography,
 } from '@mui/material';
+import { AxiosError } from 'axios';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 import PhoneRoundedIcon from '@mui/icons-material/PhoneRounded';
 import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
+import PersonOutlineRoundedIcon from '@mui/icons-material/PersonOutlineRounded';
+import MailOutlineRoundedIcon from '@mui/icons-material/MailOutlineRounded';
+import SendRoundedIcon from '@mui/icons-material/SendRounded';
+import apiClient from '@/lib/api/client';
 
 const CONTACT_INFO = [
   {
@@ -36,15 +43,95 @@ const CONTACT_INFO = [
   },
 ];
 
-export default function ContactPage() {
-  const [form, setForm] = useState({ name: '', email: '', message: '' });
-  const [submitted, setSubmitted] = useState(false);
+interface FormState {
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+}
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+const INITIAL_FORM: FormState = { name: '', email: '', phone: '', message: '' };
+
+export default function ContactPage() {
+  const [form, setForm] = useState<FormState>(INITIAL_FORM);
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  /**
+   * Normalize Tanzanian phone number to 0XXXXXXXXX form.
+   * Backend's formatAndValidatePhone accepts 0/255/+255 prefixes.
+   */
+  const normalizePhone = (value: string): string => {
+    let v = value.replace(/\s+/g, '').replace(/-/g, '');
+    if (v.startsWith('+255')) v = '0' + v.slice(4);
+    if (v.startsWith('255') && v.length === 12) v = '0' + v.slice(3);
+    if (v.length === 9 && /^\d+$/.test(v)) v = '0' + v;
+    return v;
+  };
+
+  const isValidPhone = (value: string) => /^0[67]\d{8}$/.test(normalizePhone(value));
+  const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    if (error) setError('');
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: wire to your backend / email service
-    console.log(form);
-    setSubmitted(true);
+    setError('');
+
+    // ---- Client-side validation (mirrors backend) ----
+    if (!form.name.trim()) {
+      setError('Please enter your name');
+      return;
+    }
+    if (!isValidEmail(form.email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    if (!form.phone.trim()) {
+      setError('Please enter your phone number so we can reach you');
+      return;
+    }
+    if (!isValidPhone(form.phone)) {
+      setError('Enter a valid Tanzanian number (e.g. 0712345678)');
+      return;
+    }
+    if (!form.message.trim() || form.message.trim().length < 10) {
+      setError('Please write a message (at least 10 characters)');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Public endpoint — no auth required.
+      // Creates a support ticket visible in the admin's support panel.
+      await apiClient.post('/contact', {
+        name: form.name.trim(),
+        email: form.email.trim().toLowerCase(),
+        phone: normalizePhone(form.phone),
+        message: form.message.trim(),
+      });
+
+      setSubmitted(true);
+      setForm(INITIAL_FORM);
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        setError(
+          err.response?.data?.message ||
+            'Failed to send message. Please try again or email us directly.'
+        );
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -76,10 +163,15 @@ export default function ContactPage() {
             gap: 6,
           }}
         >
-          {/* Info column */}
+          {/* ─── Info column ─── */}
           <Box>
             <Typography
-              sx={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--navy)', mb: 3 }}
+              sx={{
+                fontSize: '1.25rem',
+                fontWeight: 700,
+                color: 'var(--navy)',
+                mb: 3,
+              }}
             >
               Contact Information
             </Typography>
@@ -113,9 +205,34 @@ export default function ContactPage() {
                 </Box>
               ))}
             </Box>
+
+            {/* Optional help note */}
+            <Box
+              sx={{
+                mt: 4,
+                p: 2.5,
+                borderRadius: 3,
+                bgcolor: 'var(--cyan-muted)',
+                border: '1px solid rgba(0,180,216,0.18)',
+              }}
+            >
+              <Typography
+                variant="body2"
+                sx={{ color: 'var(--navy)', fontWeight: 600, mb: 0.5 }}
+              >
+                Need a quick reply?
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.6 }}
+              >
+                Include your phone number so our team can reach you directly. We reply
+                within a few hours on business days.
+              </Typography>
+            </Box>
           </Box>
 
-          {/* Form column */}
+          {/* ─── Form column ─── */}
           <Card
             sx={{
               borderRadius: 3,
@@ -125,52 +242,146 @@ export default function ContactPage() {
           >
             <CardContent sx={{ p: 4 }}>
               {submitted ? (
-                <Alert severity="success">
-                  Your message has been sent. We&apos;ll get back to you soon.
-                </Alert>
+                <Box sx={{ textAlign: 'center', py: 2 }}>
+                  <Box
+                    sx={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: '50%',
+                      bgcolor: 'var(--success-muted)',
+                      color: 'var(--success)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mx: 'auto',
+                      mb: 2,
+                    }}
+                  >
+                    <SendRoundedIcon sx={{ fontSize: 30 }} />
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{ color: 'var(--navy)', fontWeight: 700, mb: 1 }}
+                  >
+                    Message sent successfully!
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: 'var(--text-muted)', mb: 3 }}
+                  >
+                    Our support team has received your message and will get back to you
+                    shortly.
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    onClick={() => setSubmitted(false)}
+                    sx={{ mt: 1 }}
+                  >
+                    Send another message
+                  </Button>
+                </Box>
               ) : (
-                <Box component="form" onSubmit={handleSubmit}>
+                <Box component="form" onSubmit={handleSubmit} noValidate>
                   <TextField
-                    label="Name"
+                    label="Full name"
+                    name="name"
                     fullWidth
                     required
                     margin="normal"
                     value={form.name}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setForm({ ...form, name: e.target.value })
-                    }
+                    onChange={handleChange}
+                    autoComplete="name"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PersonOutlineRoundedIcon
+                            sx={{ color: 'var(--text-muted)', fontSize: 20 }}
+                          />
+                        </InputAdornment>
+                      ),
+                    }}
                   />
+
                   <TextField
                     label="Email"
+                    name="email"
                     type="email"
                     fullWidth
                     required
                     margin="normal"
                     value={form.email}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setForm({ ...form, email: e.target.value })
-                    }
+                    onChange={handleChange}
+                    autoComplete="email"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <MailOutlineRoundedIcon
+                            sx={{ color: 'var(--text-muted)', fontSize: 20 }}
+                          />
+                        </InputAdornment>
+                      ),
+                    }}
                   />
+
+                  <TextField
+                    label="Phone number"
+                    name="phone"
+                    type="tel"
+                    fullWidth
+                    required
+                    margin="normal"
+                    value={form.phone}
+                    onChange={handleChange}
+                    placeholder="e.g. 0712345678"
+                    autoComplete="tel"
+                    helperText="So we can reach you directly"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PhoneRoundedIcon
+                            sx={{ color: 'var(--text-muted)', fontSize: 20 }}
+                          />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+
                   <TextField
                     label="Message"
+                    name="message"
                     multiline
                     rows={5}
                     fullWidth
                     required
                     margin="normal"
                     value={form.message}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                      setForm({ ...form, message: e.target.value })
-                    }
+                    onChange={handleChange}
+                    placeholder="Tell us how we can help…"
                   />
+
+                  {error && (
+                    <Alert severity="error" sx={{ mt: 2, borderRadius: 2 }}>
+                      {error}
+                    </Alert>
+                  )}
+
                   <Button
                     type="submit"
                     variant="contained"
                     fullWidth
-                    sx={{ mt: 3 }}
                     size="large"
+                    disabled={loading}
+                    className="btn-shine"
+                    startIcon={
+                      loading ? (
+                        <CircularProgress size={18} color="inherit" />
+                      ) : (
+                        <SendRoundedIcon />
+                      )
+                    }
+                    sx={{ mt: 3, py: 1.6 }}
                   >
-                    Send Message
+                    {loading ? 'Sending…' : 'Send Message'}
                   </Button>
                 </Box>
               )}
