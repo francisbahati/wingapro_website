@@ -142,7 +142,7 @@ export default function DownloadPage() {
 
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 5 }}>
                 <Button
-                  href="/apk/gimirey.exe"
+                  href="/apk/Wingapro.exe"
                   download
                   variant="contained"
                   size="large"
