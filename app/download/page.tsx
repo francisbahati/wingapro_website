@@ -56,7 +56,7 @@ const APPS = [
       'Install the desktop client for a larger workspace. Ideal for sellers and corporate accounts.',
     size: '62 MB',
     version: 'v1.1.0',
-    href: '/apk/Wingapro.exe',
+    href: '/apk/gimirey.exe',
     cta: 'Download for Windows',
     isPrimary: false,
     
@@ -142,7 +142,7 @@ export default function DownloadPage() {
 
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 5 }}>
                 <Button
-                  href="/apk/Wingapro v1.1.apk"
+                  href="/apk/gimirey.exe"
                   download
                   variant="contained"
                   size="large"
