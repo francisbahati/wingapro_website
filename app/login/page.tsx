@@ -1,7 +1,7 @@
 // app/login/page.tsx
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Alert,
@@ -33,6 +33,17 @@ function LoginForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Show role-block message if it was set by AuthContext on a stale session
+  useEffect(() => {
+    try {
+      const blocked = sessionStorage.getItem('authRoleBlockMessage');
+      if (blocked) {
+        setError(blocked);
+        sessionStorage.removeItem('authRoleBlockMessage');
+      }
+    } catch (_) {}
+  }, []);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -42,7 +53,17 @@ function LoginForm() {
       router.push(next);
       router.refresh();
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Invalid credentials');
+      const msg = err?.response?.data?.message || err?.message;
+
+      if (
+        err?.response?.status === 403 &&
+        typeof msg === 'string' &&
+        msg.toLowerCase().includes('customers only')
+      ) {
+        setError(msg);
+      } else {
+        setError(msg || 'Invalid credentials');
+      }
     } finally {
       setLoading(false);
     }
