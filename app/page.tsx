@@ -25,9 +25,7 @@ import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { brand } from '@/theme-provider';
 
-/* Framer Motion v13 requires cubic-bezier easing to be a 4-tuple */
 const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const container: Variants = {
@@ -47,24 +45,72 @@ const NETWORKS = [
 ];
 
 const STEPS = [
-  { n: '01', title: 'Choose your package', desc: 'Browse bundles for Halotel, Tigo, Vodacom and Airtel — all in one place.' },
-  { n: '02', title: 'Pay your way',        desc: 'Use your WingaPro wallet or mobile money. Confirmation in seconds.' },
-  { n: '03', title: 'Get instant delivery', desc: 'Your data lands on the recipient phone within moments.' },
+  {
+    n: '01',
+    title: 'Choose your package',
+    desc: 'Browse bundles for Halotel, Tigo, Vodacom and Airtel — all in one place.',
+  },
+  {
+    n: '02',
+    title: 'Pay your way',
+    desc: 'Use your WingaPro wallet or mobile money. Confirmation in seconds.',
+  },
+  {
+    n: '03',
+    title: 'Get instant delivery',
+    desc: 'Your data lands on the recipient phone within moments.',
+  },
 ];
 
 const FEATURES = [
-  { icon: <SecurityRoundedIcon />,     title: 'Bank-grade security',  desc: 'Encrypted payments and secure account protection at every step.' },
-  { icon: <BoltRoundedIcon />,         title: 'Instant delivery',     desc: 'Data delivered within seconds of a confirmed payment.' },
-  { icon: <SupportAgentRoundedIcon />, title: '24/7 support',         desc: 'Real humans ready to help whenever you need us.' },
-  { icon: <VerifiedUserRoundedIcon />, title: 'Trusted platform',     desc: 'Thousands of happy customers across Tanzania.' },
-  { icon: <TrendingUpRoundedIcon />,   title: 'Best prices',          desc: 'Competitive rates and weekly promotions.' },
-  { icon: <DownloadRoundedIcon />,     title: 'Mobile & desktop',     desc: 'Apps for Android, Windows and any modern browser.' },
+  {
+    icon: <SecurityRoundedIcon />,
+    title: 'Bank-grade security',
+    desc: 'Encrypted payments and secure account protection at every step.',
+  },
+  {
+    icon: <BoltRoundedIcon />,
+    title: 'Instant delivery',
+    desc: 'Data delivered within seconds of a confirmed payment.',
+  },
+  {
+    icon: <SupportAgentRoundedIcon />,
+    title: '24/7 support',
+    desc: 'Real humans ready to help whenever you need us.',
+  },
+  {
+    icon: <VerifiedUserRoundedIcon />,
+    title: 'Trusted platform',
+    desc: 'Thousands of happy customers across Tanzania.',
+  },
+  {
+    icon: <TrendingUpRoundedIcon />,
+    title: 'Best prices',
+    desc: 'Competitive rates and weekly promotions.',
+  },
+  {
+    icon: <DownloadRoundedIcon />,
+    title: 'Mobile & desktop',
+    desc: 'Apps for Android, Windows and any modern browser.',
+  },
 ];
 
 const TESTIMONIALS = [
-  { name: 'John D.',  role: 'Dar es Salaam', text: 'WingaPro is my go-to for buying data. Instant and unbeatable prices!' },
-  { name: 'Amina K.', role: 'Arusha',        text: 'I love the wallet feature. I buy for my whole family in one place.' },
-  { name: 'Peter M.', role: 'Mwanza',        text: 'Support resolved my issue in minutes. Five stars from me!' },
+  {
+    name: 'John D.',
+    role: 'Dar es Salaam',
+    text: 'WingaPro is my go-to for buying data. Instant and unbeatable prices!',
+  },
+  {
+    name: 'Amina K.',
+    role: 'Arusha',
+    text: 'I love the wallet feature. I buy for my whole family in one place.',
+  },
+  {
+    name: 'Peter M.',
+    role: 'Mwanza',
+    text: 'Support resolved my issue in minutes. Five stars from me!',
+  },
 ];
 
 export default function HomePage() {
@@ -74,9 +120,7 @@ export default function HomePage() {
     <Box sx={{ bgcolor: 'var(--bg)', minHeight: '100vh' }}>
       <Navbar />
 
-      {/* ═══════════════════════════════════════════════════════════
-          HERO — video background with theme-aware overlay
-          ═══════════════════════════════════════════════════════════ */}
+      {/* HERO */}
       <Box
         sx={{
           position: 'relative',
@@ -87,7 +131,6 @@ export default function HomePage() {
           justifyContent: 'center',
         }}
       >
-        {/* ─── Video background ─── */}
         <Box
           component="video"
           autoPlay
@@ -108,7 +151,6 @@ export default function HomePage() {
           <source src="/images/wingaprovideo.mp4" type="video/mp4" />
         </Box>
 
-        {/* ─── Theme-aware solid overlay ─── */}
         <Box
           aria-hidden
           sx={{
@@ -122,7 +164,6 @@ export default function HomePage() {
           }}
         />
 
-        {/* ─── Soft radial glow on top of overlay ─── */}
         <Box
           aria-hidden
           sx={{
@@ -136,17 +177,11 @@ export default function HomePage() {
           }}
         />
 
-        {/* ─── Content ─── */}
         <Container
           maxWidth="md"
-          sx={{
-            position: 'relative',
-            zIndex: 3,
-            py: { xs: 8, md: 10 },
-          }}
+          sx={{ position: 'relative', zIndex: 3, py: { xs: 8, md: 10 } }}
         >
           <motion.div initial="hidden" animate="show" variants={container}>
-            {/* Live badge */}
             <motion.div variants={item}>
               <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
                 <Chip
@@ -166,7 +201,6 @@ export default function HomePage() {
               </Box>
             </motion.div>
 
-            {/* H1 */}
             <motion.div variants={item}>
               <Typography
                 component="h1"
@@ -178,18 +212,16 @@ export default function HomePage() {
                   letterSpacing: '-0.04em',
                   lineHeight: 1.02,
                   mb: 3,
-                  textShadow:
-                    '0 2px 24px rgba(255,255,255,0.35), 0 0 1px rgba(255,255,255,0.2)',
-                  '[data-theme="dark"] &': {
-                    textShadow: '0 2px 32px rgba(0,0,0,0.55)',
-                  },
+                  textShadow: '0 2px 24px rgba(255,255,255,0.35), 0 0 1px rgba(255,255,255,0.2)',
+                  '[data-theme="dark"] &': { textShadow: '0 2px 32px rgba(0,0,0,0.55)' },
                 }}
               >
                 Fast. Reliable.{' '}
                 <Box
                   component="span"
                   sx={{
-                    background: 'linear-gradient(135deg, #0096B8 0%, #22C7E0 50%, #4DD0E1 100%)',
+                    background:
+                      'linear-gradient(135deg, #0096B8 0%, #22C7E0 50%, #4DD0E1 100%)',
                     WebkitBackgroundClip: 'text',
                     backgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
@@ -204,7 +236,6 @@ export default function HomePage() {
               </Typography>
             </motion.div>
 
-            {/* Subtitle */}
             <motion.div variants={item}>
               <Typography
                 align="center"
@@ -223,7 +254,6 @@ export default function HomePage() {
               </Typography>
             </motion.div>
 
-            {/* CTAs */}
             <motion.div variants={item}>
               <Box
                 sx={{
@@ -276,21 +306,19 @@ export default function HomePage() {
               </Box>
             </motion.div>
 
-            {/* Trust chips row */}
             <motion.div variants={item}>
               <Stack
                 direction="row"
                 spacing={{ xs: 2, sm: 3.5 }}
-                sx={{
-                  justifyContent: 'center',
-                  flexWrap: 'wrap',
-                  rowGap: 1.5,
-                }}
+                sx={{ justifyContent: 'center', flexWrap: 'wrap', rowGap: 1.5 }}
               >
                 {[
                   { i: <SecurityRoundedIcon sx={{ fontSize: 18 }} />, t: 'Secure payments' },
-                  { i: <BoltRoundedIcon sx={{ fontSize: 18 }} />,     t: 'Instant delivery' },
-                  { i: <VerifiedUserRoundedIcon sx={{ fontSize: 18 }} />, t: 'Trusted platform' },
+                  { i: <BoltRoundedIcon sx={{ fontSize: 18 }} />, t: 'Instant delivery' },
+                  {
+                    i: <VerifiedUserRoundedIcon sx={{ fontSize: 18 }} />,
+                    t: 'Trusted platform',
+                  },
                 ].map((s) => (
                   <Box
                     key={s.t}
@@ -305,10 +333,7 @@ export default function HomePage() {
                       border: '1px solid var(--border)',
                       backdropFilter: 'blur(10px)',
                       transition: 'transform .2s ease, border-color .2s ease',
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                        borderColor: 'var(--cyan)',
-                      },
+                      '&:hover': { transform: 'translateY(-2px)', borderColor: 'var(--cyan)' },
                     }}
                   >
                     <Box sx={{ color: 'var(--cyan-deep)', display: 'flex' }}>{s.i}</Box>
@@ -327,7 +352,6 @@ export default function HomePage() {
               </Stack>
             </motion.div>
 
-            {/* Stats row */}
             <motion.div variants={item}>
               <Box
                 sx={{
@@ -343,8 +367,8 @@ export default function HomePage() {
                 }}
               >
                 {[
-                  { n: '10K+',  l: 'Customers' },
-                  { n: '1M+',   l: 'Bundles delivered' },
+                  { n: '10K+', l: 'Customers' },
+                  { n: '1M+', l: 'Bundles delivered' },
                   { n: '99.9%', l: 'Uptime' },
                 ].map((s) => (
                   <Box key={s.l} sx={{ textAlign: 'center' }}>
@@ -376,7 +400,6 @@ export default function HomePage() {
           </motion.div>
         </Container>
 
-        {/* ─── Bottom fade (smooth transition into next section) ─── */}
         <Box
           aria-hidden
           sx={{
@@ -392,7 +415,7 @@ export default function HomePage() {
         />
       </Box>
 
-      {/* ═══════════ TRUST STRIP ═══════════ */}
+      {/* TRUST STRIP */}
       <Box
         sx={{
           bgcolor: 'var(--surface)',
@@ -412,11 +435,11 @@ export default function HomePage() {
             }}
           >
             {[
-              { i: <SecurityRoundedIcon />,     t: 'Secure payments' },
-              { i: <BoltRoundedIcon />,         t: 'Instant delivery' },
+              { i: <SecurityRoundedIcon />, t: 'Secure payments' },
+              { i: <BoltRoundedIcon />, t: 'Instant delivery' },
               { i: <SupportAgentRoundedIcon />, t: '24/7 support' },
               { i: <VerifiedUserRoundedIcon />, t: 'Trusted platform' },
-              { i: <TrendingUpRoundedIcon />,   t: 'Best prices' },
+              { i: <TrendingUpRoundedIcon />, t: 'Best prices' },
             ].map((s) => (
               <Box key={s.t} sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
                 <Box sx={{ color: 'var(--cyan-deep)', display: 'flex' }}>{s.i}</Box>
@@ -429,7 +452,7 @@ export default function HomePage() {
         </Container>
       </Box>
 
-      {/* ═══════════ NETWORKS ═══════════ */}
+      {/* NETWORKS */}
       <Box className="section">
         <Container maxWidth="lg">
           <motion.div
@@ -446,7 +469,10 @@ export default function HomePage() {
               >
                 Available networks
               </Typography>
-              <Typography align="center" sx={{ mb: 7, maxWidth: 560, mx: 'auto', color: 'var(--text-muted)' }}>
+              <Typography
+                align="center"
+                sx={{ mb: 7, maxWidth: 560, mx: 'auto', color: 'var(--text-muted)' }}
+              >
                 All major Tanzanian operators, one seamless experience.
               </Typography>
             </motion.div>
@@ -483,7 +509,15 @@ export default function HomePage() {
                     }}
                   >
                     <CardContent sx={{ py: 5, textAlign: 'center' }}>
-                      <Box sx={{ height: 72, display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2.5 }}>
+                      <Box
+                        sx={{
+                          height: 72,
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          mb: 2.5,
+                        }}
+                      >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={n.logo}
@@ -491,10 +525,19 @@ export default function HomePage() {
                           style={{ maxHeight: 60, maxWidth: '100%', objectFit: 'contain' }}
                         />
                       </Box>
-                      <Typography sx={{ fontWeight: 700, color: 'var(--navy)', mb: 0.75, fontSize: '1.05rem' }}>
+                      <Typography
+                        sx={{
+                          fontWeight: 700,
+                          color: 'var(--navy)',
+                          mb: 0.75,
+                          fontSize: '1.05rem',
+                        }}
+                      >
                         {n.name}
                       </Typography>
-                      <Typography sx={{ fontSize: '0.8rem', color: 'var(--cyan-deep)', fontWeight: 600 }}>
+                      <Typography
+                        sx={{ fontSize: '0.8rem', color: 'var(--cyan-deep)', fontWeight: 600 }}
+                      >
                         View plans →
                       </Typography>
                     </CardContent>
@@ -506,7 +549,7 @@ export default function HomePage() {
         </Container>
       </Box>
 
-      {/* ═══════════ HOW IT WORKS ═══════════ */}
+      {/* HOW IT WORKS */}
       <Box sx={{ bgcolor: 'var(--bg-soft)', py: { xs: 8, md: 12 } }}>
         <Container maxWidth="lg">
           <motion.div
@@ -516,7 +559,11 @@ export default function HomePage() {
             variants={container}
           >
             <motion.div variants={item}>
-              <Typography component="h2" align="center" sx={{ mb: 1.5, fontWeight: 800, color: 'var(--navy)' }}>
+              <Typography
+                component="h2"
+                align="center"
+                sx={{ mb: 1.5, fontWeight: 800, color: 'var(--navy)' }}
+              >
                 How it works
               </Typography>
               <Typography align="center" sx={{ mb: 7, color: 'var(--text-muted)' }}>
@@ -524,7 +571,13 @@ export default function HomePage() {
               </Typography>
             </motion.div>
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 4 }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+                gap: 4,
+              }}
+            >
               {STEPS.map((step) => (
                 <motion.div key={step.n} variants={item}>
                   <Card
@@ -534,7 +587,10 @@ export default function HomePage() {
                       border: '1px solid var(--border)',
                       p: 1,
                       transition: 'transform .25s ease, box-shadow .25s ease',
-                      '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 20px 40px rgba(15,23,42,0.08)' },
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 20px 40px rgba(15,23,42,0.08)',
+                      },
                     }}
                   >
                     <CardContent sx={{ p: 3 }}>
@@ -546,7 +602,7 @@ export default function HomePage() {
                           width: 48,
                           height: 48,
                           borderRadius: 3,
-                          background: `linear-gradient(135deg, var(--navy), var(--cyan))`,
+                          background: 'linear-gradient(135deg, var(--navy), var(--cyan))',
                           color: '#fff',
                           fontWeight: 800,
                           fontSize: '1rem',
@@ -556,10 +612,14 @@ export default function HomePage() {
                       >
                         {step.n}
                       </Box>
-                      <Typography sx={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--navy)', mb: 1 }}>
+                      <Typography
+                        sx={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--navy)', mb: 1 }}
+                      >
                         {step.title}
                       </Typography>
-                      <Typography sx={{ fontSize: '0.925rem', color: 'var(--text-muted)', lineHeight: 1.65 }}>
+                      <Typography
+                        sx={{ fontSize: '0.925rem', color: 'var(--text-muted)', lineHeight: 1.65 }}
+                      >
                         {step.desc}
                       </Typography>
                     </CardContent>
@@ -571,7 +631,7 @@ export default function HomePage() {
         </Container>
       </Box>
 
-      {/* ═══════════ FEATURES ═══════════ */}
+      {/* FEATURES */}
       <Box className="section">
         <Container maxWidth="lg">
           <motion.div
@@ -581,7 +641,11 @@ export default function HomePage() {
             variants={container}
           >
             <motion.div variants={item}>
-              <Typography component="h2" align="center" sx={{ mb: 1.5, fontWeight: 800, color: 'var(--navy)' }}>
+              <Typography
+                component="h2"
+                align="center"
+                sx={{ mb: 1.5, fontWeight: 800, color: 'var(--navy)' }}
+              >
                 Why choose WingaPro
               </Typography>
               <Typography align="center" sx={{ mb: 7, color: 'var(--text-muted)' }}>
@@ -589,16 +653,22 @@ export default function HomePage() {
               </Typography>
             </motion.div>
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 3 }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: {
+                  xs: '1fr',
+                  sm: 'repeat(2, 1fr)',
+                  md: 'repeat(3, 1fr)',
+                },
+                gap: 3,
+              }}
+            >
               {FEATURES.map((f) => (
                 <motion.div key={f.title} variants={item}>
                   <Card
                     className="lift"
-                    sx={{
-                      height: '100%',
-                      bgcolor: 'var(--surface)',
-                      border: '1px solid var(--border)',
-                    }}
+                    sx={{ height: '100%', bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}
                   >
                     <CardContent sx={{ p: 3.5 }}>
                       <Box
@@ -621,10 +691,14 @@ export default function HomePage() {
                       >
                         {f.icon}
                       </Box>
-                      <Typography sx={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--navy)', mb: 1 }}>
+                      <Typography
+                        sx={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--navy)', mb: 1 }}
+                      >
                         {f.title}
                       </Typography>
-                      <Typography sx={{ fontSize: '0.925rem', color: 'var(--text-muted)', lineHeight: 1.65 }}>
+                      <Typography
+                        sx={{ fontSize: '0.925rem', color: 'var(--text-muted)', lineHeight: 1.65 }}
+                      >
                         {f.desc}
                       </Typography>
                     </CardContent>
@@ -636,7 +710,7 @@ export default function HomePage() {
         </Container>
       </Box>
 
-      {/* ═══════════ TESTIMONIALS ═══════════ */}
+      {/* TESTIMONIALS */}
       <Box sx={{ bgcolor: 'var(--bg-soft)', py: { xs: 8, md: 12 } }}>
         <Container maxWidth="lg">
           <motion.div
@@ -646,7 +720,11 @@ export default function HomePage() {
             variants={container}
           >
             <motion.div variants={item}>
-              <Typography component="h2" align="center" sx={{ mb: 1.5, fontWeight: 800, color: 'var(--navy)' }}>
+              <Typography
+                component="h2"
+                align="center"
+                sx={{ mb: 1.5, fontWeight: 800, color: 'var(--navy)' }}
+              >
                 Loved by our customers
               </Typography>
               <Typography align="center" sx={{ mb: 7, color: 'var(--text-muted)' }}>
@@ -654,7 +732,13 @@ export default function HomePage() {
               </Typography>
             </motion.div>
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 3 }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+                gap: 3,
+              }}
+            >
               {TESTIMONIALS.map((t) => (
                 <motion.div key={t.name} variants={item}>
                   <Card
@@ -663,24 +747,47 @@ export default function HomePage() {
                       bgcolor: 'var(--surface)',
                       border: '1px solid var(--border)',
                       transition: 'transform .25s ease, box-shadow .25s ease',
-                      '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 20px 40px rgba(15,23,42,0.08)' },
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 20px 40px rgba(15,23,42,0.08)',
+                      },
                     }}
                   >
                     <CardContent sx={{ p: 3.5 }}>
                       <Box sx={{ display: 'flex', gap: 0.5, mb: 2 }}>
                         {[1, 2, 3, 4, 5].map((i) => (
-                          <Box key={i} sx={{ color: '#F59E0B', fontSize: 16, lineHeight: 1 }}>★</Box>
+                          <Box key={i} sx={{ color: '#F59E0B', fontSize: 16, lineHeight: 1 }}>
+                            ★
+                          </Box>
                         ))}
                       </Box>
-                      <Typography sx={{ fontStyle: 'italic', mb: 3, color: 'var(--text)', lineHeight: 1.7, fontSize: '0.95rem' }}>
+                      <Typography
+                        sx={{
+                          fontStyle: 'italic',
+                          mb: 3,
+                          color: 'var(--text)',
+                          lineHeight: 1.7,
+                          fontSize: '0.95rem',
+                        }}
+                      >
                         &ldquo;{t.text}&rdquo;
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Avatar sx={{ bgcolor: 'var(--navy)', width: 40, height: 40, fontSize: 15, fontWeight: 700 }}>
+                        <Avatar
+                          sx={{
+                            bgcolor: 'var(--navy)',
+                            width: 40,
+                            height: 40,
+                            fontSize: 15,
+                            fontWeight: 700,
+                          }}
+                        >
                           {t.name.charAt(0)}
                         </Avatar>
                         <Box>
-                          <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--navy)' }}>
+                          <Typography
+                            sx={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--navy)' }}
+                          >
                             {t.name}
                           </Typography>
                           <Typography sx={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
@@ -697,7 +804,7 @@ export default function HomePage() {
         </Container>
       </Box>
 
-      {/* ═══════════ FINAL CTA ═══════════ */}
+      {/* FINAL CTA */}
       <Box sx={{ py: { xs: 8, md: 12 } }}>
         <Container maxWidth="lg">
           <motion.div
@@ -712,7 +819,8 @@ export default function HomePage() {
                 overflow: 'hidden',
                 borderRadius: 5,
                 p: { xs: 5, md: 8 },
-                background: `linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 55%, var(--cyan) 165%)`,
+                background:
+                  'linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 55%, var(--cyan) 165%)',
                 color: '#fff',
                 boxShadow: '0 30px 60px rgba(10,46,92,0.28)',
                 textAlign: 'center',
@@ -726,7 +834,8 @@ export default function HomePage() {
                   width: 320,
                   height: 320,
                   borderRadius: '50%',
-                  background: 'radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%)',
+                  background:
+                    'radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%)',
                   filter: 'blur(20px)',
                 }}
               />
@@ -758,7 +867,11 @@ export default function HomePage() {
                   Join thousands of Tanzanians who trust WingaPro for their data needs.
                 </Typography>
 
-                <Stack direction="row" spacing={1.5} sx={{ mb: 4, flexWrap: 'wrap', justifyContent: 'center' }}>
+                <Stack
+                  direction="row"
+                  spacing={1.5}
+                  sx={{ mb: 4, flexWrap: 'wrap', justifyContent: 'center' }}
+                >
                   {['No signup fee', 'Instant delivery', '24/7 support'].map((it) => (
                     <Box key={it} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                       <CheckCircleRoundedIcon sx={{ fontSize: 18, color: 'var(--cyan)' }} />

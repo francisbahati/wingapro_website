@@ -1,4 +1,4 @@
-// proxy.ts  (project root — same folder as next.config.ts)
+// proxy.ts (project root — same folder as next.config.ts)
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -15,7 +15,25 @@ const PUBLIC_PATHS = [
   '/recovery',
 ];
 
-const ADMIN_PATHS = ['/users'];
+// Only admins can reach these
+const ADMIN_PATHS = ['/users', '/reports'];
+
+// Authenticated users (any role)
+const AUTH_PATHS = [
+  '/dashboard',
+  '/orders',
+  '/packages',
+  '/wallet',
+  '/promotions',
+  '/support',
+  '/notifications',
+  '/profile',
+  '/settings',
+  '/deposit-withdraw',
+  '/payment',
+  '/order-confirmation',
+  '/buy',
+];
 
 function matchesPath(pathname: string, list: string[]) {
   return list.some((p) => pathname === p || pathname.startsWith(p + '/'));
@@ -29,7 +47,7 @@ export default function proxy(request: NextRequest) {
   const isPublic = matchesPath(pathname, PUBLIC_PATHS);
   const isAdminOnly = matchesPath(pathname, ADMIN_PATHS);
 
-  // Not logged in → redirect to login
+  // 1. Not logged in → redirect to login for any non-public route
   if (!token && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
@@ -37,7 +55,7 @@ export default function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Already logged in but trying to log in again
+  // 2. Already logged in → can't revisit login/register
   if (token && (pathname === '/login' || pathname === '/register')) {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard';
@@ -45,10 +63,11 @@ export default function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Admin-only routes
+  // 3. Admin-only routes → block non-admins
   if (isAdminOnly && role !== 'admin') {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard';
+    url.search = '';
     return NextResponse.redirect(url);
   }
 
@@ -57,6 +76,6 @@ export default function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|images|apk|windows|firebase-messaging-sw.js).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|images|apk|windows|firebase-messaging-sw.js|firebase-config.js).*)',
   ],
 };

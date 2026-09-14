@@ -32,6 +32,23 @@ interface Package {
   description?: string;
 }
 
+function normalizePhone(value: string): string {
+  let v = value.replace(/\s+/g, '').replace(/-/g, '');
+  if (v.startsWith('+255')) v = '0' + v.slice(4);
+  if (v.startsWith('255') && v.length === 12) v = '0' + v.slice(3);
+  if (v.length === 9 && /^\d+$/.test(v)) v = '0' + v;
+  return v;
+}
+
+const isValidPhone = (v: string) => /^0[67]\d{8}$/.test(normalizePhone(v));
+
+function generateIdempotencyKey(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID();
+  }
+  return `pur-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 function PackagesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -47,25 +64,26 @@ function PackagesContent() {
   const [buyDialogOpen, setBuyDialogOpen] = useState(false);
   const [recipientName, setRecipientName] = useState('');
   const [recipientPhone, setRecipientPhone] = useState('');
+  const [dialogError, setDialogError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchPackages = async () => {
       try {
         const res = await apiClient.get('/packages');
-        let data = res.data.packages || [];
-        if (networkFilter) data = data.filter((p: Package) => p.network === networkFilter);
+        let data: Package[] = res.data.packages || [];
+        if (networkFilter) data = data.filter((p) => p.network === networkFilter);
         if (searchQuery) {
           const q = searchQuery.toLowerCase();
           data = data.filter(
-            (p: Package) =>
+            (p) =>
               p.name.toLowerCase().includes(q) ||
               p.network.toLowerCase().includes(q) ||
               p.price.toString().includes(q)
           );
         }
-        if (minPrice !== null) data = data.filter((p: Package) => p.price >= minPrice);
-        if (maxPrice !== null) data = data.filter((p: Package) => p.price <= maxPrice);
+        if (minPrice !== null) data = data.filter((p) => p.price >= minPrice);
+        if (maxPrice !== null) data = data.filter((p) => p.price <= maxPrice);
         setPackages(data);
       } catch (err) {
         if (err instanceof AxiosError) {
@@ -82,32 +100,47 @@ function PackagesContent() {
 
   const handleBuy = (pkg: Package) => {
     setSelectedPackage(pkg);
+    setDialogError('');
     setBuyDialogOpen(true);
   };
 
   const handleConfirmPurchase = async () => {
-    if (!recipientName.trim() || !recipientPhone.trim()) {
-      alert('Please fill in recipient details');
+    setDialogError('');
+
+    if (!recipientName.trim()) {
+      setDialogError('Please enter the recipient name');
       return;
     }
+    if (!recipientPhone.trim()) {
+      setDialogError('Please enter the recipient phone number');
+      return;
+    }
+    if (!isValidPhone(recipientPhone)) {
+      setDialogError('Enter a valid Tanzanian number (e.g. 0712345678)');
+      return;
+    }
+
     setSubmitting(true);
     try {
+      const idempotencyKey = generateIdempotencyKey();
+
       await apiClient.post('/purchase', {
         packageId: selectedPackage?.id,
-        recipientName,
-        recipientPhone,
+        recipientName: recipientName.trim(),
+        recipientPhone: normalizePhone(recipientPhone),
         network: selectedPackage?.network,
+        idempotencyKey,
       });
+      setBuyDialogOpen(false);
       router.push('/orders');
     } catch (err) {
       if (err instanceof AxiosError) {
-        alert(err.response?.data?.message || 'Purchase failed');
+        setDialogError(err.response?.data?.message || 'Purchase failed');
       } else {
-        alert('An unexpected error occurred');
+        setDialogError('An unexpected error occurred');
       }
     } finally {
       setSubmitting(false);
-      setBuyDialogOpen(false);
     }
   };
 
@@ -150,6 +183,7 @@ function PackagesContent() {
       <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3, color: 'var(--navy)' }}>
         {networkFilter ? `${networkFilter} Packages` : 'All Packages'}
       </Typography>
+
       {packages.length === 0 ? (
         <Typography variant="body1" sx={{ color: 'var(--text-muted)' }}>
           No packages match your criteria.
@@ -185,7 +219,11 @@ function PackagesContent() {
                   size="small"
                   sx={{ bgcolor: 'var(--navy)', color: 'white', mb: 1 }}
                 />
-                <Typography variant="h6" component="div" sx={{ fontWeight: 700, color: 'var(--navy)' }}>
+                <Typography
+                  variant="h6"
+                  component="div"
+                  sx={{ fontWeight: 700, color: 'var(--navy)' }}
+                >
                   {pkg.name}
                 </Typography>
                 <Typography variant="body2" sx={{ my: 1, color: 'var(--text-muted)' }}>
@@ -212,7 +250,7 @@ function PackagesContent() {
 
       <Dialog
         open={buyDialogOpen}
-        onClose={() => setBuyDialogOpen(false)}
+        onClose={() => !submitting && setBuyDialogOpen(false)}
         PaperProps={{
           sx: {
             bgcolor: 'var(--surface)',
@@ -252,20 +290,24 @@ function PackagesContent() {
             sx={{ mb: 2 }}
           />
           <TextField
-            label="Recipient Phone (10 digits)"
+            label="Recipient Phone"
             fullWidth
             value={recipientPhone}
             onChange={(e) => setRecipientPhone(e.target.value)}
             placeholder="e.g., 0712345678"
+            helperText="Tanzanian mobile number"
           />
+          {dialogError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {dialogError}
+            </Alert>
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setBuyDialogOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            disabled={submitting}
-            onClick={handleConfirmPurchase}
-          >
+          <Button onClick={() => setBuyDialogOpen(false)} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button variant="contained" disabled={submitting} onClick={handleConfirmPurchase}>
             {submitting ? <CircularProgress size={24} color="inherit" /> : 'Buy Now'}
           </Button>
         </DialogActions>

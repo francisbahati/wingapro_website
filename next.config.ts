@@ -1,15 +1,17 @@
 // next.config.ts
 import type { NextConfig } from 'next';
 
+const devOrigins = (process.env.DEV_ALLOWED_ORIGINS || 'localhost,127.0.0.1')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
 const nextConfig: NextConfig = {
-  // Required for the Dockerfile (server.js + .next/standalone)
   output: 'standalone',
 
   reactStrictMode: true,
   poweredByHeader: false,
 
-  // Next.js 16 removed the `eslint` option from next.config.
-  // Run lint separately with: npx eslint .
   typescript: {
     ignoreBuildErrors: false,
   },
@@ -18,16 +20,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [],
   },
 
-  // Allow the dev server to be reached from any device on the LAN
-  // (phones, tablets, other laptops). Production is unaffected.
-  allowedDevOrigins: [
-    'localhost',
-    '127.0.0.1',
-    '192.168.1.*',    // any device on this subnet
-    '192.168.0.*',    // in case router uses this range
-    '10.0.0.*',       // some routers
-    '172.16.0.*',     // some routers
-  ],
+  // Exact hostnames or IPs only — Next.js 16 rejects glob wildcards.
+  // Set DEV_ALLOWED_ORIGINS=localhost,192.168.1.5 in your .env.local
+  allowedDevOrigins: devOrigins,
 };
 
 export default nextConfig;

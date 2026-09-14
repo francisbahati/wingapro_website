@@ -65,23 +65,19 @@
   --container-max: 1240px;
   --container-pad: 24px;
 
-  /* ── Theme-aware chrome ── */
   --navbar-bg:          rgba(255, 255, 255, 0.72);
   --navbar-bg-scrolled: rgba(255, 255, 255, 0.90);
   --footer-bg:          #0A2E5C;
   --hero-base:          #FFFFFF;
-
-  /* ── Hero video overlay (light) ── */
   --hero-overlay:       rgba(255, 255, 255, 0.82);
 
-  /* ── Logo circle: ALWAYS white in both modes so the logo is visible ── */
   --logo-circle-bg:     #FFFFFF;
   --logo-circle-border: rgba(10, 46, 92, 0.08);
 
   color-scheme: light;
 }
 
-/* ---------- 2. TOKENS (DARK — soft navy-slate, no black) ---------- */
+/* ---------- 2. TOKENS (DARK) ---------- */
 [data-theme="dark"] {
   --bg:            #0E1526;
   --bg-soft:       #131C31;
@@ -127,11 +123,8 @@
   --navbar-bg-scrolled: rgba(22, 32, 58, 0.92);
   --footer-bg:          #131C31;
   --hero-base:          #0E1526;
-
-  /* ── Hero video overlay (dark) ── */
   --hero-overlay:       rgba(14, 21, 38, 0.86);
 
-  /* Logo circle stays white in dark mode too */
   --logo-circle-bg:     #FFFFFF;
   --logo-circle-border: rgba(148, 163, 184, 0.20);
 
@@ -647,14 +640,13 @@ code {
 .snap-x::-webkit-scrollbar { display: none; }
 .snap-x > * { scroll-snap-align: start; flex-shrink: 0; }
 
-/* ---------- 28. THEME TRANSITION (smooth switch) ---------- */
+/* ---------- 28. THEME TRANSITION ---------- */
 * {
   transition-property: background-color, border-color, color, fill, stroke;
   transition-duration: 200ms;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Don't animate things that shouldn't */
 img, svg, video, canvas,
 .animate-float, .animate-float-slow,
 .animate-spin, .animate-pulse-ring,
@@ -711,7 +703,6 @@ img, svg, video, canvas,
   }
 }
 
-/* Prevent iOS zoom on focus */
 @media (max-width: 768px) {
   input, textarea, select {
     font-size: 16px !important;
@@ -734,7 +725,7 @@ img, svg, video, canvas,
   .no-print { display: none !important; }
 }
 
-/* ---------- 33. GLOBAL THEME ENFORCEMENT ppppo---------- */
+/* ---------- 33. GLOBAL THEME ENFORCEMENT ---------- */
 [data-theme="dark"] {
   .MuiPaper-root:not([data-skip-theme]),
   .MuiCard-root,

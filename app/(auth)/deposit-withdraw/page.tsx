@@ -1,3 +1,4 @@
+// app/(auth)/deposit-withdraw/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -23,9 +24,23 @@ import apiClient from '@/lib/api/client';
 
 type Mode = 'deposit' | 'withdraw';
 
-// ⚠️ These MUST match the backend validation limits
-const MIN_DEPOSIT = 1000;    // backend: "Minimum deposit is TZS 1,000"
-const MIN_WITHDRAW = 25000;  // backend: "Minimum withdrawal amount is TZS 25,000"
+const MIN_DEPOSIT = 1000;
+const MIN_WITHDRAW = 25000;
+
+function normalizePhone(value: string): string {
+  let v = value.replace(/\s+/g, '').replace(/-/g, '');
+  if (v.startsWith('+255')) v = '0' + v.slice(4);
+  if (v.startsWith('255') && v.length === 12) v = '0' + v.slice(3);
+  if (v.length === 9 && /^\d+$/.test(v)) v = '0' + v;
+  return v;
+}
+
+function generateIdempotencyKey(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID();
+  }
+  return `tx-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
 
 export default function DepositWithdrawPage() {
   const router = useRouter();
@@ -39,19 +54,6 @@ export default function DepositWithdrawPage() {
   const isWithdraw = mode === 'withdraw';
   const minAmount = isWithdraw ? MIN_WITHDRAW : MIN_DEPOSIT;
 
-  /**
-   * Normalize any Tanzanian number to 0XXXXXXXXX (10 digits).
-   * Backend's formatAndValidatePhone accepts: 0XXXXXXXXX | 255XXXXXXXXX | +255XXXXXXXXX
-   * We send 0XXXXXXXXX because it's the most human-readable form.
-   */
-  const normalizePhone = (value: string): string => {
-    let v = value.replace(/\s+/g, '').replace(/-/g, '');
-    if (v.startsWith('+255')) v = '0' + v.slice(4);
-    if (v.startsWith('255') && v.length === 12) v = '0' + v.slice(3);
-    if (v.length === 9 && /^\d+$/.test(v)) v = '0' + v;
-    return v;
-  };
-
   const isValidPhone = (value: string) => /^0[67]\d{8}$/.test(normalizePhone(value));
 
   const handleModeChange = (_: any, val: Mode | null) => {
@@ -64,7 +66,6 @@ export default function DepositWithdrawPage() {
   };
 
   const handleSubmit = async () => {
-    // ---------- Client-side validation (mirrors backend exactly) ----------
     const numericAmount = parseFloat(amount);
 
     if (!amount || isNaN(numericAmount) || numericAmount <= 0) {
@@ -72,7 +73,9 @@ export default function DepositWithdrawPage() {
       return;
     }
     if (numericAmount < minAmount) {
-      setError(`Minimum ${isWithdraw ? 'withdrawal' : 'deposit'} amount is TZS ${minAmount.toLocaleString()}`);
+      setError(
+        `Minimum ${isWithdraw ? 'withdrawal' : 'deposit'} amount is TZS ${minAmount.toLocaleString()}`
+      );
       return;
     }
     if (!phone.trim()) {
@@ -93,28 +96,25 @@ export default function DepositWithdrawPage() {
     setLoading(true);
 
     try {
-      // ---------- Build payload that EXACTLY matches backend expectations ----------
       const normalizedPhone = normalizePhone(phone);
+      const idempotencyKey = generateIdempotencyKey();
 
       if (isWithdraw) {
-        // POST /api/wallet/withdraw  →  { amount: number, phone: string }
         await apiClient.post('/wallet/withdraw', {
-          amount: numericAmount,           // number, not string
-          phone: normalizedPhone,          // 0XXXXXXXXX
+          amount: numericAmount,
+          phone: normalizedPhone,
+          idempotencyKey,
         });
-
         setSuccess(
           `Withdrawal of TZS ${numericAmount.toLocaleString()} is being sent to ${normalizedPhone}. ` +
-          `It should arrive within a few minutes.`
+            `It should arrive within a few minutes.`
         );
       } else {
-        // POST /api/wallet/deposit  →  { amount: number, phone: string, idempotencyKey?: string }
-        // Backend generates its own key if we don't send one, so omit it.
         await apiClient.post('/wallet/deposit', {
           amount: numericAmount,
           phone: normalizedPhone,
+          idempotencyKey,
         });
-
         setSuccess(
           `Deposit initiated. Please approve the payment prompt sent to ${normalizedPhone}.`
         );
@@ -136,15 +136,9 @@ export default function DepositWithdrawPage() {
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 560, mx: 'auto' }}>
-      {/* Header */}
       <Typography
         variant="h4"
-        sx={{
-          fontWeight: 800,
-          mb: 1,
-          letterSpacing: '-0.02em',
-          color: 'var(--navy)',
-        }}
+        sx={{ fontWeight: 800, mb: 1, letterSpacing: '-0.02em', color: 'var(--navy)' }}
       >
         Deposit & Withdraw
       </Typography>
@@ -163,16 +157,14 @@ export default function DepositWithdrawPage() {
           bgcolor: 'var(--surface)',
         }}
       >
-        {/* Top accent bar */}
         <Box
           sx={{
             height: 4,
-            background: `linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%)`,
+            background: 'linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%)',
           }}
         />
 
         <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-          {/* Mode toggle */}
           <ToggleButtonGroup
             value={mode}
             exclusive
@@ -194,7 +186,6 @@ export default function DepositWithdrawPage() {
             </ToggleButton>
           </ToggleButtonGroup>
 
-          {/* Amount */}
           <TextField
             label="Amount"
             type="number"
@@ -210,13 +201,8 @@ export default function DepositWithdrawPage() {
             sx={{ mb: 3 }}
           />
 
-          {/* Phone — shown for BOTH modes */}
           <TextField
-            label={
-              isWithdraw
-                ? 'Phone number to receive money'
-                : 'Mobile money phone number'
-            }
+            label={isWithdraw ? 'Phone number to receive money' : 'Mobile money phone number'}
             fullWidth
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
@@ -229,16 +215,13 @@ export default function DepositWithdrawPage() {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <PhoneIphoneRoundedIcon
-                    sx={{ color: 'var(--text-muted)', fontSize: 20 }}
-                  />
+                  <PhoneIphoneRoundedIcon sx={{ color: 'var(--text-muted)', fontSize: 20 }} />
                 </InputAdornment>
               ),
             }}
             sx={{ mb: 3 }}
           />
 
-          {/* Alerts */}
           {error && (
             <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
               {error}
@@ -250,7 +233,6 @@ export default function DepositWithdrawPage() {
             </Alert>
           )}
 
-          {/* Submit */}
           <Button
             variant="contained"
             fullWidth
@@ -271,7 +253,6 @@ export default function DepositWithdrawPage() {
         </CardContent>
       </Card>
 
-      {/* Info footer */}
       <Box
         sx={{
           mt: 3,
@@ -286,11 +267,7 @@ export default function DepositWithdrawPage() {
         </Typography>
         <Typography
           variant="body2"
-          sx={{
-            fontSize: '0.85rem',
-            lineHeight: 1.6,
-            color: 'var(--text-muted)',
-          }}
+          sx={{ fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text-muted)' }}
         >
           {isWithdraw
             ? `Withdrawals are processed within minutes. Minimum: TZS ${MIN_WITHDRAW.toLocaleString()}. Make sure the phone number matches your mobile money account.`

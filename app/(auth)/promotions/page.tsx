@@ -1,7 +1,18 @@
+// app/(auth)/promotions/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Card, CardContent, Typography, Button, Chip, Alert, Skeleton, Divider } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Chip,
+  Alert,
+  Skeleton,
+  Divider,
+} from '@mui/material';
 import { useRouter } from 'next/navigation';
 import apiClient from '@/lib/api/client';
 import { AxiosError } from 'axios';
@@ -18,7 +29,7 @@ interface Promotion {
     network: string;
     dataSize: string;
     validity: string;
-    displayPrice: number;
+    price: number;
   };
 }
 
@@ -34,8 +45,11 @@ export default function PromotionsPage() {
         const res = await apiClient.get('/promotions');
         setPromotions(res.data.promotions || []);
       } catch (err) {
-        if (err instanceof AxiosError) setError(err.response?.data?.message || 'Failed to load promotions');
-        else setError('An unexpected error occurred');
+        if (err instanceof AxiosError) {
+          setError(err.response?.data?.message || 'Failed to load promotions');
+        } else {
+          setError('An unexpected error occurred');
+        }
       } finally {
         setLoading(false);
       }
@@ -44,14 +58,17 @@ export default function PromotionsPage() {
   }, []);
 
   const handleBuy = (pkg: Promotion['Package']) => {
-    if (pkg) router.push(`/packages?search=${pkg.name}`);
+    if (pkg) router.push(`/packages?search=${encodeURIComponent(pkg.name)}`);
   };
 
   if (loading) {
     return (
       <Box sx={{ p: 3 }}>
         {[1, 2, 3].map((i) => (
-          <Card key={i} sx={{ mb: 2, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
+          <Card
+            key={i}
+            sx={{ mb: 2, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}
+          >
             <CardContent>
               <Skeleton variant="text" width="60%" />
               <Skeleton variant="text" width="40%" />
@@ -67,7 +84,13 @@ export default function PromotionsPage() {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="error">{error}</Alert>
-        <Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>Retry</Button>
+        <Button
+          variant="contained"
+          onClick={() => window.location.reload()}
+          sx={{ mt: 2 }}
+        >
+          Retry
+        </Button>
       </Box>
     );
   }
@@ -77,10 +100,19 @@ export default function PromotionsPage() {
       <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3, color: 'var(--navy)' }}>
         Offers & Promotions
       </Typography>
+
       {promotions.length === 0 ? (
-        <Typography sx={{ color: 'var(--text-muted)' }}>No active promotions at the moment.</Typography>
+        <Typography sx={{ color: 'var(--text-muted)' }}>
+          No active promotions at the moment.
+        </Typography>
       ) : (
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 3 }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
+            gap: 3,
+          }}
+        >
           {promotions.map((promo) => (
             <Card
               key={promo.id}
@@ -110,6 +142,7 @@ export default function PromotionsPage() {
                 <Typography variant="body2" sx={{ mt: 1, color: 'var(--text-muted)' }}>
                   {promo.description}
                 </Typography>
+
                 {promo.Package && (
                   <>
                     <Divider sx={{ my: 2, borderColor: 'var(--border)' }} />
@@ -126,7 +159,7 @@ export default function PromotionsPage() {
                       <strong>Validity:</strong> {promo.Package.validity}
                     </Typography>
                     <Typography variant="h6" sx={{ mt: 1, color: 'var(--navy)' }}>
-                      TZS {promo.Package.displayPrice}
+                      TZS {Number(promo.Package.price || 0).toLocaleString()}
                     </Typography>
                   </>
                 )}

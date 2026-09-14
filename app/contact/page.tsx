@@ -26,22 +26,12 @@ import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import apiClient from '@/lib/api/client';
 
 const CONTACT_INFO = [
-  {
-    icon: <EmailRoundedIcon />,
-    label: 'Email',
-    value: 'support@wingapro.com',
-  },
-  {
-    icon: <PhoneRoundedIcon />,
-    label: 'Phone',
-    value: '+255 762 040 592',
-  },
-  {
-    icon: <LocationOnRoundedIcon />,
-    label: 'Location',
-    value: 'Dar es Salaam, Tanzania',
-  },
+  { icon: <EmailRoundedIcon />, label: 'Email', value: 'support@wingapro.com' },
+  { icon: <PhoneRoundedIcon />, label: 'Phone', value: '+255 762 040 592' },
+  { icon: <LocationOnRoundedIcon />, label: 'Location', value: 'Dar es Salaam, Tanzania' },
 ];
+
+const MAX_MESSAGE_LENGTH = 5000;
 
 interface FormState {
   name: string;
@@ -52,23 +42,19 @@ interface FormState {
 
 const INITIAL_FORM: FormState = { name: '', email: '', phone: '', message: '' };
 
+function normalizePhone(value: string): string {
+  let v = value.replace(/\s+/g, '').replace(/-/g, '');
+  if (v.startsWith('+255')) v = '0' + v.slice(4);
+  if (v.startsWith('255') && v.length === 12) v = '0' + v.slice(3);
+  if (v.length === 9 && /^\d+$/.test(v)) v = '0' + v;
+  return v;
+}
+
 export default function ContactPage() {
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  /**
-   * Normalize Tanzanian phone number to 0XXXXXXXXX form.
-   * Backend's formatAndValidatePhone accepts 0/255/+255 prefixes.
-   */
-  const normalizePhone = (value: string): string => {
-    let v = value.replace(/\s+/g, '').replace(/-/g, '');
-    if (v.startsWith('+255')) v = '0' + v.slice(4);
-    if (v.startsWith('255') && v.length === 12) v = '0' + v.slice(3);
-    if (v.length === 9 && /^\d+$/.test(v)) v = '0' + v;
-    return v;
-  };
 
   const isValidPhone = (value: string) => /^0[67]\d{8}$/.test(normalizePhone(value));
   const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -84,7 +70,6 @@ export default function ContactPage() {
     e.preventDefault();
     setError('');
 
-    // ---- Client-side validation (mirrors backend) ----
     if (!form.name.trim()) {
       setError('Please enter your name');
       return;
@@ -105,12 +90,14 @@ export default function ContactPage() {
       setError('Please write a message (at least 10 characters)');
       return;
     }
+    if (form.message.length > MAX_MESSAGE_LENGTH) {
+      setError(`Message is too long (maximum ${MAX_MESSAGE_LENGTH.toLocaleString()} characters)`);
+      return;
+    }
 
     setLoading(true);
 
     try {
-      // Public endpoint — no auth required.
-      // Creates a support ticket visible in the admin's support panel.
       await apiClient.post('/contact', {
         name: form.name.trim(),
         email: form.email.trim().toLowerCase(),
@@ -163,15 +150,10 @@ export default function ContactPage() {
             gap: 6,
           }}
         >
-          {/* ─── Info column ─── */}
+          {/* INFO */}
           <Box>
             <Typography
-              sx={{
-                fontSize: '1.25rem',
-                fontWeight: 700,
-                color: 'var(--navy)',
-                mb: 3,
-              }}
+              sx={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--navy)', mb: 3 }}
             >
               Contact Information
             </Typography>
@@ -206,7 +188,6 @@ export default function ContactPage() {
               ))}
             </Box>
 
-            {/* Optional help note */}
             <Box
               sx={{
                 mt: 4,
@@ -216,10 +197,7 @@ export default function ContactPage() {
                 border: '1px solid rgba(0,180,216,0.18)',
               }}
             >
-              <Typography
-                variant="body2"
-                sx={{ color: 'var(--navy)', fontWeight: 600, mb: 0.5 }}
-              >
+              <Typography variant="body2" sx={{ color: 'var(--navy)', fontWeight: 600, mb: 0.5 }}>
                 Need a quick reply?
               </Typography>
               <Typography
@@ -232,7 +210,7 @@ export default function ContactPage() {
             </Box>
           </Box>
 
-          {/* ─── Form column ─── */}
+          {/* FORM */}
           <Card
             sx={{
               borderRadius: 3,
@@ -259,24 +237,14 @@ export default function ContactPage() {
                   >
                     <SendRoundedIcon sx={{ fontSize: 30 }} />
                   </Box>
-                  <Typography
-                    variant="h6"
-                    sx={{ color: 'var(--navy)', fontWeight: 700, mb: 1 }}
-                  >
+                  <Typography variant="h6" sx={{ color: 'var(--navy)', fontWeight: 700, mb: 1 }}>
                     Message sent successfully!
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ color: 'var(--text-muted)', mb: 3 }}
-                  >
+                  <Typography variant="body2" sx={{ color: 'var(--text-muted)', mb: 3 }}>
                     Our support team has received your message and will get back to you
                     shortly.
                   </Typography>
-                  <Button
-                    variant="outlined"
-                    onClick={() => setSubmitted(false)}
-                    sx={{ mt: 1 }}
-                  >
+                  <Button variant="outlined" onClick={() => setSubmitted(false)} sx={{ mt: 1 }}>
                     Send another message
                   </Button>
                 </Box>
@@ -294,9 +262,7 @@ export default function ContactPage() {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <PersonOutlineRoundedIcon
-                            sx={{ color: 'var(--text-muted)', fontSize: 20 }}
-                          />
+                          <PersonOutlineRoundedIcon sx={{ color: 'var(--text-muted)', fontSize: 20 }} />
                         </InputAdornment>
                       ),
                     }}
@@ -315,9 +281,7 @@ export default function ContactPage() {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <MailOutlineRoundedIcon
-                            sx={{ color: 'var(--text-muted)', fontSize: 20 }}
-                          />
+                          <MailOutlineRoundedIcon sx={{ color: 'var(--text-muted)', fontSize: 20 }} />
                         </InputAdornment>
                       ),
                     }}
@@ -338,17 +302,11 @@ export default function ContactPage() {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <PhoneRoundedIcon
-                            sx={{ color: 'var(--text-muted)', fontSize: 20 }}
-                          />
+                          <PhoneRoundedIcon sx={{ color: 'var(--text-muted)', fontSize: 20 }} />
                         </InputAdornment>
                       ),
                     }}
                   />
-
-
-
-
 
                   <TextField
                     label="Message"
@@ -361,6 +319,8 @@ export default function ContactPage() {
                     value={form.message}
                     onChange={handleChange}
                     placeholder="Tell us how we can help…"
+                    inputProps={{ maxLength: MAX_MESSAGE_LENGTH }}
+                    helperText={`${form.message.length} / ${MAX_MESSAGE_LENGTH} characters`}
                   />
 
                   {error && (

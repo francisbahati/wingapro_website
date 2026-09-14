@@ -1,10 +1,28 @@
+// app/(auth)/profile/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import {
-  Box, Card, Typography, Avatar, TextField, Button, Dialog, DialogTitle, DialogContent,
-  DialogActions, IconButton, InputAdornment, List, ListItemButton, ListItemIcon, ListItemText,
-  Divider, CircularProgress, Alert, Skeleton,
+  Box,
+  Card,
+  Typography,
+  Avatar,
+  TextField,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  InputAdornment,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  CircularProgress,
+  Alert,
+  Skeleton,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -21,12 +39,16 @@ interface Profile {
   username: string;
   email: string;
   phone: string;
+  role?: string;
   referral_code: string;
   Branch?: { name: string };
 }
 
+const isValidPassword = (p: string) =>
+  /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/.test(p);
+
 export default function ProfilePage() {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,6 +61,7 @@ export default function ProfilePage() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
   const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
@@ -47,8 +70,11 @@ export default function ProfilePage() {
         const res = await apiClient.get('/users/profile');
         setProfile(res.data.user);
       } catch (err) {
-        if (err instanceof AxiosError) setError(err.response?.data?.message || 'Failed to load profile');
-        else setError('An unexpected error occurred');
+        if (err instanceof AxiosError) {
+          setError(err.response?.data?.message || 'Failed to load profile');
+        } else {
+          setError('An unexpected error occurred');
+        }
       } finally {
         setLoading(false);
       }
@@ -57,12 +83,15 @@ export default function ProfilePage() {
   }, []);
 
   const handleChangePassword = async () => {
+    setPasswordError('');
     if (newPassword !== confirmPassword) {
-      alert('Passwords do not match');
+      setPasswordError('Passwords do not match');
       return;
     }
-    if (newPassword.length < 6) {
-      alert('New password must be at least 6 characters');
+    if (!isValidPassword(newPassword)) {
+      setPasswordError(
+        'Password must be at least 8 characters with at least one letter and one number'
+      );
       return;
     }
     setChangingPassword(true);
@@ -73,9 +102,13 @@ export default function ProfilePage() {
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      setPasswordError('');
     } catch (err) {
-      if (err instanceof AxiosError) alert(err.response?.data?.message || 'Failed to change password');
-      else alert('An unexpected error occurred');
+      if (err instanceof AxiosError) {
+        setPasswordError(err.response?.data?.message || 'Failed to change password');
+      } else {
+        setPasswordError('An unexpected error occurred');
+      }
     } finally {
       setChangingPassword(false);
     }
@@ -95,7 +128,6 @@ export default function ProfilePage() {
         <Skeleton variant="text" width="40%" sx={{ mx: 'auto' }} />
         <Skeleton variant="rectangular" height={60} sx={{ mt: 3 }} />
         <Skeleton variant="rectangular" height={60} sx={{ mt: 2 }} />
-        <Skeleton variant="rectangular" height={60} sx={{ mt: 2 }} />
       </Box>
     );
   }
@@ -104,7 +136,9 @@ export default function ProfilePage() {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="error">{error}</Alert>
-        <Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>Retry</Button>
+        <Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>
+          Retry
+        </Button>
       </Box>
     );
   }
@@ -114,6 +148,7 @@ export default function ProfilePage() {
   const phone = profile?.phone || '';
   const referralCode = profile?.referral_code || 'N/A';
   const branch = profile?.Branch?.name || '';
+  const role = profile?.role || user?.role || 'customer';
 
   return (
     <Box sx={{ p: 3, maxWidth: 600, mx: 'auto' }}>
@@ -122,37 +157,74 @@ export default function ProfilePage() {
       </Typography>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
-        <Avatar sx={{ width: 80, height: 80, bgcolor: 'var(--navy)', color: '#fff', fontSize: 32 }}>
+        <Avatar
+          sx={{ width: 80, height: 80, bgcolor: 'var(--navy)', color: '#fff', fontSize: 32 }}
+        >
           {username.charAt(0).toUpperCase()}
         </Avatar>
         <Typography variant="h5" sx={{ fontWeight: 'bold', mt: 1, color: 'var(--navy)' }}>
           {username}
         </Typography>
-        <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>{email}</Typography>
-        <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>{phone}</Typography>
-        {branch && <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>Branch: {branch}</Typography>}
-        <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>Role: Customer</Typography>
+        <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>
+          {email}
+        </Typography>
+        <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>
+          {phone}
+        </Typography>
+        {branch && (
+          <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>
+            Branch: {branch}
+          </Typography>
+        )}
+        <Typography
+          variant="body2"
+          sx={{ color: 'var(--text-muted)', textTransform: 'capitalize' }}
+        >
+          Role: {role}
+        </Typography>
       </Box>
 
-      <Card sx={{ mb: 2, borderRadius: 3, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
+      <Card
+        sx={{
+          mb: 2,
+          borderRadius: 3,
+          bgcolor: 'var(--surface)',
+          border: '1px solid var(--border)',
+        }}
+      >
         <List>
           <ListItemButton onClick={() => setPasswordDialog(true)}>
-            <ListItemIcon><LockIcon sx={{ color: 'var(--navy)' }} /></ListItemIcon>
+            <ListItemIcon>
+              <LockIcon sx={{ color: 'var(--navy)' }} />
+            </ListItemIcon>
             <ListItemText primary="Change Password" />
           </ListItemButton>
           <Divider sx={{ borderColor: 'var(--border)' }} />
-          <ListItemButton onClick={() => alert(`Referral code: ${referralCode}`)}>
-            <ListItemIcon><ShareIcon sx={{ color: 'var(--navy)' }} /></ListItemIcon>
+          <ListItemButton
+            onClick={() => {
+              if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                navigator.clipboard.writeText(referralCode);
+              }
+              alert(`Referral code: ${referralCode}`);
+            }}
+          >
+            <ListItemIcon>
+              <ShareIcon sx={{ color: 'var(--navy)' }} />
+            </ListItemIcon>
             <ListItemText primary="Referral Code" secondary={referralCode} />
           </ListItemButton>
           <Divider sx={{ borderColor: 'var(--border)' }} />
           <ListItemButton onClick={() => router.push('/settings')}>
-            <ListItemIcon><SettingsIcon sx={{ color: 'var(--navy)' }} /></ListItemIcon>
+            <ListItemIcon>
+              <SettingsIcon sx={{ color: 'var(--navy)' }} />
+            </ListItemIcon>
             <ListItemText primary="Settings" />
           </ListItemButton>
           <Divider sx={{ borderColor: 'var(--border)' }} />
           <ListItemButton onClick={handleLogout} disabled={loggingOut}>
-            <ListItemIcon><LogoutIcon color="error" /></ListItemIcon>
+            <ListItemIcon>
+              <LogoutIcon color="error" />
+            </ListItemIcon>
             <ListItemText primary="Logout" sx={{ color: 'error.main' }} />
             {loggingOut && <CircularProgress size={20} />}
           </ListItemButton>
@@ -162,9 +234,17 @@ export default function ProfilePage() {
       <Dialog
         open={passwordDialog}
         onClose={() => !changingPassword && setPasswordDialog(false)}
-        PaperProps={{ sx: { bgcolor: 'var(--surface)', border: '1px solid var(--border)', backgroundImage: 'none' } }}
+        PaperProps={{
+          sx: {
+            bgcolor: 'var(--surface)',
+            border: '1px solid var(--border)',
+            backgroundImage: 'none',
+          },
+        }}
       >
-        <DialogTitle sx={{ color: 'var(--navy)', fontWeight: 700 }}>Change Password</DialogTitle>
+        <DialogTitle sx={{ color: 'var(--navy)', fontWeight: 700 }}>
+          Change Password
+        </DialogTitle>
         <DialogContent>
           <TextField
             label="Current Password"
@@ -192,7 +272,7 @@ export default function ProfilePage() {
             margin="dense"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            helperText="Minimum 6 characters"
+            helperText="Min 8 chars, at least one letter and one number"
             slotProps={{
               input: {
                 endAdornment: (
@@ -224,11 +304,22 @@ export default function ProfilePage() {
               },
             }}
           />
+          {passwordError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {passwordError}
+            </Alert>
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setPasswordDialog(false)} disabled={changingPassword}>Cancel</Button>
+          <Button onClick={() => setPasswordDialog(false)} disabled={changingPassword}>
+            Cancel
+          </Button>
           <Button variant="contained" onClick={handleChangePassword} disabled={changingPassword}>
-            {changingPassword ? <CircularProgress size={24} color="inherit" /> : 'Update Password'}
+            {changingPassword ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              'Update Password'
+            )}
           </Button>
         </DialogActions>
       </Dialog>

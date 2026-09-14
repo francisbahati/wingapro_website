@@ -1,8 +1,8 @@
 // app/error.tsx
 'use client';
 
+import { useEffect } from 'react';
 import { Box, Button, Container, Typography } from '@mui/material';
-import ReportProblemRoundedIcon from '@mui/icons-material/ReportProblemRounded';
 
 export default function GlobalError({
   error,
@@ -11,35 +11,44 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    // Log to the console; in production, send to your error tracker here.
+    // eslint-disable-next-line no-console
+    console.error('[GlobalError]', error);
+  }, [error]);
+
   return (
     <Box sx={{ bgcolor: 'var(--bg)', minHeight: '100vh' }}>
       <Container maxWidth="sm" sx={{ py: 12, textAlign: 'center' }}>
-        <Box
+        <Typography
           sx={{
-            width: 88,
-            height: 88,
-            borderRadius: '50%',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            bgcolor: 'var(--error-muted)',
-            color: 'var(--error)',
-            mb: 3,
+            fontSize: { xs: '4rem', md: '6rem' },
+            fontWeight: 800,
+            lineHeight: 1,
+            background: 'linear-gradient(135deg, var(--navy) 0%, var(--cyan) 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
           }}
         >
-          <ReportProblemRoundedIcon sx={{ fontSize: 44 }} />
-        </Box>
-        <Typography variant="h4" fontWeight={700} sx={{ color: 'var(--navy)' }} gutterBottom>
+          Oops
+        </Typography>
+        <Typography variant="h5" sx={{ fontWeight: 700, color: 'var(--navy)', mt: 2 }} gutterBottom>
           Something went wrong
         </Typography>
         <Typography sx={{ mb: 4, color: 'var(--text-muted)' }}>
-          We hit an unexpected error. Try again, or head back to the dashboard.
+          Please try again. If the problem persists, contact support.
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-          <Button variant="contained" size="large" onClick={() => reset()}>
+          <Button onClick={reset} variant="contained" size="large">
             Try Again
           </Button>
-          <Button variant="outlined" size="large" href="/">
+          <Button
+            onClick={() => {
+              if (typeof window !== 'undefined') window.location.href = '/';
+            }}
+            variant="outlined"
+            size="large"
+          >
             Go Home
           </Button>
         </Box>

@@ -1,9 +1,24 @@
+// app/(auth)/support/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import {
-  Box, Card, CardContent, Typography, Button, TextField, Dialog, DialogTitle, DialogContent,
-  DialogActions, List, Chip, IconButton, CircularProgress, Alert, Skeleton,
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  List,
+  Chip,
+  IconButton,
+  CircularProgress,
+  Alert,
+  Skeleton,
 } from '@mui/material';
 import apiClient from '@/lib/api/client';
 import { AxiosError } from 'axios';
@@ -11,14 +26,28 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import WarningIcon from '@mui/icons-material/Warning';
 
+type TicketStatus = 'open' | 'in_progress' | 'closed';
+
 interface Ticket {
   id: number;
   subject: string;
   message: string;
-  status: 'open' | 'closed';
+  status: TicketStatus;
   adminReply?: string;
   createdAt: string;
 }
+
+const STATUS_COLORS: Record<TicketStatus, 'success' | 'warning' | 'info'> = {
+  open: 'warning',
+  in_progress: 'info',
+  closed: 'success',
+};
+
+const STATUS_LABELS: Record<TicketStatus, string> = {
+  open: 'Open',
+  in_progress: 'In Progress',
+  closed: 'Closed',
+};
 
 export default function SupportPage() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -37,8 +66,11 @@ export default function SupportPage() {
         const res = await apiClient.get('/tickets');
         setTickets(res.data.tickets || []);
       } catch (err) {
-        if (err instanceof AxiosError) setError(err.response?.data?.message || 'Failed to load tickets');
-        else setError('An unexpected error occurred');
+        if (err instanceof AxiosError) {
+          setError(err.response?.data?.message || 'Failed to load tickets');
+        } else {
+          setError('An unexpected error occurred');
+        }
       } finally {
         setLoading(false);
       }
@@ -61,8 +93,11 @@ export default function SupportPage() {
       const res = await apiClient.get('/tickets');
       setTickets(res.data.tickets || []);
     } catch (err) {
-      if (err instanceof AxiosError) alert(err.response?.data?.message || 'Failed to create ticket');
-      else alert('An unexpected error occurred');
+      if (err instanceof AxiosError) {
+        alert(err.response?.data?.message || 'Failed to create ticket');
+      } else {
+        alert('An unexpected error occurred');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -75,8 +110,11 @@ export default function SupportPage() {
       await apiClient.delete(`/tickets/${id}`);
       setTickets(tickets.filter((t) => t.id !== id));
     } catch (err) {
-      if (err instanceof AxiosError) alert(err.response?.data?.message || 'Failed to delete');
-      else alert('An unexpected error occurred');
+      if (err instanceof AxiosError) {
+        alert(err.response?.data?.message || 'Failed to delete');
+      } else {
+        alert('An unexpected error occurred');
+      }
     } finally {
       setDeletingId(null);
     }
@@ -86,7 +124,10 @@ export default function SupportPage() {
     return (
       <Box sx={{ p: 3 }}>
         {[1, 2, 3].map((i) => (
-          <Card key={i} sx={{ mb: 2, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
+          <Card
+            key={i}
+            sx={{ mb: 2, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}
+          >
             <CardContent>
               <Skeleton variant="text" width="60%" />
               <Skeleton variant="text" width="40%" />
@@ -102,7 +143,13 @@ export default function SupportPage() {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="error">{error}</Alert>
-        <Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>Retry</Button>
+        <Button
+          variant="contained"
+          onClick={() => window.location.reload()}
+          sx={{ mt: 2 }}
+        >
+          Retry
+        </Button>
       </Box>
     );
   }
@@ -117,7 +164,10 @@ export default function SupportPage() {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => { setIsDispute(false); setDialogOpen(true); }}
+          onClick={() => {
+            setIsDispute(false);
+            setDialogOpen(true);
+          }}
         >
           New Ticket
         </Button>
@@ -125,7 +175,10 @@ export default function SupportPage() {
           variant="contained"
           color="error"
           startIcon={<WarningIcon />}
-          onClick={() => { setIsDispute(true); setDialogOpen(true); }}
+          onClick={() => {
+            setIsDispute(true);
+            setDialogOpen(true);
+          }}
         >
           Dispute
         </Button>
@@ -146,9 +199,18 @@ export default function SupportPage() {
               }}
             >
               <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                  }}
+                >
                   <Box>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'var(--navy)' }}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ fontWeight: 'bold', color: 'var(--navy)' }}
+                    >
                       {ticket.subject}
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>
@@ -165,8 +227,8 @@ export default function SupportPage() {
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Chip
-                      label={ticket.status}
-                      color={ticket.status === 'closed' ? 'success' : 'warning'}
+                      label={STATUS_LABELS[ticket.status] || ticket.status}
+                      color={STATUS_COLORS[ticket.status] || 'default'}
                       size="small"
                     />
                     {ticket.status === 'open' && (
@@ -194,18 +256,38 @@ export default function SupportPage() {
         open={dialogOpen}
         onClose={() => !submitting && setDialogOpen(false)}
         PaperProps={{
-          sx: { bgcolor: 'var(--surface)', border: '1px solid var(--border)', backgroundImage: 'none' },
+          sx: {
+            bgcolor: 'var(--surface)',
+            border: '1px solid var(--border)',
+            backgroundImage: 'none',
+          },
         }}
       >
         <DialogTitle sx={{ color: 'var(--navy)', fontWeight: 700 }}>
           {isDispute ? 'File a Dispute' : 'New Support Ticket'}
         </DialogTitle>
         <DialogContent>
-          <TextField label="Subject" fullWidth margin="dense" value={subject} onChange={(e) => setSubject(e.target.value)} />
-          <TextField label="Message" fullWidth multiline rows={4} margin="dense" value={message} onChange={(e) => setMessage(e.target.value)} />
+          <TextField
+            label="Subject"
+            fullWidth
+            margin="dense"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+          />
+          <TextField
+            label="Message"
+            fullWidth
+            multiline
+            rows={4}
+            margin="dense"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDialogOpen(false)} disabled={submitting}>Cancel</Button>
+          <Button onClick={() => setDialogOpen(false)} disabled={submitting}>
+            Cancel
+          </Button>
           <Button
             variant="contained"
             color={isDispute ? 'error' : 'primary'}

@@ -43,7 +43,7 @@ const APPS = [
       'Install the APK directly on your phone. Buy bundles, manage your wallet, and track orders on the go.',
     size: '18 MB',
     version: 'v1.1.0',
-    href: '/apk/Wingapro v1.1.apk',
+    href: '/apk/Wingapro-v1.1.apk',
     cta: 'Download APK',
     isPrimary: true,
   },
@@ -59,13 +59,12 @@ const APPS = [
     href: '/apk/gimirey.exe',
     cta: 'Download for Windows',
     isPrimary: false,
-    
   },
 ];
 
 const TRUST = [
-  { icon: <SecurityRoundedIcon />,     label: 'Secure & verified' },
-  { icon: <BoltRoundedIcon />,         label: 'Fast installation' },
+  { icon: <SecurityRoundedIcon />, label: 'Secure & verified' },
+  { icon: <BoltRoundedIcon />, label: 'Fast installation' },
   { icon: <VerifiedUserRoundedIcon />, label: 'No ads or tracking' },
   { icon: <SupportAgentRoundedIcon />, label: '24/7 support' },
 ];
@@ -142,7 +141,7 @@ export default function DownloadPage() {
 
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 5 }}>
                 <Button
-                  href="/apk/Wingapro.exe"
+                  href="/apk/Wingapro-v1.1.apk"
                   download
                   variant="contained"
                   size="large"
@@ -198,7 +197,8 @@ export default function DownloadPage() {
                 sx={{
                   position: 'absolute',
                   inset: '-8%',
-                  background: 'radial-gradient(circle at center, rgba(0,180,216,0.14) 0%, transparent 65%)',
+                  background:
+                    'radial-gradient(circle at center, rgba(0,180,216,0.14) 0%, transparent 65%)',
                   filter: 'blur(30px)',
                   zIndex: 0,
                 }}
@@ -305,7 +305,7 @@ export default function DownloadPage() {
                     left: 0,
                     right: 0,
                     height: 4,
-                    background: `linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%)`,
+                    background: 'linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%)',
                   }}
                 />
               )}
@@ -350,17 +350,32 @@ export default function DownloadPage() {
                   <Chip
                     label={app.version}
                     size="small"
-                    sx={{ bgcolor: 'var(--navy-muted)', color: 'var(--navy)', fontWeight: 600, borderRadius: 1.5 }}
+                    sx={{
+                      bgcolor: 'var(--navy-muted)',
+                      color: 'var(--navy)',
+                      fontWeight: 600,
+                      borderRadius: 1.5,
+                    }}
                   />
                   <Chip
                     label={app.size}
                     size="small"
-                    sx={{ bgcolor: 'var(--navy-muted)', color: 'var(--navy)', fontWeight: 600, borderRadius: 1.5 }}
+                    sx={{
+                      bgcolor: 'var(--navy-muted)',
+                      color: 'var(--navy)',
+                      fontWeight: 600,
+                      borderRadius: 1.5,
+                    }}
                   />
                   <Chip
                     label="Free"
                     size="small"
-                    sx={{ bgcolor: 'var(--success-muted)', color: 'var(--success)', fontWeight: 600, borderRadius: 1.5 }}
+                    sx={{
+                      bgcolor: 'var(--success-muted)',
+                      color: 'var(--success)',
+                      fontWeight: 600,
+                      borderRadius: 1.5,
+                    }}
                   />
                 </Box>
 
@@ -394,7 +409,12 @@ export default function DownloadPage() {
             <Box>
               <Typography
                 component="h2"
-                sx={{ fontSize: { xs: '1.8rem', md: '2.25rem' }, mb: 2, color: 'var(--navy)', fontWeight: 800 }}
+                sx={{
+                  fontSize: { xs: '1.8rem', md: '2.25rem' },
+                  mb: 2,
+                  color: 'var(--navy)',
+                  fontWeight: 800,
+                }}
               >
                 Everything you need,{' '}
                 <Box component="span" sx={{ color: 'var(--cyan)' }}>
@@ -415,21 +435,11 @@ export default function DownloadPage() {
                 }}
               >
                 {FEATURES.map((feature) => (
-                  <Box
-                    key={feature}
-                    sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.25 }}
-                  >
+                  <Box key={feature} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.25 }}>
                     <CheckCircleRoundedIcon
-                      sx={{
-                        fontSize: 20,
-                        color: 'var(--cyan-deep)',
-                        flexShrink: 0,
-                        mt: 0.25,
-                      }}
+                      sx={{ fontSize: 20, color: 'var(--cyan-deep)', flexShrink: 0, mt: 0.25 }}
                     />
-                    <Typography
-                      sx={{ fontSize: '0.9rem', color: 'var(--text)', lineHeight: 1.5 }}
-                    >
+                    <Typography sx={{ fontSize: '0.9rem', color: 'var(--text)', lineHeight: 1.5 }}>
                       {feature}
                     </Typography>
                   </Box>
@@ -444,7 +454,7 @@ export default function DownloadPage() {
                   width: { xs: 220, md: 260 },
                   aspectRatio: '9 / 19',
                   borderRadius: 6,
-                  border: `10px solid var(--navy)`,
+                  border: '10px solid var(--navy)',
                   overflow: 'hidden',
                   bgcolor: 'var(--navy-deep)',
                   boxShadow: '0 40px 80px rgba(10,46,92,0.28)',
@@ -512,16 +522,15 @@ export default function DownloadPage() {
           ].map((item) => (
             <Card
               key={item.q}
-              sx={{ borderRadius: 3, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}
+              sx={{
+                borderRadius: 3,
+                bgcolor: 'var(--surface)',
+                border: '1px solid var(--border)',
+              }}
             >
               <CardContent>
                 <Typography
-                  sx={{
-                    fontSize: '1.05rem',
-                    fontWeight: 700,
-                    color: 'var(--navy)',
-                    mb: 1,
-                  }}
+                  sx={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--navy)', mb: 1 }}
                 >
                   {item.q}
                 </Typography>
@@ -540,7 +549,7 @@ export default function DownloadPage() {
       <Box
         sx={{
           py: { xs: 8, md: 10 },
-          background: `linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%)`,
+          background: 'linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%)',
           color: '#fff',
         }}
       >

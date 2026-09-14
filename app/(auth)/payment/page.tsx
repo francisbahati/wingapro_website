@@ -1,8 +1,18 @@
+// app/(auth)/payment/page.tsx
 'use client';
 
 import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Box, Card, CardContent, Typography, Button, CircularProgress, Alert, Divider } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  CircularProgress,
+  Alert,
+  Divider,
+} from '@mui/material';
 import apiClient from '@/lib/api/client';
 import { AxiosError } from 'axios';
 
@@ -15,6 +25,13 @@ interface PackageData {
   network: string;
 }
 
+function generateIdempotencyKey(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID();
+  }
+  return `pur-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 function PaymentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -22,6 +39,7 @@ function PaymentContent() {
   const network = searchParams.get('network') || '';
   const recipientName = searchParams.get('recipientName') || '';
   const recipientPhone = searchParams.get('recipientPhone') || '';
+
   const [packageData, setPackageData] = useState<PackageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -35,11 +53,20 @@ function PaymentContent() {
         return;
       }
       try {
-        const res = await apiClient.get(`/packages/${packageId}`);
-        setPackageData(res.data.package);
+        const res = await apiClient.get('/packages');
+        const list: PackageData[] = res.data.packages ?? [];
+        const found = list.find((p) => String(p.id) === String(packageId));
+        if (!found) {
+          setError('Package not found or no longer available');
+        } else {
+          setPackageData(found);
+        }
       } catch (err) {
-        if (err instanceof AxiosError) setError(err.response?.data?.message || 'Failed to load package');
-        else setError('An unexpected error occurred');
+        if (err instanceof AxiosError) {
+          setError(err.response?.data?.message || 'Failed to load package');
+        } else {
+          setError('An unexpected error occurred');
+        }
       } finally {
         setLoading(false);
       }
@@ -50,42 +77,58 @@ function PaymentContent() {
   const handlePay = async () => {
     if (!packageData) return;
     setProcessing(true);
+    setError('');
     try {
+      const idempotencyKey = generateIdempotencyKey();
       await apiClient.post('/purchase', {
         packageId: Number(packageId),
         recipientName,
         recipientPhone,
         network,
+        idempotencyKey,
       });
-      router.push(`/order-confirmation?package=${packageData.name}&id=${packageId}`);
+      router.push(
+        `/order-confirmation?package=${encodeURIComponent(packageData.name)}&id=${packageId}`
+      );
     } catch (err) {
-      if (err instanceof AxiosError) setError(err.response?.data?.message || 'Payment failed');
-      else setError('An unexpected error occurred');
+      if (err instanceof AxiosError) {
+        setError(err.response?.data?.message || 'Payment failed');
+      } else {
+        setError('An unexpected error occurred');
+      }
       setProcessing(false);
     }
   };
 
-  if (loading) return (
-    <Box sx={{ p: 3, textAlign: 'center' }}>
-      <CircularProgress />
-    </Box>
-  );
+  if (loading) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
-  if (error) return (
-    <Box sx={{ p: 3 }}>
-      <Alert severity="error">{error}</Alert>
-      <Button variant="contained" onClick={() => router.back()} sx={{ mt: 2 }}>Go Back</Button>
-    </Box>
-  );
+  if (error && !packageData) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error">{error}</Alert>
+        <Button variant="contained" onClick={() => router.back()} sx={{ mt: 2 }}>
+          Go Back
+        </Button>
+      </Box>
+    );
+  }
 
-  if (!packageData) return (
-    <Box sx={{ p: 3 }}>
-      <Alert severity="warning">Package not found</Alert>
-      <Button variant="contained" onClick={() => router.push('/packages')} sx={{ mt: 2 }}>
-        Browse Packages
-      </Button>
-    </Box>
-  );
+  if (!packageData) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="warning">Package not found</Alert>
+        <Button variant="contained" onClick={() => router.push('/packages')} sx={{ mt: 2 }}>
+          Browse Packages
+        </Button>
+      </Box>
+    );
+  }
 
   const price = packageData.price;
 
@@ -94,33 +137,81 @@ function PaymentContent() {
       <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3, color: 'var(--navy)' }}>
         Confirm Payment
       </Typography>
-      <Card sx={{ mb: 3, borderRadius: 3, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
+
+      <Card
+        sx={{
+          mb: 3,
+          borderRadius: 3,
+          bgcolor: 'var(--surface)',
+          border: '1px solid var(--border)',
+        }}
+      >
         <CardContent>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'var(--navy)' }}>{packageData.name}</Typography>
-          <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>Network: {network}</Typography>
-          <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>Data: {packageData.dataSize}</Typography>
-          <Typography variant="body2" sx={{ mb: 2, color: 'var(--text-muted)' }}>Validity: {packageData.validity}</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'var(--navy)' }}>
+            {packageData.name}
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>
+            Network: {network}
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>
+            Data: {packageData.dataSize}
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 2, color: 'var(--text-muted)' }}>
+            Validity: {packageData.validity}
+          </Typography>
           <Divider sx={{ my: 2, borderColor: 'var(--border)' }} />
-          <Typography variant="h5" sx={{ color: 'var(--navy)' }}>TZS {price.toLocaleString()}</Typography>
+          <Typography variant="h5" sx={{ color: 'var(--navy)' }}>
+            TZS {price.toLocaleString()}
+          </Typography>
         </CardContent>
       </Card>
-      <Card sx={{ mb: 3, borderRadius: 3, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
+
+      <Card
+        sx={{
+          mb: 3,
+          borderRadius: 3,
+          bgcolor: 'var(--surface)',
+          border: '1px solid var(--border)',
+        }}
+      >
         <CardContent>
-          <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'var(--navy)' }}>Recipient Details</Typography>
-          <Typography variant="body2" sx={{ color: 'var(--text)' }}>Name: {recipientName}</Typography>
-          <Typography variant="body2" sx={{ color: 'var(--text)' }}>Phone: {recipientPhone}</Typography>
+          <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'var(--navy)' }}>
+            Recipient Details
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'var(--text)' }}>
+            Name: {recipientName}
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'var(--text)' }}>
+            Phone: {recipientPhone}
+          </Typography>
         </CardContent>
       </Card>
+
       <Box sx={{ bgcolor: 'var(--cyan-muted)', p: 2, borderRadius: 2, mb: 3 }}>
         <Typography variant="body2" sx={{ color: 'var(--navy)' }}>
           Payment method: <strong>Wallet Balance</strong>
         </Typography>
       </Box>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      <Button variant="contained" fullWidth disabled={processing} onClick={handlePay} sx={{ py: 1.5 }}>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
+      <Button
+        variant="contained"
+        fullWidth
+        disabled={processing}
+        onClick={handlePay}
+        sx={{ py: 1.5 }}
+      >
         {processing ? <CircularProgress size={24} color="inherit" /> : 'Pay Now'}
       </Button>
-      <Typography variant="caption" sx={{ mt: 1, display: 'block', textAlign: 'center', color: 'var(--text-muted)' }}>
+      <Typography
+        variant="caption"
+        sx={{ mt: 1, display: 'block', textAlign: 'center', color: 'var(--text-muted)' }}
+      >
         Your wallet will be debited TZS {price.toLocaleString()}
       </Typography>
     </Box>
@@ -131,7 +222,14 @@ export default function PaymentPage() {
   return (
     <Suspense
       fallback={
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '50vh',
+          }}
+        >
           <CircularProgress />
         </Box>
       }
