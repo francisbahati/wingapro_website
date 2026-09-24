@@ -43,7 +43,7 @@ const APPS = [
       'Install the APK directly on your phone. Buy bundles, manage your wallet, and track orders on the go.',
     size: '18 MB',
     version: 'v1.1.0',
-    href: '/apk/Wingapro-v1.1.apk',
+    href: '/apk/Wingapro v 3.apk',
     cta: 'Download APK',
     isPrimary: true,
   },
@@ -141,7 +141,7 @@ export default function DownloadPage() {
 
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 5 }}>
                 <Button
-                  href="/apk/Wingapro-v1.1.apk"
+                  href="/apk/Wingapro v 3.apk"
                   download
                   variant="contained"
                   size="large"
