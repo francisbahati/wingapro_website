@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Alert,
   Box,
@@ -9,9 +10,11 @@ import {
   Card,
   CardContent,
   CircularProgress,
+  Divider,
   TextField,
   Typography,
 } from '@mui/material';
+import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import apiClient from '@/lib/api/client';
 import { AxiosError } from 'axios';
 import { useAuth } from '@/context/AuthContext';
@@ -30,6 +33,7 @@ const isValidPassword = (value: string) =>
 
 export default function SettingsPage() {
   const { user } = useAuth();
+  const router = useRouter();
 
   const [username, setUsername] = useState('');
   const [phone, setPhone] = useState('');
@@ -125,6 +129,9 @@ export default function SettingsPage() {
     }
   };
 
+  const canSelfDelete =
+    user?.role === 'customer' || user?.role === 'seller' || !user?.role;
+
   return (
     <Box sx={{ p: 3, maxWidth: 640, mx: 'auto' }}>
       <Typography variant="h4" sx={{ mb: 3, color: 'var(--navy)', fontWeight: 700 }}>
@@ -181,7 +188,7 @@ export default function SettingsPage() {
       </Card>
 
       <Card
-        sx={{ borderRadius: 3, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}
+        sx={{ mb: 4, borderRadius: 3, bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}
       >
         <CardContent>
           <Typography variant="h6" sx={{ mb: 2, color: 'var(--navy)' }}>
@@ -217,6 +224,85 @@ export default function SettingsPage() {
           </form>
         </CardContent>
       </Card>
+
+      {/* ── DANGER ZONE — Google Play compliance ── */}
+      {canSelfDelete && (
+        <>
+          <Typography
+            sx={{
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              letterSpacing: '0.08em',
+              color: 'var(--error)',
+              mb: 1,
+              pl: 0.5,
+            }}
+          >
+            DANGER ZONE
+          </Typography>
+          <Card
+            sx={{
+              borderRadius: 3,
+              bgcolor: 'var(--surface)',
+              border: '1px solid rgba(239,68,68,0.35)',
+            }}
+          >
+            <CardContent>
+              <Box
+                onClick={() => router.push('/delete-account')}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  cursor: 'pointer',
+                  p: 0.5,
+                  borderRadius: 2,
+                  transition: 'background-color .2s ease',
+                  '&:hover': { bgcolor: 'var(--error-muted)' },
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 2,
+                    bgcolor: 'var(--error-muted)',
+                    color: 'var(--error)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <DeleteForeverRoundedIcon />
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <Typography
+                    sx={{ fontWeight: 600, color: 'var(--error)', fontSize: '0.95rem' }}
+                  >
+                    Delete Account
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    Permanently delete your account and data
+                  </Typography>
+                </Box>
+                <Typography sx={{ color: 'var(--text-muted)' }}>›</Typography>
+              </Box>
+              <Divider sx={{ my: 1.5, borderColor: 'var(--border)' }} />
+              <Typography sx={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                Learn more about what is deleted vs. retained in our{' '}
+                <a
+                  href="/account-deletion"
+                  style={{ color: 'var(--cyan-deep)', fontWeight: 600 }}
+                >
+                  account deletion policy
+                </a>
+                .
+              </Typography>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </Box>
   );
 }

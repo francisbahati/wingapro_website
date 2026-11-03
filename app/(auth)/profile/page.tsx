@@ -32,6 +32,7 @@ import LockIcon from '@mui/icons-material/Lock';
 import ShareIcon from '@mui/icons-material/Share';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
+import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
@@ -149,6 +150,7 @@ export default function ProfilePage() {
   const referralCode = profile?.referral_code || 'N/A';
   const branch = profile?.Branch?.name || '';
   const role = profile?.role || user?.role || 'customer';
+  const canSelfDelete = role === 'customer' || role === 'seller';
 
   return (
     <Box sx={{ p: 3, maxWidth: 600, mx: 'auto' }}>
@@ -220,6 +222,23 @@ export default function ProfilePage() {
             </ListItemIcon>
             <ListItemText primary="Settings" />
           </ListItemButton>
+
+          {/* ✅ Google Play Account Deletion */}
+          {canSelfDelete && (
+            <>
+              <Divider sx={{ borderColor: 'var(--border)' }} />
+              <ListItemButton onClick={() => router.push('/delete-account')}>
+                <ListItemIcon>
+                  <DeleteForeverRoundedIcon color="error" />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Delete Account"
+                  slotProps={{ primary: { sx: { color: 'error.main', fontWeight: 600 } } }}
+                />
+              </ListItemButton>
+            </>
+          )}
+
           <Divider sx={{ borderColor: 'var(--border)' }} />
           <ListItemButton onClick={handleLogout} disabled={loggingOut}>
             <ListItemIcon>

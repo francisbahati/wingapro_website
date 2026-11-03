@@ -1,81 +1,68 @@
-// proxy.ts (project root — same folder as next.config.ts)
+// proxy.ts — Next.js 15.5+ proxy (replaces middleware.ts)
+//
+// IMPORTANT: Next.js looks for a function exported as `proxy` (or as the
+// default export) inside this file. Do NOT name it `middleware` — that was
+// the old convention and will fail on Next 15.5+.
+
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PUBLIC_PATHS = [
+// Routes that must ALWAYS be reachable without login.
+// Includes all Google Play compliance pages.
+const PUBLIC_PATHS = new Set<string>([
   '/',
-  '/about', '/legal',
+  '/about',
   '/contact',
   '/download',
   '/plans',
+  '/legal',
+  '/children-abuse',      // ← Google Play CSAE policy
+  '/account-deletion',    // ← Google Play account-deletion URL
+  '/account-deleted',     // ← post-deletion landing
   '/login',
   '/register',
   '/forgot-password',
   '/reset-password',
   '/recovery',
-];
+]);
 
-// Only admins can reach these
-const ADMIN_PATHS = ['/users', '/reports'];
+// Auth pages a logged-in user should skip.
+const AUTH_PAGES_WHEN_LOGGED_IN = new Set<string>(['/login', '/register']);
 
-// Authenticated users (any role)
-const AUTH_PATHS = [
-  '/dashboard',
-  '/orders',
-  '/packages',
-  '/wallet',
-  '/promotions',
-  '/support',
-  '/notifications',
-  '/profile',
-  '/settings',
-  '/deposit-withdraw',
-  '/payment',
-  '/order-confirmation',
-  '/buy',
-];
-
-function matchesPath(pathname: string, list: string[]) {
-  return list.some((p) => pathname === p || pathname.startsWith(p + '/'));
-}
-
-export default function proxy(request: NextRequest) {
+// ⚠️ FUNCTION NAME MUST BE `proxy`
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Allow any path that looks like a static asset (has a file extension).
+  if (/\.[a-zA-Z0-9]+$/.test(pathname)) {
+    return NextResponse.next();
+  }
+
+  // Allow Next.js internals and API routes.
+  if (pathname.startsWith('/_next') || pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+
   const token = request.cookies.get('jwt_token')?.value;
-  const role = request.cookies.get('user_role')?.value;
 
-  const isPublic = matchesPath(pathname, PUBLIC_PATHS);
-  const isAdminOnly = matchesPath(pathname, ADMIN_PATHS);
-
-  // 1. Not logged in → redirect to login for any non-public route
-  if (!token && !isPublic) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    url.searchParams.set('next', pathname);
-    return NextResponse.redirect(url);
+  // Public pages — allowed with or without login
+  if (PUBLIC_PATHS.has(pathname)) {
+    if (token && AUTH_PAGES_WHEN_LOGGED_IN.has(pathname)) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+    return NextResponse.next();
   }
 
-  // 2. Already logged in → can't revisit login/register
-  if (token && (pathname === '/login' || pathname === '/register')) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
-    url.search = '';
-    return NextResponse.redirect(url);
-  }
-
-  // 3. Admin-only routes → block non-admins
-  if (isAdminOnly && role !== 'admin') {
-    const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
-    url.search = '';
-    return NextResponse.redirect(url);
+  // Everything else requires authentication
+  if (!token) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('next', pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|images|apk|windows|firebase-messaging-sw.js|firebase-config.js).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };

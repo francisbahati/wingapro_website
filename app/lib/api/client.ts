@@ -90,7 +90,17 @@ apiClient.interceptors.response.use(
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         clearAuthCookies();
-        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        // Don't bounce public/compliance pages to /login on stale-token 401.
+        const PUBLIC_PREFIXES = [
+          '/', '/about', '/contact', '/download', '/plans', '/legal',
+          '/children-abuse', '/account-deletion', '/account-deleted',
+          '/login', '/register', '/forgot-password', '/reset-password', '/recovery',
+        ];
+        const path = typeof window !== 'undefined' ? window.location.pathname : '';
+        const isPublic = PUBLIC_PREFIXES.some(
+          (p) => path === p || path.startsWith(p + '/')
+        );
+        if (typeof window !== 'undefined' && !isPublic) {
           window.location.href = '/login';
         }
         return Promise.reject(error);
