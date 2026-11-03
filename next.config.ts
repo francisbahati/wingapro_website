@@ -7,7 +7,6 @@ const devOrigins = (process.env.DEV_ALLOWED_ORIGINS || 'localhost,127.0.0.1')
   .filter(Boolean);
 
 const nextConfig: NextConfig = {
-  experimental: { proxyFile: 'proxy.ts' },
   output: 'standalone',
 
   reactStrictMode: true,
